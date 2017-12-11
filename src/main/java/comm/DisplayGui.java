@@ -110,7 +110,7 @@ public class DisplayGui extends JFrame{
 	    this.setJMenuBar(menubar);
 	    
 //	   final StatusBar stbar=new StatusBar(new Dimension(740,20));
-	   final SOLStar star=new SOLStar(new Dimension(740,20));		//创建状态栏面板
+	   final SOLStar star=new SOLStar(new Dimension(400,24));		//创建状态栏面板
 		
 	    aboutitem.addActionListener(new SOLEvents.AboutEvent());
 
@@ -285,7 +285,7 @@ public class DisplayGui extends JFrame{
 		solhis.SetComponent(res);		//将搜索结果面板传参给搜索历史面板
 		solhis.SetComponent(star); 		//将状态栏面板传参给搜索历史面板
 		history.clear();
-		
+/*		
 		class SearchEvent implements ActionListener{
 			public void actionPerformed(ActionEvent e) {
 
@@ -329,7 +329,7 @@ public class DisplayGui extends JFrame{
 							String[] fields=new String[]{"file","law"};
 							content=handle.GetMultipleSearch(ipath,fields,range,keywords.toString(),top);
 						}
-/*							if(files==null)
+							if(files==null)
 								ste.setText("<i><b>未搜索到关键词</b></i>");
 							else{
 								contentoflaw=handle.GetContentOfLawByIndex(files,"D:\\Lucene\\src\\");
@@ -349,7 +349,7 @@ public class DisplayGui extends JFrame{
 									}
 									ste.setText(text.toString());					
 								}
-*/							
+							
 						long end=System.currentTimeMillis();
 						long total=res.UpdateText(content);
 //						stbar.setStatusText("检索完毕!"+" "+"耗时："+String.valueOf(end-start)+"ms"+" "+"共搜索到："+total);
@@ -374,8 +374,8 @@ public class DisplayGui extends JFrame{
 				sbt.setEnabled(true);		
 			}
 		}
-//		sbt.addActionListener(new SearchEvent());
-
+		sbt.addActionListener(new SearchEvent());
+*/
 		other.addMouseListener(new SOLEvents.SelectEvent(ipath, range, defselect));
 		
 		JPanel npaneofnorth=new JPanel();		/*搜索输入框和搜索按钮面板*/
@@ -448,7 +448,7 @@ public class DisplayGui extends JFrame{
 	    this.setTitle("Searching Of Laws");//窗体标签  
 	    this.setSize(WindowSize.X,WindowSize.Y);//窗体大小  
 	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
-	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//退出关闭JFrame  
+	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//退出关闭JFrame   
 	    this.setVisible(true);//显示窗体
 	    this.setResizable(false); //锁定窗体	
 	 	

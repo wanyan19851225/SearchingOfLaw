@@ -163,10 +163,7 @@ public class  SOLEvents {
 		
 		JButton sbt;
 		JTextField stf,adr,port;
-//		JPanel npaneofnorth,npaneofcenter;
-		int top;
-		Boolean rangef=true;
-		Boolean srf;
+		JPanel npaneofcenter;
 		List<String> range,tmphis,history;
 		SOLHistory solhis;
 		SOLResult res;
@@ -176,7 +173,7 @@ public class  SOLEvents {
 		public SearchEvent(JPanel npaneofnorth,JPanel npaneofcenter,List<String> range,List<String> tmphis,List<String> history,SOLHistory solhis,String ipath,SOLResult res,SOLStar star){
 			
 //			this.npaneofnorth=npaneofnorth;
-//			this.npaneofcenter=npaneofcenter;
+			this.npaneofcenter=npaneofcenter;
 			this.range=range;
 			this.tmphis=tmphis;
 			this.history=history;
@@ -201,25 +198,9 @@ public class  SOLEvents {
 			    JPanel jp=(JPanel)obj;
 			    int a=jp.getComponentCount();
 			    for(int j=0;j<a;j++){
-				    Object obj1 =npaneofcenter.getComponent(j);
-				    if (obj1 instanceof JRadioButton){
-				    	JRadioButton rb=(JRadioButton)obj1;
-				    	if(rb.isSelected()){
-				    		if(rb.getName().equals("1000"))
-				    			this.top=1000;
-				    		else if(rb.getName().equals("2000"))
-				    			this.top=2000;
-				    		else if(rb.getName().equals("3000"))
-				    			this.top=3000;
-				    		else if(rb.getName().equals("other"))
-				    			this.rangef=false;
-				    		else if(rb.getName().equals("remote"))
-				    			this.srf=false;
-				    	}
-				    }
-				    
-				    if(obj instanceof JTextField){
-				    	JTextField jt=(JTextField)obj;
+				    Object obj1 =jp.getComponent(j);    
+				    if(obj1 instanceof JTextField){
+				    	JTextField jt=(JTextField)obj1;
 				    	if(jt.getName().equals("adr"))
 				    		this.adr=jt;
 				    	else if(jt.getName().equals("port"))
@@ -244,7 +225,7 @@ public class  SOLEvents {
 			
 			try {
 	
-				if(rangef)
+				if(this.IsRange(npaneofcenter))
 					range.clear();
 				
 				if(!keywords.toString().isEmpty()){
@@ -254,8 +235,9 @@ public class  SOLEvents {
 					iolist.add("Date@"+ndate+" "+keywords.toString(),history);
 					solhis.UpdateHistory(tmphis);
 					long start=System.currentTimeMillis();
+					int top=this.GetTop(npaneofcenter);
 					if(range.isEmpty()){
-						content=handle.GetSearch(ipath,keywords.toString(),10);
+						content=handle.GetSearch(ipath,keywords.toString(),top);
 					}
 					else{					
 //						多条件查询，指定在某个法条文档中查询						
@@ -285,6 +267,94 @@ public class  SOLEvents {
 			}					
 			sbt.setEnabled(true);		
 		}
+	
+		public Boolean IsRange(JPanel npaneofcenter){
+			
+			Boolean f=true;		
+			int s=npaneofcenter.getComponentCount();
+			for(int i=0;i<s;i++){
+			    Object obj =npaneofcenter.getComponent(i);
+			    JPanel jp=(JPanel)obj;
+			    int a=jp.getComponentCount();
+			    for(int j=0;j<a;j++){
+				    Object obj1 =jp.getComponent(j);
+				    if (obj1 instanceof JRadioButton){
+				    	JRadioButton rb=(JRadioButton)obj1;
+				    		if(rb.getName().equals("other")){
+						    	if(rb.isSelected()){
+				    			f=false;
+				    			break;
+						    	}
+				    		}
+				    }
+			    }
+			}
+			
+			return f;
+			
+		}
+		
+		public Boolean IsRemote(JPanel npaneofcenter){
+			Boolean f=true;		
+			int s=npaneofcenter.getComponentCount();
+			for(int i=0;i<s;i++){
+			    Object obj =npaneofcenter.getComponent(i);
+			    JPanel jp=(JPanel)obj;
+			    int a=jp.getComponentCount();
+			    for(int j=0;j<a;j++){
+				    Object obj1 =jp.getComponent(j);
+				    if (obj1 instanceof JRadioButton){
+				    	JRadioButton rb=(JRadioButton)obj1;
+				    		if(rb.getName().equals("remote")){
+						    	if(rb.isSelected()){
+				    			f=false;
+				    			break;
+						    	}
+				    		}
+				    }
+			    }
+			}
+			
+			return f;
+			
+		}
+	
+		public int GetTop(JPanel npaneofcenter){
+			int top=1000;
+			
+			int s=npaneofcenter.getComponentCount();
+			for(int i=0;i<s;i++){
+			    Object obj =npaneofcenter.getComponent(i);
+			    JPanel jp=(JPanel)obj;
+			    int a=jp.getComponentCount();
+			    for(int j=0;j<a;j++){
+				    Object obj1 =jp.getComponent(j);
+				    if (obj1 instanceof JRadioButton){
+				    	JRadioButton rb=(JRadioButton)obj1;
+				    		if(rb.getName().equals("1000")){
+						    	if(rb.isSelected()){
+				    			top=1000;
+				    			break;
+						    	}
+				    		}else if(rb.getName().equals("2000")){
+						    	if(rb.isSelected()){
+				    			top=2000;
+				    			break;
+						    	}
+				    		}else if(rb.getName().equals("3000")){
+						    	if(rb.isSelected()){
+				    			top=3000;
+				    			break;
+						    	}
+				    		}
+				    }
+			    }
+			}
+			
+			
+			return top;
+		}
+		
 	}
 	
 }
