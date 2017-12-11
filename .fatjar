@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Mon Nov 27 14:28:41 CST 2017
+onejar.license.required=false
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=true
+jarname=E\:\\MyJar\\SearchingOfLaw2.3.4\\SearchingOfLaw.jar
+manifest.mergeall=true
+manifest.mainclass=bacy_testscript.Demo
+manifest.file=<createnew>
+jarname.isextern=true
+onejar.expand=
+excludes=<jar|json-lib-2.4-jdk15.jar>;<jar|netty-all-5.0.0.Alpha2.jar>;<jar|mysql-connector-java-5.1.39.jar>;<jar|ikanalyzer-2012_u6.jar>
+includes=
