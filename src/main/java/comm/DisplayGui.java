@@ -110,7 +110,7 @@ public class DisplayGui extends JFrame{
 	    this.setJMenuBar(menubar);
 	    
 //	   final StatusBar stbar=new StatusBar(new Dimension(740,20));
-	   final SOLStar star=new SOLStar(new Dimension(400,24));		//创建状态栏面板
+	   final SOLStar star=new SOLStar(this);		//创建状态栏面板
 		
 	    aboutitem.addActionListener(new SOLEvents.AboutEvent());
 
@@ -376,7 +376,7 @@ public class DisplayGui extends JFrame{
 		}
 		sbt.addActionListener(new SearchEvent());
 */
-		other.addMouseListener(new SOLEvents.SelectEvent(ipath, range, defselect));
+
 		
 		JPanel npaneofnorth=new JPanel();		/*搜索输入框和搜索按钮面板*/
 //		npaneofnorth.setBorder(BorderFactory.createLineBorder(Color.red));
@@ -427,7 +427,6 @@ public class DisplayGui extends JFrame{
 	    npaneofcenter.add(npaneofcenter1);		//添加搜索源面板
 	    npaneofcenter.add(npaneofcenter2);		//添加远程地址面板
 	    
-	    sbt.addMouseListener(new SOLEvents.SearchEvent(npaneofnorth, npaneofcenter, range, tmphis, history, solhis, ipath, res, star));
 	    
 		JPanel npane=new JPanel();		/*搜索输入框、搜索按钮、搜索条数、搜索范围面板*/
 	    npane.setLayout(new BorderLayout(0,0));
@@ -444,6 +443,11 @@ public class DisplayGui extends JFrame{
 		
 		contentpane.add(searchpanel,BorderLayout.EAST);
 		contentpane.add(solhis,BorderLayout.WEST);
+		
+	    sbt.addMouseListener(new SOLEvents.SearchEvent(npaneofnorth, npaneofcenter, range, tmphis, history, solhis, ipath, res, star));
+		other.addMouseListener(new SOLEvents.SelectEvent(ipath, range, defselect));
+		remote.addMouseListener(new SOLEvents.RemoteEvent(star));
+		local.addMouseListener(new SOLEvents.UnRemoteEvent(star));
 		
 	    this.setTitle("Searching Of Laws");//窗体标签  
 	    this.setSize(WindowSize.X,WindowSize.Y);//窗体大小  

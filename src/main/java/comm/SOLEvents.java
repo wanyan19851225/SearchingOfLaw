@@ -357,4 +357,105 @@ public class  SOLEvents {
 		
 	}
 	
+	public static class RemoteEvent extends MouseAdapter{
+		
+		SOLStar s;
+		
+		public RemoteEvent(SOLStar s){
+			this.s=s;
+		}
+		
+		public void mouseClicked(MouseEvent e){
+			s.SetRemoteMarkVisable(true);
+		}
+		
+	}
+	
+	public static class UnRemoteEvent extends MouseAdapter{
+		
+		SOLStar s;
+		
+		public UnRemoteEvent(SOLStar s){
+			this.s=s;
+		}
+		
+		public void mouseClicked(MouseEvent e){
+			s.SetRemoteMarkVisable(false);
+		}
+		
+	}
+	
+	public static class LoginEvent extends MouseAdapter{
+		private Boolean islogin=false;
+		private JTextField usert,pwdt;
+		private SOLStar star;
+		
+		public LoginEvent(JTextField user,JTextField pwd,SOLStar star){
+			this.usert=user;
+			this.pwdt=pwd;
+			this.star=star;
+		}
+		public void mouseClicked(MouseEvent e){
+			
+			StringBuffer ac=new StringBuffer();
+			String user=usert.getText();
+			String pwd=pwdt.getText();
+			ac.append(user+":"+pwd);
+			IOFile f=new IOFile();
+			try {
+				if(!user.isEmpty()&&!pwd.isEmpty()){
+					Map<String, String> m = f.Reader("D:\\Lucene\\conf\\usr.inf");
+					if(m.isEmpty()){
+						f.Writer(ac.toString(),"D:\\Lucene\\conf\\usr.inf");
+					}
+					else if(!m.containsKey(user)){
+						f.Writer(ac.toString(),"D:\\Lucene\\conf\\usr.inf");
+					}
+					else{
+						if (m.get(user).equals(pwd)){		//登录成功
+							islogin=true;
+							star.SetLoginMarkVisable(true);
+							star.SetLoginLabelText(user);
+						}
+							
+						else{
+							islogin=false;
+							JOptionPane.showMessageDialog(null, "密码错误", "警告", JOptionPane.ERROR_MESSAGE);
+						}
+							
+					}
+				
+				}else
+					JOptionPane.showMessageDialog(null, "用户名、密码不允许为空", "警告", JOptionPane.ERROR_MESSAGE);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}	
+	} 
+
+	public static class ShowSOLLoginEvent extends MouseAdapter{
+		
+		JFrame jf;
+		SOLStar star;
+		
+		public ShowSOLLoginEvent(JFrame jf,SOLStar star){
+			this.jf=jf;
+			this.star=star;
+		}
+		
+		public void mouseClicked(MouseEvent e){
+			try {
+				SOLLogin sollogin=new SOLLogin(jf,star);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
+	}
+
 }
