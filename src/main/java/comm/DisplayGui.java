@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -60,7 +61,16 @@ import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 
 public class DisplayGui extends JFrame{
 	
-	private List<String> history=new ArrayList<String>();
+	private List<String> history,tmphis;
+	private JTextField stf,adr,port;
+	private JButton sbt;
+	private JRadioButton lawnums_30,lawnums_50,lawnums_100,other,remote;
+	public  SOLHistory solhis;
+	public SOLResult solresult;
+	public static SOLLogin sollogin;
+	public static SOLStar star;
+	public static List<String> range=new ArrayList<String>();
+	public static List<Boolean> defselect=new ArrayList<Boolean>();
 	
 	/*
 	 *
@@ -78,17 +88,20 @@ public class DisplayGui extends JFrame{
 	 * 该方法修改于2017.10.29 21:00:00，使用JEditorPane代替JTextArea,能够高亮显示搜索结果的效果
 	 * @2017-10-31
 	 * 				新增变量int totaloflaws,在状态条中显示搜索结果的记录数
+	 * @2017-12-20
+	 * 				修改SOLStar为静态类
+	 * 				初始化Display时，实例化SOLLogin，默认不显示
+	 * @2017-12-21
+	 * 				将该方法修改成构造函数
+	 * 				修改range\defselect为静态变量
 	 * 
 	 */
 	
-	public void home(String indexpath) throws IOException, java.text.ParseException{
+	public DisplayGui() throws IOException, java.text.ParseException{
 		
-		final String ipath=indexpath;
-		final List<String> range=new ArrayList<String>();
-		final List<String> tmphis=new ArrayList<String>();
-		final List<Boolean> defselect=new ArrayList<Boolean>();
+		tmphis=new ArrayList<String>();
 		IOHistory iohis=new IOHistory();
-		history=iohis.HistoryReaderByList("D:\\Lucene\\conf\\history.cf");
+		history=iohis.HistoryReaderByList(Path.historypath);
 		tmphis.addAll(history);
 		
 		Container contentpane=this.getContentPane();
@@ -109,11 +122,12 @@ public class DisplayGui extends JFrame{
 	    menubar.add(about);
 	    this.setJMenuBar(menubar);
 	    
-//	   final StatusBar stbar=new StatusBar(new Dimension(740,20));
-	   final SOLStar star=new SOLStar(this);		//创建状态栏面板
+	   star=new SOLStar(new Dimension(WindowSize.X-213-15,24));		//创建状态栏面板
+	   star.SetLoginLabelVisabel(true); //初始化时，显示登录用户标签
+	   star.AddShowSOLLLoginEvent(new SOLEvents.ShowSOLLoginEvent());		//初始化时，对登录用户名标签装载ShowSOLLogin鼠标事件
 		
-	    aboutitem.addActionListener(new SOLEvents.AboutEvent());
 
+/*
 	    class CreateIndexEvent implements ActionListener{
 
 			public void actionPerformed(ActionEvent e) {
@@ -122,7 +136,7 @@ public class DisplayGui extends JFrame{
 				CreateIndex createindex=new CreateIndex();
 				
 				createindex.dispaly(ipath);
-/*				
+				
 				HandleLucene handle=new HandleLucene();
 
 				
@@ -140,12 +154,13 @@ public class DisplayGui extends JFrame{
 				}
 			createindex.setEnabled(true);	
 			
-*/			
+			
 			}
 	    	
 	    }
-	    createindex.addActionListener(new CreateIndexEvent());
-	    
+*/	    
+
+/*	    
 	    class AddIndexEvent implements ActionListener{
 
 			public void actionPerformed(ActionEvent e) {
@@ -154,7 +169,7 @@ public class DisplayGui extends JFrame{
 				AddIndex addindex=new AddIndex();
 				
 				addindex.dispaly(ipath);
-/*				
+				
 				HandleLucene handle=new HandleLucene();
 
 				
@@ -172,18 +187,19 @@ public class DisplayGui extends JFrame{
 				}
 			createindex.setEnabled(true);	
 			
-*/			
+			
 			}
 	    	
 	    }
-	    addindex.addActionListener(new AddIndexEvent());
+*/
+//	    addindex.addActionListener(new AddIndexEvent());
 	    
 	    class ShowIndexEvent implements ActionListener{
 	    	public void actionPerformed(ActionEvent e) {
 	    		// TODO Auto-generated method stub
 	    		ShowIndex showindex=new ShowIndex();
 	    		try {
-					showindex.dispaly(ipath);
+					showindex.dispaly();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -202,13 +218,13 @@ public class DisplayGui extends JFrame{
 		sta.setFont(new Font("宋体",Font.PLAIN,15));
 */
 
-	    final SOLResult res=new SOLResult();		//创建搜索结果面板
+	    solresult=new SOLResult();		//创建搜索结果面板
 		
-		final JTextField stf=new JTextField(79);
+		stf=new JTextField(79);
 		stf.setPreferredSize(new Dimension(300,34));
 		stf.setFont(new Font("宋体",Font.PLAIN,15));
 		
-		final JButton sbt=new JButton("检索");
+		sbt=new JButton("检索");
 		sbt.setPreferredSize(new Dimension(100,34));
 		
 //		JLabel sll=new JLabel("请选择需要显示的条数：");
@@ -216,17 +232,17 @@ public class DisplayGui extends JFrame{
 		
 		ButtonGroup numbg=new ButtonGroup();
 		
-		final JRadioButton lawnums_30=new JRadioButton("1000",true);
+		lawnums_30=new JRadioButton("1000",true);
 		lawnums_30.setLocation(20, 20);
 		lawnums_30.setSize(50, 20);
 		lawnums_30.setName("1000");
 		
-		final JRadioButton lawnums_50=new JRadioButton("2000");
+		lawnums_50=new JRadioButton("2000");
 		lawnums_50.setLocation(20, 50);
 		lawnums_50.setSize(50, 20);
 		lawnums_50.setName("2000");
 		
-		final JRadioButton lawnums_100=new JRadioButton("3000");
+		lawnums_100=new JRadioButton("3000");
 		lawnums_100.setLocation(20, 50);
 		lawnums_100.setSize(50, 20);
 		lawnums_100.setName("3000");
@@ -242,7 +258,7 @@ public class DisplayGui extends JFrame{
 		all.setSize(50, 20);
 		all.setName("all");
 		
-		final JRadioButton other=new JRadioButton("自定义文档"); 
+		other=new JRadioButton("自定义文档"); 
 		other.setLocation(20, 20);
 		other.setSize(50, 20);
 		other.setName("other");
@@ -258,7 +274,7 @@ public class DisplayGui extends JFrame{
 		local.setName("local");
 		
 		
-		final JRadioButton remote=new JRadioButton("远程"); 
+		remote=new JRadioButton("远程"); 
 		remote.setLocation(20, 20);
 		remote.setSize(50, 20);
 		remote.setName("remote");
@@ -266,7 +282,7 @@ public class DisplayGui extends JFrame{
 		sourcebg.add(local);
 		sourcebg.add(remote);
 		
-		JTextField adr=new JTextField(12);
+		adr=new JTextField(12);
 		adr.setText("http://");
 		adr.setPreferredSize(new Dimension(300,23));
 		adr.setEnabled(false);
@@ -275,14 +291,14 @@ public class DisplayGui extends JFrame{
 		JLabel jl=new JLabel(":");
 		jl.setEnabled(false);
 		
-		JTextField port=new JTextField(3);
+		port=new JTextField(3);
 		port.setPreferredSize(new Dimension(300,23));
 		port.setEnabled(false);
 		port.setName("port");
 
 		
-		final SOLHistory solhis=new SOLHistory(history);	//创建搜索历史面板
-		solhis.SetComponent(res);		//将搜索结果面板传参给搜索历史面板
+		solhis=new SOLHistory(history);	//创建搜索历史面板
+		solhis.SetComponent(solresult);		//将搜索结果面板传参给搜索历史面板
 		solhis.SetComponent(star); 		//将状态栏面板传参给搜索历史面板
 		history.clear();
 /*		
@@ -434,20 +450,24 @@ public class DisplayGui extends JFrame{
 		npane.add(npaneofcenter,BorderLayout.CENTER);	//添加搜索条数和搜索范围面板
 		
 		JPanel searchpanel=new JPanel();			/*搜索面板*/
-		searchpanel.setPreferredSize(new Dimension(750,588));
+		searchpanel.setPreferredSize(new Dimension(WindowSize.X-213,588));
 //		searchpanel.setBorder(BorderFactory.createLineBorder(Color.red));
 		searchpanel.setLayout(new BorderLayout(0,0));
 		searchpanel.add(npane,BorderLayout.NORTH);		//添加搜索输入框、搜索按钮、搜索条数、搜索范围面板
-		searchpanel.add(res,BorderLayout.CENTER);		//添加搜索结果面板
+		searchpanel.add(solresult,BorderLayout.CENTER);		//添加搜索结果面板
 		searchpanel.add(star,BorderLayout.SOUTH);		//添加状态栏面板
 		
 		contentpane.add(searchpanel,BorderLayout.EAST);
 		contentpane.add(solhis,BorderLayout.WEST);
 		
-	    sbt.addMouseListener(new SOLEvents.SearchEvent(npaneofnorth, npaneofcenter, range, tmphis, history, solhis, ipath, res, star));
-		other.addMouseListener(new SOLEvents.SelectEvent(ipath, range, defselect));
-		remote.addMouseListener(new SOLEvents.RemoteEvent(star));
-		local.addMouseListener(new SOLEvents.UnRemoteEvent(star));
+		createindex.addActionListener(new SOLEvents.ShowSOLCreateIndexEvent());
+		addindex.addActionListener(new SOLEvents.ShowSOLAddIndexEvent());
+		aboutitem.addActionListener(new SOLEvents.AboutEvent());
+		sbt.addMouseListener(new SOLEvents.SearchEvent(this));
+		other.addMouseListener(new SOLEvents.ShowSOLSelectIndexEvent());
+		remote.addMouseListener(new SOLEvents.RemoteEvent());
+		local.addMouseListener(new SOLEvents.UnRemoteEvent());
+		this.addWindowListener(new SOLEvents.DisplayGuiColseEvent(this));
 		
 	    this.setTitle("Searching Of Laws");//窗体标签  
 	    this.setSize(WindowSize.X,WindowSize.Y);//窗体大小  
@@ -455,9 +475,11 @@ public class DisplayGui extends JFrame{
 	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//退出关闭JFrame   
 	    this.setVisible(true);//显示窗体
 	    this.setResizable(false); //锁定窗体	
-	 	
+	    
+		sollogin=new SOLLogin(this);	//创建登录窗口
+ 	
 	}
-
+/*
 	private class StatusBar extends JPanel{
 		
 		private JLabel sll;
@@ -483,7 +505,8 @@ public class DisplayGui extends JFrame{
 			return sll.getText();
 		}
 	}
-	
+*/
+/*	
 	private class About extends JFrame{
 		
 		About(){
@@ -506,7 +529,8 @@ public class DisplayGui extends JFrame{
 		    this.setResizable(false); //锁定窗体	
 		}
 	}
-	
+*/
+/*	
 	private class CreateIndex extends JFrame{
 		
 //		private StringBuffer fdir=new StringBuffer();
@@ -606,7 +630,8 @@ public class DisplayGui extends JFrame{
 		}
 		
 	}
-	
+*/
+/*	
 	private class AddIndex extends JFrame{
 		
 //		private StringBuffer fdir=new StringBuffer();
@@ -697,14 +722,14 @@ public class DisplayGui extends JFrame{
 		    this.setTitle("Searching Of Laws");//窗体标签  
 		    this.setSize(FrameSize.X,FrameSize.Y);//窗体大小  
 		    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
-		    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);//退出关闭JFrame  
+		    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
 		    this.setVisible(true);//显示窗体
 		    this.setResizable(false); //锁定窗体
 		  	   	    
 		}
 		
 	}
-	
+*/	
 	public void StoreHistory() throws IOException{
 		
 		IOHistory iohis=new IOHistory();
@@ -718,6 +743,60 @@ public class DisplayGui extends JFrame{
 		return his;
 	}
 	
+	public String GetKeywordsInputText(){
+		StringBuffer s=new StringBuffer();
+		s.append(stf.getText());
+		return s.toString();
+	}
+	
+	public void SetStatusText(String s,long total){
+		star.setStatusText("检索完毕!"+" "+"耗时："+s+"ms"+" "+"共搜索到："+total);
+	}
+	
+	public int GetTop(){
+		int top=1000;
+		if(lawnums_30.isSelected())
+			top=1000;
+		if(lawnums_50.isSelected())
+			top=2000;
+		if(lawnums_100.isSelected())
+			top=3000;
+		return top;
+	}
+	
+	public Boolean GetRage(){
+		Boolean f=true;
+		if(other.isSelected())
+			f=false;
+		return f;
+	}
+	
+	public void SetSearchButtonEnable(Boolean f){
+		sbt.setEnabled(f);
+	}
+	
+	public String GetRemoteAddress(){
+		StringBuffer s=new StringBuffer();
+		s.append(adr.getText()+":"+port.getText());
+		return s.toString();
+	}
+	
+	public Boolean GetIsRemote(){
+		Boolean f=false;
+		if(remote.isSelected())
+			f=true;
+		return f;
+	}
+	
+	public List<String> GethTmpHis(){
+		return tmphis;
+	}
+	
+	public List<String> GetHistory(){
+		return history;
+	}
+	
+	
 	/** 
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
 	 * All right reserved. 
@@ -730,9 +809,9 @@ public class DisplayGui extends JFrame{
 	
 	private class ShowIndex extends JFrame{
 		
-		public void dispaly(String indexpath) throws IOException, ParseException{
+		public void dispaly() throws IOException, ParseException{
 			
-			final String ipath=indexpath;
+//			final String ipath=indexpath;
 			
 			Container contentpane=this.getContentPane();
 			contentpane.setLayout(new BorderLayout(3,3));
@@ -747,13 +826,13 @@ public class DisplayGui extends JFrame{
 	        final Vector rowdata = new Vector();
 	        final DefaultTableModel tableModel = new DefaultTableModel();
 	        
-	        fre=handle.GetTermFreq(ipath);
+	        fre=handle.GetTermFreq(Path.indexpath);
 	        
 	        if(!fre.isEmpty()){
-	        	for(String key:fre.keySet()){
+	        	for(Entry<String,Integer> entry: fre.entrySet()){
 	        		Vector line=new Vector();
-	        		line.add(key);
-	        		line.add(fre.get(key));
+	        		line.add(entry.getKey());
+	        		line.add(entry.getValue());
 	        		rowdata.add(line);
 	        	}
 	        }
@@ -797,7 +876,7 @@ public class DisplayGui extends JFrame{
 					if(!file.isEmpty()){
 						for(int i=0;i<file.size();i++){
 							try {
-								handle.DeleteIndex(file.get(i),ipath);
+								handle.DeleteIndex(file.get(i),Path.indexpath);
 							} catch (IOException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
@@ -805,7 +884,7 @@ public class DisplayGui extends JFrame{
 						}
 					rowdata.clear();
 					Map<String,Integer> fret=new HashMap<String,Integer>();
-			        fret=handle.GetTermFreq(ipath); 
+			        fret=handle.GetTermFreq(Path.indexpath); 
 					
 					if(!fret.isEmpty()){
 						for(String key:fret.keySet()){
@@ -837,7 +916,7 @@ public class DisplayGui extends JFrame{
 			            	String file=jt.getValueAt(row,0).toString();
 			            	ShowLaws showlaws=new ShowLaws();
 			            	try {
-			            		showlaws.dispaly(file,ipath,top);
+			            		showlaws.dispaly(file,top);
 			            	} catch (IOException e1) {
 			            		// TODO Auto-generated catch block
 			            		e1.printStackTrace();
@@ -887,9 +966,9 @@ public class DisplayGui extends JFrame{
 	 */
 	
 	private class ShowLaws extends JFrame{
-		public void dispaly(String file,String indexpath,int top) throws IOException, ParseException, InvalidTokenOffsetsException{
+		public void dispaly(String file,int top) throws IOException, ParseException, InvalidTokenOffsetsException{
 			
-			final String ipath=indexpath;
+//			final String ipath=indexpath;
 			
 			Container contentpane=this.getContentPane();
 			contentpane.setLayout(new BorderLayout(3,3));
@@ -904,7 +983,7 @@ public class DisplayGui extends JFrame{
 	        
 	        Map<String,List<String[]>> contentoflaw=new HashMap<String,List<String[]>>();
 	        
-	        contentoflaw=handle.GetTermSearch(ipath,file,top);
+	        contentoflaw=handle.GetTermSearch(Path.indexpath,file,top);
 	        List<String[]> laws=contentoflaw.get(file);
 	        
 	        for(int i=0;i<laws.size();i++){
@@ -1011,7 +1090,7 @@ public class DisplayGui extends JFrame{
 	 * @Modified Date:2017-11-20
 	 * 			修复JTabel中添加JCheckBox时，不显示复选框框体的问题
 	 */
-
+/*
 	private class SelectIndex extends JFrame{
 
 		public void dispaly(String indexpath,final List<String> range,final List<Boolean> defselect) throws IOException, ParseException{
@@ -1043,11 +1122,11 @@ public class DisplayGui extends JFrame{
 	        }
         
 	        tableModel.setDataVector(rowdata,columnName);
-/*	        
+	        
 			JCheckBox jcb=new JCheckBox();
 			jcb.setHorizontalAlignment(SwingConstants.CENTER);
 			jcb.setBackground( Color.white);
-*/	        
+	        
 	        final JTable jt=new JTable(tableModel);
 			jt.setRowHeight(35);
 			jt.getColumnModel().getColumn(0).setPreferredWidth(266);
@@ -1143,11 +1222,10 @@ public class DisplayGui extends JFrame{
 		    
 		}
 	}
-	
+*/	
 	public static void main(String[] args) throws IOException, java.text.ParseException {
-		DisplayGui display=new DisplayGui();
- 
-		display.home("D:\\Lucene\\index");
+		new DisplayGui();
+
 	}
 
 }

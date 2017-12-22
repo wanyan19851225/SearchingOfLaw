@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,11 +23,12 @@ import javax.swing.table.DefaultTableModel;
 @SuppressWarnings("serial")
 public class SOLSelectIndex extends JFrame{
 	
+	private JTable jt;
+	
 	@SuppressWarnings("unchecked")
-	public SOLSelectIndex(String indexpath,final List<String> range,List<Boolean> defselect){
+	public SOLSelectIndex(){
 		
-		String ipath=indexpath;
-		
+
 		Container contentpane=this.getContentPane();
 		contentpane.setLayout(new BorderLayout(3,3));
 		HandleLucene handle=new HandleLucene();
@@ -42,20 +44,20 @@ public class SOLSelectIndex extends JFrame{
 		Vector rowdata = new Vector();
         DefaultTableModel tableModel = new DefaultTableModel();
         
-        fre=handle.GetTermFreq(ipath);
+        fre=handle.GetTermFreq(Path.indexpath);
         
-        if(!fre.isEmpty()){
-        	for(String key:fre.keySet()){
+        if(!fre.isEmpty()){  	
+        	for(Entry<String,Integer> entry: fre.entrySet()){
         		Vector line=new Vector();
-        		line.add(key);
-        		line.add(fre.get(key));
+        		line.add(entry.getKey());
+        		line.add(entry.getValue());
         		rowdata.add(line);
         	}
         }
         
         tableModel.setDataVector(rowdata,columnName);
         
-        JTable jt=new JTable(tableModel);
+        jt=new JTable(tableModel);
         
 		jt.setRowHeight(35);
 		jt.getColumnModel().getColumn(0).setPreferredWidth(266);
@@ -63,18 +65,8 @@ public class SOLSelectIndex extends JFrame{
 		jt.getColumnModel().getColumn(2).setPreferredWidth(85);
 		jt.getColumnModel().getColumn(2).setCellEditor(jt.getDefaultEditor(Boolean.class));
 		jt.getColumnModel().getColumn(2).setCellRenderer(jt.getDefaultRenderer(Boolean.class));
-		
-		if(defselect.isEmpty()){
-			for(int i=0;i<jt.getRowCount();i++){
-				jt.setValueAt(true,i,2);
-				defselect.add(true);
-			}
-		}
-		else{
-			for(int i=0;i<jt.getRowCount();i++){
-				jt.setValueAt(defselect.get(i),i,2);
-			}
-		}
+
+		this.InitSelectStatus();
 		
 		final JButton lbt=new JButton("确定");
 		lbt.setPreferredSize(new Dimension(60,35));
@@ -94,11 +86,11 @@ public class SOLSelectIndex extends JFrame{
 		jt.setDefaultRenderer(Object.class,r);
 		
 
-		lbt.addMouseListener(new SOLEvents.ExeEvent(range, jt, defselect,this));
+		lbt.addMouseListener(new SOLEvents.ExeEvent(this));
 					
-		sbt.addActionListener(new SOLEvents.SelEvent(jt));
+		sbt.addActionListener(new SOLEvents.SelEvent(this));
 	
-		sbt1.addActionListener(new SOLEvents.UnselEvent(jt));
+		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
 		
 		JPanel cpane=new JPanel();
 	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
@@ -120,6 +112,45 @@ public class SOLSelectIndex extends JFrame{
 	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
 	    this.setVisible(true);//显示窗体
 	    this.setResizable(false); //锁定窗体
+	}
+	
+	public void SetRange(){
+		DisplayGui.range.clear();
+		for(int i=0;i<jt.getRowCount();i++){			
+			if(((Boolean)jt.getValueAt(i,2)).booleanValue())
+				DisplayGui.range.add(jt.getValueAt(i, 0).toString());	
+			DisplayGui.defselect.set(i,((Boolean)jt.getValueAt(i,2)).booleanValue());
+		}
+	}
+	
+	public void InitSelectStatus(){
+		if(DisplayGui.defselect.isEmpty()){
+			for(int i=0;i<jt.getRowCount();i++){
+				jt.setValueAt(true,i,2);
+				DisplayGui.defselect.add(true);
+			}
+		}
+		else{
+			for(int i=0;i<jt.getRowCount();i++){
+				jt.setValueAt(DisplayGui.defselect.get(i),i,2);
+			}
+		}	
+	}
+	
+	public void SelectAll(){
+		for(int i=0;i<jt.getRowCount();i++){
+			jt.setValueAt(true,i,2);
+		}
+	}
+	
+	public void SelectInvert(){
+		for(int i=0;i<jt.getRowCount();i++){
+			
+			if(((Boolean)jt.getValueAt(i,2)).booleanValue())
+				jt.setValueAt(false,i,2);
+			else
+				jt.setValueAt(true,i,2);
+		}	
 	}
 
 }

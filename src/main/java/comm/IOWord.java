@@ -220,6 +220,8 @@ public class IOWord{
 	 * 		修改判断为IsInTop
 	 * @2017-11-6
 	 * 		增加判断，将读取到的法条存储到中文索引，每次读取法条判断中文索引中是否已经存在，如果存在则作为新法条，将上一法条保存，如果不存在，则追加到上一法条的内容中
+	 * @2017-12-19
+	 * 		增加判断，当读取到法条时，判断法条的位置是否在第一章之前，如果在第一章之前读取到的法条，则丢弃不存储
 	 * 
 	 */
 
@@ -288,7 +290,7 @@ public class IOWord{
 					
 					itemindex=0;
 				}
-				else if(updatestring.IsInTop(temp1,"条")){
+				else if(updatestring.IsInTop(temp1,"条")&&chapterindex!=0){		//增加chapterindex章索引号的判断，当章索引号为零时，即第一章之前读取到的法条不走此分支
 					inputitemindex=itemindex;
 					itemindex++;
 					boolean f=legal.containsKey(updatestring.GetStringBetween(temp1,"条"));

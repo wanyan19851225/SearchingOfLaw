@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -80,75 +82,46 @@ public class  SOLEvents {
 
 	public static class ExeEvent extends MouseAdapter{
 		
-		List<String> range;
-		JTable jt;
-		List<Boolean> defselect;
-		JFrame p;
+		SOLSelectIndex p;
 		
-		public ExeEvent(List<String> range,JTable jt,List<Boolean> defselect,JFrame p){
-			this.range=range;
-			this.jt=jt;
-			this.defselect=defselect;
+		public ExeEvent(SOLSelectIndex p){
 			this.p=p;
 			
 		}
-		public void mouseClicked(MouseEvent e){
-			range.clear();
-			for(int i=0;i<jt.getRowCount();i++){			
-				if(((Boolean)jt.getValueAt(i,2)).booleanValue()){
-					range.add(jt.getValueAt(i, 0).toString());	
-				}
-				defselect.set(i,((Boolean)jt.getValueAt(i,2)).booleanValue());
-			}
-			p.dispose();//退出关闭JFrame 
+		public void mouseClicked(MouseEvent e){			
+			p.SetRange();
+			p.dispose();//退出关闭SOLSelectIndex窗口 
 		}	
 	} 
 
 	public static class SelEvent implements ActionListener{
-		JTable jt;
+		SOLSelectIndex p;
 		
-		public SelEvent(JTable jt){
-			this.jt=jt;
+		public SelEvent(SOLSelectIndex p){
+			this.p=p;
 		}
 		
 		public void actionPerformed(ActionEvent e) {
-			for(int i=0;i<jt.getRowCount();i++){
-				jt.setValueAt(true,i,2);
-			}
+			p.SelectAll();
 		}
 	}
 
 	public static class UnselEvent implements ActionListener{
-		JTable jt;
+		SOLSelectIndex p;
 		
-		public UnselEvent(JTable jt){
-			this.jt=jt;
+		public UnselEvent(SOLSelectIndex p){
+			this.p=p;
 		}
 		public void actionPerformed(ActionEvent e) {
-			for(int i=0;i<jt.getRowCount();i++){
-			
-				if(((Boolean)jt.getValueAt(i,2)).booleanValue())
-					jt.setValueAt(false,i,2);
-				else
-					jt.setValueAt(true,i,2);
-			}	
+			p.SelectInvert();
 		}
 	}
 	
-	public static class SelectEvent extends MouseAdapter{
+	public static class ShowSOLSelectIndexEvent extends MouseAdapter{
 		
-		String ipath;
-		List<String> range;
-		List<Boolean> defselect;
-		public SelectEvent(String ipath,List<String> range,List<Boolean> defselect){
-			this.ipath=ipath;
-			this.range=range;
-			this.defselect=defselect;
-		}
 		public void mouseClicked(MouseEvent e){
-			SOLSelectIndex selectindex=new SOLSelectIndex(ipath,range,defselect);
-		}
-		
+			new SOLSelectIndex();
+		}	
 	}
 	
 	public static class AboutEvent implements ActionListener{
@@ -161,35 +134,36 @@ public class  SOLEvents {
 
 	public static class SearchEvent extends MouseAdapter{
 		
-		JButton sbt;
-		JTextField stf,adr,port;
-		JPanel npaneofcenter;
-		List<String> range,tmphis,history;
-		SOLHistory solhis;
-		SOLResult res;
-		SOLStar star;
-		String ipath;
+//		JButton sbt;
+//		JTextField adr,port;
+//		JPanel npaneofcenter;
+//		List<String> tmphis,history;
+//		SOLHistory solhis;
+//		SOLResult res;
+//		SOLStar star;
+		DisplayGui p;
 
-		public SearchEvent(JPanel npaneofnorth,JPanel npaneofcenter,List<String> range,List<String> tmphis,List<String> history,SOLHistory solhis,String ipath,SOLResult res,SOLStar star){
+		public SearchEvent(DisplayGui p){
 			
 //			this.npaneofnorth=npaneofnorth;
-			this.npaneofcenter=npaneofcenter;
-			this.range=range;
-			this.tmphis=tmphis;
-			this.history=history;
-			this.solhis=solhis;
-			this.ipath=ipath;
-			this.res=res;
-			this.star=star;
-			
+//			this.npaneofcenter=npaneofcenter;
+//			this.tmphis=tmphis;
+//			this.history=history;
+//			this.solhis=solhis;
+//			this.res=res;
+//			this.star=star;
+			this.p=p;
+/*			
 			int c=npaneofnorth.getComponentCount();
 			
 			for(int i=0;i<c;i++){
 			    Object obj =npaneofnorth.getComponent(i);
-			    if (obj instanceof JTextField)
-			    	this.stf=(JTextField)obj;
-			    if(obj instanceof JButton)
-			    	this.sbt=(JButton)obj;   
+			    if (obj instanceof JTextField){
+			    	//this.stf=(JTextField)obj;
+			    }
+			    if(obj instanceof JButton){
+			    	//this.sbt=(JButton)obj;  
+			    }
 			}
 			
 			int s=npaneofcenter.getComponentCount();
@@ -201,53 +175,64 @@ public class  SOLEvents {
 				    Object obj1 =jp.getComponent(j);    
 				    if(obj1 instanceof JTextField){
 				    	JTextField jt=(JTextField)obj1;
-				    	if(jt.getName().equals("adr"))
-				    		this.adr=jt;
-				    	else if(jt.getName().equals("port"))
-				    		this.port=jt;
+				    	if(jt.getName().equals("adr")){
+				    		//this.adr=jt;
+				    	}
+				    	else if(jt.getName().equals("port")){
+				    		//this.port=jt;
+				    	}
 				    } 
 			    }
 
 			}
-		
+*/		
 		}
 		
 		public void mouseClicked(MouseEvent e){
 
 			HandleLucene handle=new HandleLucene();
 			Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
-			StringBuffer keywords=new StringBuffer();
+			String keywords=p.GetKeywordsInputText();
 			Date date=new Date(System.currentTimeMillis());
 			DateFormat dformat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-			sbt.setEnabled(false);
-			keywords.append(stf.getText());
+			p.SetSearchButtonEnable(false);
 			
 			try {
 	
-				if(this.IsRange(npaneofcenter))
-					range.clear();
+				if(p.GetRage())
+					DisplayGui.range.clear();
 				
-				if(!keywords.toString().isEmpty()){
+				if(!keywords.isEmpty()){
 					IOList iolist=new IOList();
 					String ndate=dformat.format(date);
-					iolist.add("Date@"+ndate+" "+keywords.toString(),tmphis);
-					iolist.add("Date@"+ndate+" "+keywords.toString(),history);
-					solhis.UpdateHistory(tmphis);
+					iolist.add("Date@"+ndate+" "+keywords,p.GethTmpHis());
+					iolist.add("Date@"+ndate+" "+keywords,p.GetHistory());
+					p.solhis.UpdateHistory(p.GethTmpHis());
+					int top=p.GetTop();
+					Boolean f=p.GetIsRemote();
 					long start=System.currentTimeMillis();
-					int top=this.GetTop(npaneofcenter);
-					if(range.isEmpty()){
-						content=handle.GetSearch(ipath,keywords.toString(),top);
+					if(DisplayGui.range.isEmpty()){
+						if(f){
+							System.out.println("keywords:"+keywords+","+"address:"+p.GetRemoteAddress());
+						}
+						else
+							content=handle.GetSearch(Path.indexpath,keywords,top);
 					}
 					else{					
-//						多条件查询，指定在某个法条文档中查询						
-						String[] fields=new String[]{"file","law"};
-						content=handle.GetMultipleSearch(ipath,fields,range,keywords.toString(),top);
+//						多条件查询，指定在某个法条文档中查询	
+						if(f){
+							System.out.println("keywords:"+keywords+","+"address:"+p.GetRemoteAddress());
+						}
+						else{
+							String[] fields=new String[]{"file","law"};
+							content=handle.GetMultipleSearch(Path.indexpath,fields,DisplayGui.range,keywords,top);
+						}
 					}
 							
 					long end=System.currentTimeMillis();
-					long total=res.UpdateText(content);
-					star.setStatusText("检索完毕!"+" "+"耗时："+String.valueOf(end-start)+"ms"+" "+"共搜索到："+total);
+					long total=p.solresult.UpdateText(content);
+					p.SetStatusText(String.valueOf(end-start),total);
 					
 				}else
 					JOptionPane.showMessageDialog(null, "关键词不允许为空", "警告", JOptionPane.ERROR_MESSAGE);
@@ -265,9 +250,9 @@ public class  SOLEvents {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}					
-			sbt.setEnabled(true);		
+			p.SetSearchButtonEnable(true);
 		}
-	
+/*	
 		public Boolean IsRange(JPanel npaneofcenter){
 			
 			Boolean f=true;		
@@ -354,75 +339,74 @@ public class  SOLEvents {
 			
 			return top;
 		}
-		
+*/		
 	}
 	
 	public static class RemoteEvent extends MouseAdapter{
-		
-		SOLStar s;
-		
-		public RemoteEvent(SOLStar s){
-			this.s=s;
-		}
-		
+	
 		public void mouseClicked(MouseEvent e){
-			s.SetRemoteMarkVisable(true);
+			DisplayGui.star.SetRemoteStatus(true);
+			DisplayGui.star.SetRemoteMarkVisable(true);
 		}
 		
 	}
 	
 	public static class UnRemoteEvent extends MouseAdapter{
 		
-		SOLStar s;
-		
-		public UnRemoteEvent(SOLStar s){
-			this.s=s;
-		}
-		
 		public void mouseClicked(MouseEvent e){
-			s.SetRemoteMarkVisable(false);
+			DisplayGui.star.SetRemoteStatus(false);
+			DisplayGui.star.SetRemoteMarkVisable(false);
 		}
 		
 	}
 	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-13 
+	 * desc:窗口SOLLogin中的登录按钮_lt的鼠标事件调用该类，进行登录操作
+	 * 
+	 * 2017-12-21
+	 * 			优化登陆时判断用户名和密码的代码结构
+	 * 			
+	 */
+	
 	public static class LoginEvent extends MouseAdapter{
-		private Boolean islogin=false;
-		private JTextField usert,pwdt;
-		private SOLStar star;
+
+		private SOLLogin sollogin;
 		
-		public LoginEvent(JTextField user,JTextField pwd,SOLStar star){
-			this.usert=user;
-			this.pwdt=pwd;
-			this.star=star;
+		public LoginEvent(SOLLogin sollogin){
+			this.sollogin=sollogin;
 		}
 		public void mouseClicked(MouseEvent e){
 			
 			StringBuffer ac=new StringBuffer();
-			String user=usert.getText();
-			String pwd=pwdt.getText();
+			String user=sollogin.usert.getText();
+			String pwd=sollogin.pwdt.getText();
 			ac.append(user+":"+pwd);
-			IOFile f=new IOFile();
 			try {
 				if(!user.isEmpty()&&!pwd.isEmpty()){
-					Map<String, String> m = f.Reader("D:\\Lucene\\conf\\usr.inf");
-					if(m.isEmpty()){
-						f.Writer(ac.toString(),"D:\\Lucene\\conf\\usr.inf");
+					IOFile f=new IOFile();
+					Map<String, String> m = f.Reader("D:\\Lucene\\conf\\usr.ini");		//从usr.ini中读取用户名和密码
+					if(!m.containsKey(user)){		//判断usr.ini中是否有该用户，如果没有，则将用户名和密码写入文件并登陆
+						f.Writer(ac.toString(),"D:\\Lucene\\conf\\usr.ini");
+						sollogin.HidePanel(sollogin.loginoutpanel);
+						sollogin.ShowPanel(sollogin.loginpanel);
+						DisplayGui.star.SetLoginMarkVisable(true);
+						DisplayGui.star.SetLoginStatus(true);
+						DisplayGui.star.SetLoginLabelText(user);
 					}
-					else if(!m.containsKey(user)){
-						f.Writer(ac.toString(),"D:\\Lucene\\conf\\usr.inf");
+					else if(m.get(user).equals(pwd)){		//判断用户名和密码是否正确，如果正确，则登陆成功
+						sollogin.HidePanel(sollogin.loginoutpanel);
+						sollogin.ShowPanel(sollogin.loginpanel);
+						DisplayGui.star.SetLoginMarkVisable(true);
+						DisplayGui.star.SetLoginLabelText(user);
+						DisplayGui.star.SetLoginStatus(true);
 					}
-					else{
-						if (m.get(user).equals(pwd)){		//登录成功
-							islogin=true;
-							star.SetLoginMarkVisable(true);
-							star.SetLoginLabelText(user);
-						}
-							
-						else{
-							islogin=false;
-							JOptionPane.showMessageDialog(null, "密码错误", "警告", JOptionPane.ERROR_MESSAGE);
-						}
-							
+					else {		//用户名和密码如果不一致，则提示错误框
+						DisplayGui.star.SetLoginStatus(false);
+						JOptionPane.showMessageDialog(null, "密码错误", "警告", JOptionPane.ERROR_MESSAGE);
 					}
 				
 				}else
@@ -433,29 +417,247 @@ public class  SOLEvents {
 			}
 		}	
 	} 
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-21
+	 * desc:窗口SOLLogin中退出按钮_loginout的鼠标事件调用该类，退出登录 
+	 * 
+	 */
+	
+	public static class LoginOutEvent extends MouseAdapter{
 
-	public static class ShowSOLLoginEvent extends MouseAdapter{
+		private SOLLogin sollogin;
 		
-		JFrame jf;
-		SOLStar star;
-		
-		public ShowSOLLoginEvent(JFrame jf,SOLStar star){
-			this.jf=jf;
-			this.star=star;
+		public LoginOutEvent(SOLLogin sollogin){
+			this.sollogin=sollogin;
 		}
-		
 		public void mouseClicked(MouseEvent e){
-			try {
-				SOLLogin sollogin=new SOLLogin(jf,star);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (ParseException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			sollogin.pwdt.setText("");	//退出登录后，清空密码输入框
+			sollogin.HidePanel(sollogin.loginpanel);
+			sollogin.ShowPanel(sollogin.loginoutpanel);
+			DisplayGui.star.SetLoginMarkVisable(false);
+			DisplayGui.star.SetLoginStatus(false);
+			DisplayGui.star.SetLoginLabelText("Sign in");		
 		}
 		
 	}
+	
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-13 
+	 * 
+	 * 2017-12-19
+	 * 			鼠标事件中，增加isexit标志，如果iseixt=true，表示SOLLogin窗口处于关闭状态中，则创建SOLLogin窗口，如果iseixt=false,表示SOLLogin窗口处于打开状态
+	 * 2017-12-20
+	 * 			鼠标事件中，判断SOLLogin窗口是否显示，如果显示则取消显示，如果不显示则显示
+	 */
 
+	public static class ShowSOLLoginEvent extends MouseAdapter{
+		
+		public ShowSOLLoginEvent(){
+		
+		}
+		
+		public void mouseClicked(MouseEvent e){
+			if(DisplayGui.sollogin.isVisible())
+				DisplayGui.sollogin.setVisible(false);
+			else
+				DisplayGui.sollogin.setVisible(true);
+			
+		}			
+	}
+
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-21 
+	 * desc:窗口SOLCreateIndex中的创建按钮_sbt的监听事件，创建索引文件
+	 * 
+	 */
+	
+	public static class CreateIndexEvent implements ActionListener{
+		
+		private SOLCreateIndex jf;
+		
+		public CreateIndexEvent(SOLCreateIndex jf){
+			this.jf=jf;
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			String s=jf.GetFilePath();
+			jf.sbt.setEnabled(false);
+			if(!s.isEmpty()){
+				HandleLucene handle=new HandleLucene();
+				try {
+					long start=System.currentTimeMillis();
+					int totalofindex=handle.CreateIndex(s,Path.indexpath);
+					long end=System.currentTimeMillis();
+					if(totalofindex==-1)
+						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
+					else
+						jf.solstar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			else
+				JOptionPane.showMessageDialog(null, "请选择要创建索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
+			jf.sbt.setEnabled(true);
+		}
+	}
+	
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-13
+	 * desc:DispalyGui窗口中新建索引菜单项_createindex的监听事件，打开创建索引窗口
+	 * 
+	 */
+	
+	public static class ShowSOLCreateIndexEvent implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			new SOLCreateIndex();
+		}
+	}
+	
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-21 
+	 * desc:窗口SOLAddIndex中的创建按钮_sbt的监听事件，添加索引文件
+	 * 
+	 */
+	
+	public static class AddIndexEvent implements ActionListener{
+		
+		private SOLAddIndex jf;
+		
+		public AddIndexEvent(SOLAddIndex jf){
+			this.jf=jf;
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			String s=jf.GetFilePath();
+			jf.sbt.setEnabled(false);
+
+			if(!s.isEmpty()){
+				HandleLucene handle=new HandleLucene();
+				try {
+		
+					long start=System.currentTimeMillis();
+					int totalofindex=handle.AddIndex(s,Path.indexpath);
+					long end=System.currentTimeMillis();
+					if(totalofindex==-1)
+						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
+					else
+						jf.solstar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			else
+				JOptionPane.showMessageDialog(null, "请选择要添加索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
+			jf.sbt.setEnabled(true);	
+		}
+	}
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-13
+	 * desc:DispalyGui窗口中添加索引菜单项_addindex的监听事件，打开添加索引窗口
+	 * 
+	 */
+	
+	public static class ShowSOLAddIndexEvent implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			new SOLAddIndex();
+		}
+	}
+	
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-21
+	 * desc:DispalyGui窗口的关闭事件，关闭主窗口时，在关闭事件中将搜索记录写入history.cnf文件中
+	 * 
+	 */
+	
+	public static class DisplayGuiColseEvent extends WindowAdapter{
+		
+		private DisplayGui p;
+		
+		public DisplayGuiColseEvent(DisplayGui p){
+			this.p=p;
+		}
+		
+		public void windowClosing(WindowEvent e)
+          {
+//            super.windowClosing(e); 
+			try {
+				p.StoreHistory();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+          }	
+	}
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-20 
+	 * desc:窗口SOLLogin中窗体的焦点事件，焦点事件中判断是否处于登录状态
+	 * 
+	 * 2017-12-21
+	 * 		删除该焦点事件
+	 * 			
+	 */
+
+/*	
+	public static class SOLLoginFocusEvent implements WindowFocusListener{
+		
+		private SOLLogin sollogin;
+		
+		public SOLLoginFocusEvent(SOLLogin sollogin){
+			this.sollogin=sollogin;
+		}
+		
+		public void windowGainedFocus(WindowEvent e) {
+			// TODO Auto-generated method stub
+			if(SOLLogin.islogin){
+				sollogin.remove(sollogin.loginoutpanel);
+				sollogin.add(sollogin.loginpanel);
+			}
+			else{
+				sollogin.remove(sollogin.loginpanel);
+				sollogin.add(sollogin.loginoutpanel);
+			}
+				
+		}
+
+		public void windowLostFocus(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+	
+	} 
+*/
 }

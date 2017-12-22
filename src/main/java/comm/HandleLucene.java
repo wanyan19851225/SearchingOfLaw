@@ -986,6 +986,30 @@ public class HandleLucene {
 		return res;
 	}
 	
+
+	/*
+	 *
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-11-10 
+	 * 
+	 * AddIndex方法在根据传递的file字段，将法条文档追加到已存在的索引文件中，如果没有索引文件，则创建索引文件
+	 *
+	 * @params fdir 
+	 * 				法条文档
+	 * 				
+	 * 		   indexpath
+	 * 				索引文件路径
+	 * 
+	 * @return Integer
+	 * 				返回添加到索引文件中的法条数
+	 * 
+	 * @2017-12-19
+	 * 				增加对path字段，增加NumericDocValuesField字段，用于排序		   				
+	 * 
+	 */
+	
 public Integer AddIndex(String fdir,String indexpath) throws IOException{
 		
 //		File[] files = new File(fdir).listFiles();
@@ -1037,8 +1061,9 @@ public Integer AddIndex(String fdir,String indexpath) throws IOException{
 				fieldtype.setStored(true);		
 				fieldtype.setTokenized(false);
 				doc.add(new Field("file",file.getName(),fieldtype));		//文档名称存储，不分词
-		    	doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
-		    	doc.add(new StoredField("path",key));
+				doc.add(new NumericDocValuesField("path",key));
+				doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
+				doc.add(new StoredField("path",key));
 		    	doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//发条内容索引、分词，不存储
 		    	
 		    	ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
