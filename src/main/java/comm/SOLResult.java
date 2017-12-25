@@ -95,7 +95,7 @@ public class SOLResult extends JPanel{
 		
 		SOLResult res=new SOLResult();
 		
-		Map<String,List<String[]>> content=handle.GetSearch("D:\\Lucene\\index\\","当事人",1000);
+		Map<String,List<String[]>> content=handle.GetSearch("D:\\Lucene\\index\\","当事人");
 		
 		res.UpdateText(content);
 		

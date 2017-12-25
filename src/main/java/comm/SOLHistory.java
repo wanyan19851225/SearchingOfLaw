@@ -364,7 +364,7 @@ public class SOLHistory extends JPanel{
 				jj.setEnabled(false);
 				long start=System.currentTimeMillis();
 				try {
-					content = handle.GetSearch("D:\\Lucene\\index\\",dd,1000);
+					content = handle.GetSearch("D:\\Lucene\\index\\",dd);
 				} catch (org.apache.lucene.queryparser.classic.ParseException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

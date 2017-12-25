@@ -18,7 +18,7 @@ public class SOLAbout extends JFrame{
 		JLabel about=new JLabel();
 		about.setHorizontalAlignment(JLabel.CENTER);
 		about.setFont(new Font("宋体",Font.BOLD,20));
-		about.setText("<html>Searching Of Laws <br/><br/> Version: SOL Release (2.3.4) <br/><br/> 作者：王岩</html>");
+		about.setText("<html>Searching Of Laws <br/><br/> Version: SOL Release (2.6.6) <br/><br/> 作者：王岩</html>");
 		
 		contentpane.add(about);
 		

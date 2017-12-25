@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -192,7 +193,7 @@ public class  SOLEvents {
 
 			HandleLucene handle=new HandleLucene();
 			Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
-			String keywords=p.GetKeywordsInputText();
+			String keywords=p.GetKeywordsInputText(p.GetFuzzyMode());
 			Date date=new Date(System.currentTimeMillis());
 			DateFormat dformat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -209,24 +210,24 @@ public class  SOLEvents {
 					iolist.add("Date@"+ndate+" "+keywords,p.GethTmpHis());
 					iolist.add("Date@"+ndate+" "+keywords,p.GetHistory());
 					p.solhis.UpdateHistory(p.GethTmpHis());
-					int top=p.GetTop();
+//					int top=p.GetTop();
 					Boolean f=p.GetIsRemote();
 					long start=System.currentTimeMillis();
 					if(DisplayGui.range.isEmpty()){
 						if(f){
-							System.out.println("keywords:"+keywords+","+"address:"+p.GetRemoteAddress());
+							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
 						}
 						else
-							content=handle.GetSearch(Path.indexpath,keywords,top);
+							content=handle.GetSearch(Path.indexpath,keywords);
 					}
 					else{					
 //						多条件查询，指定在某个法条文档中查询	
 						if(f){
-							System.out.println("keywords:"+keywords+","+"address:"+p.GetRemoteAddress());
+							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
 						}
 						else{
 							String[] fields=new String[]{"file","law"};
-							content=handle.GetMultipleSearch(Path.indexpath,fields,DisplayGui.range,keywords,top);
+							content=handle.GetMultipleSearch(Path.indexpath,fields,DisplayGui.range,keywords);
 						}
 					}
 							
@@ -388,9 +389,9 @@ public class  SOLEvents {
 			try {
 				if(!user.isEmpty()&&!pwd.isEmpty()){
 					IOFile f=new IOFile();
-					Map<String, String> m = f.Reader("D:\\Lucene\\conf\\usr.ini");		//从usr.ini中读取用户名和密码
+					Map<String, String> m = f.Reader(Path.userpath);		//从usr.ini中读取用户名和密码
 					if(!m.containsKey(user)){		//判断usr.ini中是否有该用户，如果没有，则将用户名和密码写入文件并登陆
-						f.Writer(ac.toString(),"D:\\Lucene\\conf\\usr.ini");
+						f.Writer(ac.toString(),Path.userpath);
 						sollogin.HidePanel(sollogin.loginoutpanel);
 						sollogin.ShowPanel(sollogin.loginpanel);
 						DisplayGui.star.SetLoginMarkVisable(true);
@@ -480,6 +481,9 @@ public class  SOLEvents {
 	 * date: 2017-12-21 
 	 * desc:窗口SOLCreateIndex中的创建按钮_sbt的监听事件，创建索引文件
 	 * 
+	 * Modified Date:2017-12-24
+	 * 		修复当创建索引成功后，将Displaygui的defselect清空
+	 * 
 	 */
 	
 	public static class CreateIndexEvent implements ActionListener{
@@ -501,8 +505,10 @@ public class  SOLEvents {
 					long end=System.currentTimeMillis();
 					if(totalofindex==-1)
 						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
-					else
+					else{
+						DisplayGui.defselect.clear();	//清空defselect，打开SelectIndex窗口时，重新对其进行判断赋值
 						jf.solstar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
+					}
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -617,6 +623,101 @@ public class  SOLEvents {
 				e1.printStackTrace();
 			}
           }	
+	}
+	
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-22
+	 * desc:SOLShowIndex窗口中，删除按钮_lbt的删除事件
+	 * 
+	 */
+	
+	public static class DeleteIndexEvent implements ActionListener{
+		
+		SOLShowIndex p;
+		
+		public DeleteIndexEvent(SOLShowIndex p){
+			this.p=p;
+		}
+		
+		
+		public void actionPerformed(ActionEvent e) {
+			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
+			
+			if(!file.isEmpty()){
+				HandleLucene handle=new HandleLucene();
+				for(int i=0;i<file.size();i++){
+					Vector<String> obj=p.t.GetDataID(file.get(i));
+					p.RemoveData(obj);
+					p.t.RemoveDataID(file.get(i));
+					try {
+						handle.DeleteIndex(file.get(i),Path.indexpath);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}	
+				}
+
+				p.t.LoadData(p.GetData());
+		        p.t.InitTable(false);
+			}
+		}
+	}
+	
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-25
+	 * desc:DispalyGui窗口的显示SOLShowIndex事件，菜单按钮_showindex的监听事件
+	 * 
+	 */
+	
+	public static class ShowSOLShowIndexEvent implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			new SOLShowIndex();
+		}
+	}
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-25
+	 * desc:SOLShowIndex窗口的显示SOLShowLaws事件，表格_t的鼠标事件
+	 * 
+	 */
+	
+	public static class ShowSOLShowLawsEvent extends MouseAdapter{
+		
+			SOLShowIndex p;
+		
+		public ShowSOLShowLawsEvent(SOLShowIndex p){
+			this.p=p;
+		}
+		
+		public void mouseClicked(MouseEvent e){
+			if(e.getClickCount() == 1){
+				int c=p.t.columnAtPoint(e.getPoint()); //获取点击的列
+				if(c!=p.t.getColumnCount()-1){
+					int r=p.t.rowAtPoint(e.getPoint()); //获取点击的行
+					int top=Integer.valueOf(p.t.GetOnceRowDataAtCloumn(2,r));//获取索引文件的法条总数
+					String file=p.t.GetOnceRowDataAtCloumn(1,r);
+					try {
+						new SOLShowLaws(file,top);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+
+			}
+			
+		}
 	}
 	
 	/** 

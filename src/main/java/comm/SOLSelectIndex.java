@@ -23,7 +23,7 @@ import javax.swing.table.DefaultTableModel;
 @SuppressWarnings("serial")
 public class SOLSelectIndex extends JFrame{
 	
-	private JTable jt;
+	private IOTable t;
 	
 	@SuppressWarnings("unchecked")
 	public SOLSelectIndex(){
@@ -34,27 +34,31 @@ public class SOLSelectIndex extends JFrame{
 		HandleLucene handle=new HandleLucene();
 		Map<String,Integer> fre=new HashMap<String,Integer>();
 		
-		@SuppressWarnings("rawtypes")
-		Vector columnName = new Vector();
-		columnName.add("文件名");  
-        columnName.add("法条总数");
-        columnName.add("是否选择");
+		Vector<String> cname = new Vector<String>();
+		cname.add("序号");
+		cname.add("文件名");  
+        cname.add("法条总数");
+        cname.add("是否选择");
         
-        @SuppressWarnings("rawtypes")
-		Vector rowdata = new Vector();
-        DefaultTableModel tableModel = new DefaultTableModel();
+		Vector<Vector<String>> data = new Vector<Vector<String>>();
         
         fre=handle.GetTermFreq(Path.indexpath);
         
-        if(!fre.isEmpty()){  	
+        if(!fre.isEmpty()){
+        	int i=0;
         	for(Entry<String,Integer> entry: fre.entrySet()){
-        		Vector line=new Vector();
+        		Vector<String> line=new Vector<String>();
+        		line.add(String.valueOf(i++));
         		line.add(entry.getKey());
-        		line.add(entry.getValue());
-        		rowdata.add(line);
+        		line.add(String.valueOf(entry.getValue()));
+        		data.add(line);
         	}
         }
         
+        t=new IOTable(cname,data);
+        t.InitTable(DisplayGui.defselect);
+        
+  /*      
         tableModel.setDataVector(rowdata,columnName);
         
         jt=new JTable(tableModel);
@@ -67,24 +71,24 @@ public class SOLSelectIndex extends JFrame{
 		jt.getColumnModel().getColumn(2).setCellRenderer(jt.getDefaultRenderer(Boolean.class));
 
 		this.InitSelectStatus();
-		
-		final JButton lbt=new JButton("确定");
+*/		
+		JButton lbt=new JButton("确定");
 		lbt.setPreferredSize(new Dimension(60,35));
 		
-		final JButton sbt=new JButton("全选");
+		JButton sbt=new JButton("全选");
 		sbt.setPreferredSize(new Dimension(60,35));
 		
-		final JButton sbt1=new JButton("反选");
+		JButton sbt1=new JButton("反选");
 		sbt1.setPreferredSize(new Dimension(60,35));
 		
 		JScrollPane jsp=new JScrollPane();
 		jsp.setPreferredSize(new Dimension(436,245));
-		jsp.setViewportView(jt);
-		
+		jsp.setViewportView(t);
+/*		
 		DefaultTableCellRenderer r = new DefaultTableCellRenderer();    
 		r.setHorizontalAlignment(JLabel.CENTER);   
 		jt.setDefaultRenderer(Object.class,r);
-		
+*/		
 
 		lbt.addMouseListener(new SOLEvents.ExeEvent(this));
 					
@@ -116,40 +120,46 @@ public class SOLSelectIndex extends JFrame{
 	
 	public void SetRange(){
 		DisplayGui.range.clear();
-		for(int i=0;i<jt.getRowCount();i++){			
-			if(((Boolean)jt.getValueAt(i,2)).booleanValue())
-				DisplayGui.range.add(jt.getValueAt(i, 0).toString());	
-			DisplayGui.defselect.set(i,((Boolean)jt.getValueAt(i,2)).booleanValue());
+		int cnum=t.getColumnCount();
+		int rnum=t.getRowCount();
+		for(int i=0;i<rnum;i++){			
+			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
+				DisplayGui.range.add(t.getValueAt(i, 1).toString());	
+			DisplayGui.defselect.set(i,((Boolean)t.getValueAt(i,cnum-1)).booleanValue());
 		}
 	}
-	
+/*	
 	public void InitSelectStatus(){
 		if(DisplayGui.defselect.isEmpty()){
-			for(int i=0;i<jt.getRowCount();i++){
-				jt.setValueAt(true,i,2);
+			for(int i=0;i<t.getRowCount();i++){
+				t.setValueAt(true,i,2);
 				DisplayGui.defselect.add(true);
 			}
 		}
 		else{
-			for(int i=0;i<jt.getRowCount();i++){
-				jt.setValueAt(DisplayGui.defselect.get(i),i,2);
+			for(int i=0;i<t.getRowCount();i++){
+				t.setValueAt(DisplayGui.defselect.get(i),i,2);
 			}
 		}	
 	}
-	
+*/	
 	public void SelectAll(){
-		for(int i=0;i<jt.getRowCount();i++){
-			jt.setValueAt(true,i,2);
+		int cnum=t.getColumnCount();
+		int rnum=t.getRowCount();
+		for(int i=0;i<rnum;i++){
+			t.setValueAt(true,i,cnum-1);
 		}
 	}
 	
 	public void SelectInvert(){
-		for(int i=0;i<jt.getRowCount();i++){
+		int cnum=t.getColumnCount();
+		int rnum=t.getRowCount();
+		for(int i=0;i<rnum;i++){
 			
-			if(((Boolean)jt.getValueAt(i,2)).booleanValue())
-				jt.setValueAt(false,i,2);
+			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
+				t.setValueAt(false,i,cnum-1);
 			else
-				jt.setValueAt(true,i,2);
+				t.setValueAt(true,i,cnum-1);
 		}	
 	}
 

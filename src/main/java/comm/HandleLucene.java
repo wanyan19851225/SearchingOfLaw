@@ -32,6 +32,7 @@ import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.index.TieredMergePolicy;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -91,6 +92,8 @@ public class HandleLucene {
 	 * 			修复当文件夹中没有法条文档时，创建空索引的bug
 	 * 			增加调用GetIndexOflaw或者GetIndexOfdocment后，是否为空的判断，如果为空则跳过不建立索引
 	 *			增加对path字段，增加NumericDocValuesField字段，用于排序
+	 * Modeified Date:2017-12-24
+	 * 			修改合并策略TieredMergePolicy，将删除索引时的默认合并策略值10%，修改为0，由于删除索引的默认合并策略10%，即删除的索引数达到总索引数(maxDo)的10%时，才会执行forceMergeDeletes
 	 *          
 	 */
 	
@@ -165,12 +168,22 @@ public class HandleLucene {
 					totalofindex=-1;
 		
 			}	
+			
+			
 			ramiwriter.close();
-		
+			
+
+			TieredMergePolicy ti=new TieredMergePolicy();
+			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
 			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
 			fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+			fsconfig.setMergePolicy(ti);		//设置合并策略
+//			System.out.println(ti.getForceMergeDeletesPctAllowed());
 			IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
 			fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+			
+
+			
 			fsiwriter.close();
 		}
 		else
@@ -357,9 +370,12 @@ public class HandleLucene {
 	 * 						  
 	 * @2017-10-31
 	 * 				修改高亮截取的默认字符数，修改为根据法条内容的字符数显示
+	 * Modiefied Date:2017-12-25
+	 * 				取消top参数，改为默认使用索引文档中有效索引文档总数
+	 * 
 	 */
 	
-	public Map<String,List<String[]>> GetSearch(String indexpath,String keywords,int top) throws ParseException, IOException, InvalidTokenOffsetsException{
+	public Map<String,List<String[]>> GetSearch(String indexpath,String keywords) throws ParseException, IOException, InvalidTokenOffsetsException{
 		
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
 		
@@ -393,6 +409,8 @@ public class HandleLucene {
         QueryParser parser=new QueryParser("law", analyzer);
            
         Query query=parser.parse(keywords.toString());
+        
+        int top=indexreader.numDocs();		//获取索引文件中有效文档总数
         
         TopDocs topdocs=indexsearcher.search(query,top); 
         
@@ -631,11 +649,13 @@ public class HandleLucene {
 	 *
 	 * @2017-11-18
 	 * 			增加List<String>参数，用于指定在哪些文档内查询法条
-	 * 			修改keywords参数类型为String						  
+	 * 			修改keywords参数类型为String	
+	 * Modeified Date:2017-12-25
+	 * 			取消top参数，改为默认使用索引文档中有效文档总数					  
 	 * 
 	 */
 
-	public Map<String,List<String[]>> GetMultipleSearch(String indexpath,String[] fields,List<String> range,String keywords,int top) throws IOException, ParseException, InvalidTokenOffsetsException{
+	public Map<String,List<String[]>> GetMultipleSearch(String indexpath,String[] fields,List<String> range,String keywords) throws IOException, ParseException, InvalidTokenOffsetsException{
 		
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
 		
@@ -686,6 +706,8 @@ public class HandleLucene {
 		builder.add(lbooleanquery,BooleanClause.Occur.MUST);
 		
 		BooleanQuery  booleanquery=builder.build();
+		
+		int top=indexreader.numDocs();		//获取有效索引文档总数
 			
 		TopDocs topdocs=indexsearcher.search(booleanquery,top); 
 		        
@@ -865,7 +887,8 @@ public class HandleLucene {
 	 * 
 	 * @2017-11-15
 	 * 			使用方法forceMergeDeletes()，实现立即删除
-	 * 				   				
+	 * Modiefied Date:2017-12-24
+	 * 			修改删除索引时的默认合并策略值10%，需要和创建索引时设置的值保持一致			   				
 	 * 
 	 */
 
@@ -884,16 +907,21 @@ public class HandleLucene {
 		
 //		IndexWriter ramiwriter=new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
 		
-	    IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+	    IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer);
+		TieredMergePolicy ti=new TieredMergePolicy();
+		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
+		fsconfig.setMergePolicy(ti);		//设置合并策略
+//		System.out.println(ti.getForceMergeDeletesPctAllowed());
 	    IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig); 
 		
 		Term t=new Term("file",filename);
 		
+
+	
 		fsiwriter.deleteDocuments(t);
-		
 		fsiwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
 		
-//		fsiwriter.commit();
+		fsiwriter.commit();
 		
 		fsiwriter.close();
 		
@@ -933,7 +961,12 @@ public class HandleLucene {
 			RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
 			IndexReader indexreader=DirectoryReader.open(ramdir);
 //			IndexSearcher indexsearcher=new IndexSearcher(indexreader);
-		
+//			int dd=indexreader.numDocs();
+//			int aa=indexreader.maxDoc();
+//			int ww=indexreader.numDeletedDocs();
+//		System.out.println("有效文档数："+dd);
+//		System.out.println("总文档数："+aa);
+//		System.out.println("删除文档数："+ww);
 		Terms terms = MultiFields.getTerms(indexreader,"file");
 		if(terms!=null){
 			TermsEnum termsEnums = terms.iterator();
