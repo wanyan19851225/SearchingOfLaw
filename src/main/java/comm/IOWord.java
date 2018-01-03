@@ -32,6 +32,8 @@ public class IOWord{
 	 * 		  将文件内容存储到List表中
 	 * @2017-11-17
 	 * 		修复当File是目录时，报错的bug
+	 * Modified Date:2017-12-26
+	 * 		修复读入流is,docx,doc没有关闭的问题
 	 * 
 	 */
 	
@@ -56,10 +58,11 @@ public class IOWord{
 					for(int i=0;i<lip.size();i++){
 						String text=lip.get(i).getParagraphText().trim();
 						text=text.replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
-						int ll=text.length();
+//						int ll=text.length();
 						if(text.length()>3)
 	    						paragraphs.add(text);
 					}
+					docx.close();
 	  	     	
 				}else if(filetype.equals("doc")){
 	    		
@@ -73,10 +76,12 @@ public class IOWord{
 						if(text.length()>3)
 							paragraphs.add(text);	
 					}
+					doc.close();
 	    		
 				}else
-					return paragraphs;		
+					paragraphs=null;		
 			}
+			is.close();
 		}
 	    return paragraphs;
 		      
@@ -222,6 +227,8 @@ public class IOWord{
 	 * 		增加判断，将读取到的法条存储到中文索引，每次读取法条判断中文索引中是否已经存在，如果存在则作为新法条，将上一法条保存，如果不存在，则追加到上一法条的内容中
 	 * @2017-12-19
 	 * 		增加判断，当读取到法条时，判断法条的位置是否在第一章之前，如果在第一章之前读取到的法条，则丢弃不存储
+	 * Modefied Date:2018-1-3
+	 * 		增加"第"和"章"之间字符的判断，判读是否含有"条"字符，如果含有"条"字符，则不按照"章"存储
 	 * 
 	 */
 
@@ -245,7 +252,7 @@ public class IOWord{
 				
 				/*** 读取章***/
 						
-				if(updatestring.IsInTop(temp1,"章")){
+				if(updatestring.IsInTop(temp1,"章")&&!updatestring.GetStringBetween(temp1,"章").contains("条")){
 					
 					if(updatestring.GetStringBetween(temp1,"章").equals("一"))	//针对文档中有目录的情况，当读取到正文中的第一章时，章索引号清零，重新开始计数索引号
 						chapterindex=0;
@@ -356,9 +363,12 @@ public class IOWord{
 	 * @return
 	 * 		  将法条以key-value的方式存储到HashMap里，方便使用key定位到某条具体的法条
 	 * 
+	 * Modefied Date:2017-12-26
+	 * 		修改方法名称，原方法名称：GetIndexOfdocment,修改后：GetIndexOfmarkdocment
+	 * 
 	 */
 	
-	public Map<Integer,String> GetIndexOfdocment(File file) throws IOException{
+	public Map<Integer,String> GetIndexOfmarkdocment(File file) throws IOException{
 		
 		List<String> content=this.GetParagraphText(file);
 		Map<Integer,String> item=new HashMap<Integer,String>();
@@ -372,7 +382,7 @@ public class IOWord{
 				String temp1=content.get(i);
 				int index=0*100000+0*1000+itemindex;
 				
-				if(updatestring.IsFirst$(temp1))
+				if(updatestring.IsFirst$(temp1,"$"))
 					item.put(index,temp1);
 			}
 		}
@@ -380,35 +390,18 @@ public class IOWord{
 		return item;	
 	}
 
-	public Map<Integer,String> GetIndexOfnotice(File file) throws IOException{
+	public Map<Integer,String> GetIndexOfgeneraldocment(File file) throws IOException{
 		
 		List<String> content=this.GetParagraphText(file);
 		Map<Integer,String> item=new HashMap<Integer,String>();
-		UpdateString updatestring=new UpdateString();
-		int itemindex=0,inputitemindex=0;
-		StringBuffer buf=new StringBuffer();
-		
+		int itemindex=0;
+	
 		if(content!=null){		
-			for(int i=0;i<content.size();i++){
-				
+			for(int i=0;i<content.size();i++){				
+				itemindex++;
 				String temp1=content.get(i);
-				
-				if(updatestring.IsFirstChinanNum(temp1)){
-					
-					inputitemindex=itemindex;
-					itemindex++;
-					
-					if(itemindex!=1){
-						Integer index=0*100000+0*1000+inputitemindex;
-						item.put(index,buf.toString());
-						buf.delete(0,buf.length());						
-					}			
-					buf.append(temp1);	
-				}
-				else{
-					if(itemindex!=0)
-						buf.append(temp1);	//追加buf内容	
-				}
+				int index=0*100000+0*1000+itemindex;
+				item.put(index,temp1);
 			}
 		}
 		
@@ -419,7 +412,7 @@ public class IOWord{
 	public static void main(String[] args) throws Exception{
 		
 		IOWord word=new IOWord();
-		UpdateString us=new UpdateString();
+//		UpdateString us=new UpdateString();
 		
 		File file=new File("D:\\Lucene\\src\\（资料）变更劳动合同.doc");//劳动人事争议仲裁办案规则（新）.doc   中华人民共和国劳动合同法.doc  （资料）变更劳动合同.doc  中华人民共和国劳动法.doc 北京市劳动局关于解除劳动合同计发经济补偿金有关问题处理意见的通知.doc
 		
@@ -438,7 +431,7 @@ public class IOWord{
 		
 //		Map<Integer,String> item=word.GetIndexOflaw(file);
 //		Map<Integer,String> item=word.GetIndexOfnotice(file);
-		Map<Integer,String> item=word.GetIndexOfdocment(file);
+		Map<Integer,String> item=word.GetIndexOfmarkdocment(file);
 		
 		
 //		System.out.println(item.get(301006));

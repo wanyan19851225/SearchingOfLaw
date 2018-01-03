@@ -38,7 +38,6 @@ public class SOLShowIndex extends JFrame{
 	private Vector<Vector<String>> data;
 //	public Map<String,Integer> id;
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SOLShowIndex(){
 		Container contentpane=this.getContentPane();
 		contentpane.setLayout(new BorderLayout(3,3));

@@ -1,56 +1,26 @@
 package comm;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.border.LineBorder;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 
 /** 
  * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
@@ -225,7 +195,7 @@ public class DisplayGui extends JFrame{
 
 	    solresult=new SOLResult();		//创建搜索结果面板
 		
-		stf=new JTextField(79);
+		stf=new JTextField(78);
 		stf.setPreferredSize(new Dimension(300,34));
 		stf.setFont(new Font("宋体",Font.PLAIN,15));
 		
@@ -300,7 +270,7 @@ public class DisplayGui extends JFrame{
 		sourcebg.add(local);
 		sourcebg.add(remote);
 		
-		adr=new JTextField(17);
+		adr=new JTextField(19);
 		adr.setText("http://");
 		adr.setPreferredSize(new Dimension(300,23));
 		adr.setEnabled(false);
@@ -315,9 +285,9 @@ public class DisplayGui extends JFrame{
 		port.setName("port");
 
 		
-		solhis=new SOLHistory(history);	//创建搜索历史面板
-		solhis.SetComponent(solresult);		//将搜索结果面板传参给搜索历史面板
-		solhis.SetComponent(star); 		//将状态栏面板传参给搜索历史面板
+		solhis=new SOLHistory(this);	//创建搜索历史面板
+//		solhis.SetComponent(solresult);		//将搜索结果面板传参给搜索历史面板
+//		solhis.SetComponent(star); 		//将状态栏面板传参给搜索历史面板
 		history.clear();
 /*		
 		class SearchEvent implements ActionListener{
@@ -414,7 +384,7 @@ public class DisplayGui extends JFrame{
 		
 		JPanel npaneofnorth=new JPanel();		/*搜索输入框和搜索按钮面板*/
 //		npaneofnorth.setBorder(BorderFactory.createLineBorder(Color.red));
-	    npaneofnorth.setLayout(new FlowLayout(FlowLayout.CENTER,5,1));
+	    npaneofnorth.setLayout(new FlowLayout(FlowLayout.CENTER,0,1));
 	    npaneofnorth.add(stf);		//添加搜索输入框
 	    npaneofnorth.add(sbt);		//添加搜索按钮
 		
@@ -768,11 +738,39 @@ public class DisplayGui extends JFrame{
 	public String GetKeywordsInputText(Boolean f){		//参数f判断是否使用模糊搜索方式
 
 		StringBuffer s=new StringBuffer();
-		if(f)		//使用模糊搜索
-			s.append(stf.getText());
-		else		//使用精确搜索
-			s.append("\""+stf.getText()+"\"");
+		String[] k=this.InputText2Keywords();
+		if(k!=null){		//判断输入框是否为空
+			if(k.length!=0){
+				if(f)		//使用模糊搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append(k[i]);
+						else
+							s.append(k[i]+" AND ");
+					}
+				else		//使用精确搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append("\""+k[i]+"\"");
+						else
+							s.append("\""+k[i]+"\""+" AND ");
+						
+					}
+//					s.append("\""+k+"\"");
+			}
+		}
 		return s.toString();
+	}
+	
+	public String[] InputText2Keywords(){
+		String s=stf.getText().trim();
+		String[] keywords=null;
+		if(!s.isEmpty()){		//判断输入框是否为空
+			UpdateString us=new UpdateString();
+			String fk=us.FilterDoubleString(s," ");
+			keywords=fk.split(" ");
+		}
+		return keywords;
 	}
 	
 	public void SetStatusText(String s,long total){
@@ -825,7 +823,6 @@ public class DisplayGui extends JFrame{
 	public List<String> GetHistory(){
 		return history;
 	}
-	
 	
 	/** 
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 

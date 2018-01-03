@@ -6,7 +6,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,13 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -129,7 +124,7 @@ public class  SOLEvents {
 
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			SOLAbout about=new SOLAbout();
+			new SOLAbout();
 		}		
 	}
 
@@ -143,6 +138,7 @@ public class  SOLEvents {
 //		SOLResult res;
 //		SOLStar star;
 		DisplayGui p;
+		private HandleLucene handle=new HandleLucene();
 
 		public SearchEvent(DisplayGui p){
 			
@@ -191,7 +187,7 @@ public class  SOLEvents {
 		
 		public void mouseClicked(MouseEvent e){
 
-			HandleLucene handle=new HandleLucene();
+
 			Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
 			String keywords=p.GetKeywordsInputText(p.GetFuzzyMode());
 			Date date=new Date(System.currentTimeMillis());
@@ -567,8 +563,10 @@ public class  SOLEvents {
 					long end=System.currentTimeMillis();
 					if(totalofindex==-1)
 						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
-					else
-						jf.solstar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
+					else{
+						DisplayGui.defselect.clear();
+						jf.solstar.setStatusText("添加检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
+					}
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -618,6 +616,7 @@ public class  SOLEvents {
 //            super.windowClosing(e); 
 			try {
 				p.StoreHistory();
+				HandleLucene.CloseIndexReader();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

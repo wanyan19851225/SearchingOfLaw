@@ -1,6 +1,7 @@
 package comm;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -11,8 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
@@ -56,6 +61,54 @@ public class SOLResult extends JPanel{
 		this.add(sjs);
 	}
 	
+	public SOLResult(Boolean f){
+		BoxLayout layout=new BoxLayout(this, BoxLayout.Y_AXIS); 
+		this.setLayout(layout);
+		this.setPreferredSize(new Dimension(740,421));
+		this.setBorder(BorderFactory.createLineBorder(Color.red));
+	}
+	
+	public long UpdateTable(Map<String,List<String[]>> content){
+		
+		long total=0;
+//		ste.setText("");
+		
+		if(content==null){
+			JLabel jt=new JLabel();
+			jt.setText("<html><i><b>未搜索到关键词</b></i></html>");
+			this.add(jt);		
+		}
+		else{
+			StringBuffer text=new StringBuffer();
+			this.add(Box.createVerticalStrut(10));
+			for(Entry<String,List<String[]>> entry: content.entrySet()){
+				
+				JLabel jt=new JLabel();
+				jt.setText("<html><i><u><b><font color=blue face=\"微软雅黑\" size=4>"+entry.getKey()+"&emsp"+"结果:"+entry.getValue().size()+"条"+"</font></b></u></i></html>");
+				this.add(jt);
+				this.add(Box.createVerticalStrut(7));
+				/*
+				for(int i=0;i<entry.getValue().size();i++){
+					text.append("&emsp&emsp");
+					String[] item=entry.getValue().get(i);
+					text.append(item[1]);
+					text.append("&emsp"+"<i>"+"--摘录自");
+					text.append("<a href=\"file:///D:/Lucene/src/"+entry.getKey()+"\">"+entry.getKey()+"</a>");
+					text.append("&emsp"+item[0]+"</i>");
+					text.append("<br/>");
+					text.append("<br/>");
+					total++;
+					}
+					*/
+				}
+			//ste.setText(text.toString());
+		}
+		
+		
+		return total;
+		
+	}
+	
 	public long UpdateText(Map<String,List<String[]>> content){
 		
 		long total=0;
@@ -68,7 +121,7 @@ public class SOLResult extends JPanel{
 			StringBuffer text=new StringBuffer();
 			for(Entry<String,List<String[]>> entry: content.entrySet()){
 				for(int i=0;i<entry.getValue().size();i++){
-					text.append("&emsp&emsp");
+					text.append("&emsp&emsp ");
 					String[] item=entry.getValue().get(i);
 					text.append(item[1]);
 					text.append("&emsp"+"<i>"+"--摘录自");
@@ -93,17 +146,18 @@ public class SOLResult extends JPanel{
 		
 		HandleLucene handle=new HandleLucene();
 		
-		SOLResult res=new SOLResult();
+		SOLResult res=new SOLResult(true);
 		
 		Map<String,List<String[]>> content=handle.GetSearch("D:\\Lucene\\index\\","当事人");
 		
-		res.UpdateText(content);
+//		res.UpdateText(content);
+		res.UpdateTable(content);
 		
 		IOHistory iohis=new IOHistory();
 		
 		List<String> input=iohis.HistoryReaderByList("D:\\Lucene\\conf\\history.cf");
 
-		SOLHistory his=new SOLHistory(input);
+		SOLHistory his=new SOLHistory(null);
 	
 	
 //		Date date=new Date(System.currentTimeMillis());

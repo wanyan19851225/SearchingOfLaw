@@ -32,10 +32,12 @@ public class SOLHistory extends JPanel{
 	
 	private JPanel onedaypanel,twodaypanel,threedaypanel,oneweekpanel,onemothpanel,morepanel;
 	private JLabel oneday,twoday,threeday,oneweek,onemoth,more;
-	private SOLResult res;
-	private SOLStar star;
+//	private SOLResult res;
+//	private SOLStar star;
+	private DisplayGui p;
 	
-	public SOLHistory(List<String> sb) throws IOException, ParseException{
+	public SOLHistory(DisplayGui p) throws IOException, ParseException{
+		this.p=p;
 		
 		oneday=new JLabel("今天");
 		oneday.setText("<html><i><u><font color=blue face=\"微软雅黑\">今天</font></u></i></html>");
@@ -252,9 +254,9 @@ public class SOLHistory extends JPanel{
 		this.add(morepanel);
 		morepanel.setVisible(false);
 		
-		IOHistory iohis=new IOHistory();
-		Map<String,List<String>> tmhis=iohis.HistoryReaderByTime("D:\\Lucene\\conf\\history.cf");
-		this.UpdateHistory(sb);
+//		IOHistory iohis=new IOHistory();
+//		Map<String,List<String>> tmhis=iohis.HistoryReaderByTime("D:\\Lucene\\conf\\history.cf");
+		this.UpdateHistory(p.GetHistory());
 		
 		this.setPreferredSize(new Dimension(200,50));
 //		this.setBorder(BorderFactory.createLineBorder(Color.red));
@@ -376,8 +378,8 @@ public class SOLHistory extends JPanel{
 					e1.printStackTrace();
 				}
 				long end=System.currentTimeMillis();
-				long total=res.UpdateText(content);
-				star.setStatusText("检索完毕!"+" "+"耗时："+String.valueOf(end-start)+"ms"+" "+"共搜索到："+total);
+				long total=p.solresult.UpdateText(content);
+				DisplayGui.star.setStatusText("检索完毕!"+" "+"耗时："+String.valueOf(end-start)+"ms"+" "+"共搜索到："+total);
 				jj.setEnabled(true);
 			}
 			
@@ -396,9 +398,21 @@ public class SOLHistory extends JPanel{
 		
 		for(int i=sb.size()-1;i>=0;i--){
 			StringBuffer time=new StringBuffer();
-			time.append(sb.get(i).split("@")[1].split(" ")[0]+" ");
-			time.append(sb.get(i).split("@")[1].split(" ")[1]);
-			String cn=sb.get(i).split("@")[1].split(" ")[2];
+			String[] s=sb.get(i).split("@")[1].split(" ");
+			StringBuffer cn=new StringBuffer();
+			for(int j=0;j<s.length;j++){
+				if(j==0)
+					time.append(s[j]+" ");
+				if(j==1)
+					time.append(s[j]);
+				if(j>1&&j<s.length-1)
+					cn.append(s[j]+" ");
+				if(j==s.length-1)
+					cn.append(s[j]);	
+			}
+//			time.append(sb.get(i).split("@")[1].split(" ")[0]+" ");
+//			time.append(sb.get(i).split("@")[1].split(" ")[1]);
+
 			
 			long dt=dformat.parse(time.toString()).getTime();
 			long ct=System.currentTimeMillis();
@@ -406,7 +420,7 @@ public class SOLHistory extends JPanel{
 			
 			if(dvt<=onedayt){
 				JLabel jb=new JLabel();
-				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn)+"</font></i></u></html>");
+				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn.toString())+"</font></i></u></html>");
 				jb.setToolTipText(time.toString()+" "+cn);
 				jb.addMouseListener(new SearchEvent());
 				onedaypanel.add(jb);
@@ -414,7 +428,7 @@ public class SOLHistory extends JPanel{
 				oneday.setVisible(true);
 			}else if(dvt>onedayt&&dvt<=twodayt){
 				JLabel jb=new JLabel();
-				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn)+"</font></i></u></html>");
+				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn.toString())+"</font></i></u></html>");
 				jb.setToolTipText(time.toString()+" "+cn);
 				jb.addMouseListener(new SearchEvent());
 				twodaypanel.add(jb);
@@ -422,7 +436,7 @@ public class SOLHistory extends JPanel{
 				twoday.setVisible(true);
 			}else if(dvt>twodayt&&dvt<=threedayt){
 				JLabel jb=new JLabel();
-				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn)+"</font></i></u></html>");
+				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn.toString())+"</font></i></u></html>");
 				jb.setToolTipText(time.toString()+" "+cn);
 				jb.addMouseListener(new SearchEvent());
 				threedaypanel.add(jb);
@@ -430,7 +444,7 @@ public class SOLHistory extends JPanel{
 				threeday.setVisible(true);
 			}else if(dvt>threedayt&&dvt<=oneweekt){
 				JLabel jb=new JLabel();
-				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn)+"</font></i></u></html>");
+				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn.toString())+"</font></i></u></html>");
 				jb.setToolTipText(time.toString()+" "+cn);
 				jb.addMouseListener(new SearchEvent());
 				oneweekpanel.add(jb);
@@ -438,7 +452,7 @@ public class SOLHistory extends JPanel{
 				oneweek.setVisible(true);
 			}else if(dvt>oneweekt&&dvt<=onemotht){
 				JLabel jb=new JLabel();
-				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn)+"</font></i></u></html>");
+				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn.toString())+"</font></i></u></html>");
 				jb.setToolTipText(time.toString()+" "+cn);
 				jb.addMouseListener(new SearchEvent());
 				onemothpanel.add(jb);
@@ -446,7 +460,7 @@ public class SOLHistory extends JPanel{
 				onemoth.setVisible(true);
 			}else if(dvt>onemotht){
 				JLabel jb=new JLabel();
-				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn)+"</font></i></u></html>");
+				jb.setText("<html><u><i><font color=blue face=\"微软雅黑\">"+us.SimpleString(cn.toString())+"</font></i></u></html>");
 				jb.setToolTipText(time.toString()+" "+cn);
 				jb.addMouseListener(new SearchEvent());
 				morepanel.add(jb);
@@ -459,7 +473,7 @@ public class SOLHistory extends JPanel{
 
 	}
 
-	
+/*	
 	public void SetComponent(Object obj){
 //2017-11-27
 		if(obj instanceof comm.SOLResult){
@@ -467,7 +481,7 @@ public class SOLHistory extends JPanel{
 		}else if(obj instanceof comm.SOLStar)
 			this.star=(SOLStar)obj;
 	}
-	
+*/	
 	public Map<String,List<String>> GetHistory(JPanel jp){
 		
 		int count = jp.getComponentCount();
@@ -500,7 +514,7 @@ public class SOLHistory extends JPanel{
 		
 		 List<String> input=iohis.HistoryReaderByList("D:\\Lucene\\conf\\history.cf");
 
-		 SOLHistory his=new SOLHistory(input);
+		 SOLHistory his=new SOLHistory(null);
 	
 		JScrollPane sjs=new JScrollPane(his);
 		sjs.setViewportView(his);//给textArea创建一个视口 

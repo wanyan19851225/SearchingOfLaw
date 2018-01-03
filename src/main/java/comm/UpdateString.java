@@ -3,6 +3,7 @@ package comm;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class UpdateString {
 	
 	public boolean IsTopThree(String src,String value){
@@ -177,14 +178,23 @@ public class UpdateString {
 		return str;
 	}
 	
-	public boolean IsFirst$(String src){
+	public boolean IsFirst$(String src,String s){
 		
 		String head=src.substring(0,1);
-		if(head.equals("$"))
+		if(head.equals(s))
 			return true;
 		else
 			return false;		
 	}
+	
+	public boolean IsEnd(String src,String s){
+		String head=src.substring(src.length()-1,src.length());
+		if(head.equals(s))
+			return true;
+		else
+			return false;		
+	}
+
 	
 	public boolean IsFirstChinanNum(String src){
 		
@@ -217,12 +227,34 @@ public class UpdateString {
 		
 		
 	}
+	
+	/*
+	 *
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-11-24 
+	 * 
+	 * 返回“第”字符与查找字符之间的字符数
+	 *
+	 * @params src
+	 * 				字符串
+	 * 		   value
+	 * 				要查找的字符	
+	 * 	
+	 * @return int
+	 * 				返回“第”与要查找字符之间间隔的字符数，返回-1：没有查找到“第”字符，返回0：没有查找到要查找的字符		
+	 * 
+	 * Modefied Date:2017-12-28
+	 * 				修复当搜索关键词正好是14个字符时，截取字符串时报错的bug					  
+	 * 
+	 */
 
 	public String SimpleString(String src){
 		
 		int len=src.length();
 		StringBuffer s=new StringBuffer();
-		if(len>=14){
+		if(len>=15){
 			s.append(src.substring(0,15));
 			s.append("...");
 		}
@@ -240,9 +272,28 @@ public class UpdateString {
 		return s.trim();
 	}
 	
+	public String FilterDoubleString(String os,String ds){
+		
+		String regx="("+ds+"){2,}";
+//        Pattern p=Pattern.compile("(AND){2,}");
+		Pattern p=Pattern.compile(regx); 
+        Matcher m=p.matcher(os);
+        while(m.find()){ 
+ //           System.out.println("重复的字符："+dd);   
+            os=os.replace(m.group(0),ds);  
+//            System.out.println(os);
+        } 
+		return os;
+	}
+	
+	public Boolean ifSEString(){
+		return true;
+	}
+	
 	public static void main(String[] args){
 		UpdateString us=new UpdateString();
 		System.out.println(us.chineseNumber2Int("七十一"));
+		System.out.println(us.FilterDoubleString("\"当事人\"ANDANDANDAND\"小小\"","AND"));
 	}
 
 }
