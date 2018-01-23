@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.swing.JLabel;
@@ -641,8 +642,7 @@ public class  SOLEvents {
 		public DeleteIndexEvent(SOLShowIndex p){
 			this.p=p;
 		}
-		
-		
+	
 		public void actionPerformed(ActionEvent e) {
 			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
 			
@@ -666,6 +666,50 @@ public class  SOLEvents {
 		}
 	}
 	
+	/** 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-1-11
+	 * desc:SOLRemoteIndex窗口中，删除按钮_lbt的删除事件,删除远程服务器上的索引文件
+	 * 
+	 */
+	
+	public static class DeleteRemoteIndexEvent implements ActionListener{
+		
+		SOLRemoteIndex p;
+		
+		public DeleteRemoteIndexEvent(SOLRemoteIndex p){
+			this.p=p;
+		}
+	
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
+			try {
+				if(!file.isEmpty()){
+					p.SetSearchButtonEnable(false);
+					Boolean f=p.DeleteRemoteIndex(Path.urlpath,file);
+					if(f){
+						for(int i=0;i<file.size();i++){
+							Vector<String> obj=p.t.GetDataID(file.get(i));
+							p.RemoveData(obj);
+							p.t.RemoveDataID(file.get(i));
+						}
+					}
+					p.t.LoadData(p.GetData());
+			        p.t.InitTable(false);
+			       // JOptionPane.showMessageDialog(null,"删除成功！", "信息", JOptionPane.INFORMATION_MESSAGE);
+			        p.SetSearchButtonEnable(true);
+				}
+
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
 	
 	/** 
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
@@ -679,6 +723,50 @@ public class  SOLEvents {
 	public static class ShowSOLShowIndexEvent implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			new SOLShowIndex();
+		}
+	}
+	
+	/** 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-1-4
+	 * desc:DispalyGui窗口的显示SOLSynchronizeIndex事件，菜单按钮_synchronizeindex的监听事件
+	 * 
+	 */
+	
+	public static class ShowSOLSynchronizeIndexEvent implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+				new SOLCommitIndex();
+		}
+	}
+	
+	/** 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-1-11
+	 * desc:查看远程服务器的索引文件，SOLRemoteIndex窗体_lbt事件
+	 * 
+	 */
+	
+	public static class ShowSOLRemoteIndexEvent implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+				new SOLRemoteIndex();
+		}
+	}
+	
+	/** 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-1-12
+	 * 
+	 */
+	
+	public static class ShowSOLDownloadIndexEvent implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+				new SOLDownloadIndex();
 		}
 	}
 	
@@ -720,44 +808,143 @@ public class  SOLEvents {
 	}
 	
 	/** 
-	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
 	 * All right reserved. 
 	 * @author: wanyan 
-	 * date: 2017-12-20 
-	 * desc:窗口SOLLogin中窗体的焦点事件，焦点事件中判断是否处于登录状态
+	 * date: 2017-12-25
+	 * desc:SOLRemoteIndex窗口的显示SOLShowRemoteLaws事件，表格_t的鼠标事件
 	 * 
-	 * 2017-12-21
-	 * 		删除该焦点事件
-	 * 			
 	 */
-
-/*	
-	public static class SOLLoginFocusEvent implements WindowFocusListener{
+	
+	public static class ShowSOLShowRemoteLawsEvent extends MouseAdapter{
 		
-		private SOLLogin sollogin;
+			SOLRemoteIndex p;
 		
-		public SOLLoginFocusEvent(SOLLogin sollogin){
-			this.sollogin=sollogin;
+		public ShowSOLShowRemoteLawsEvent(SOLRemoteIndex p){
+			this.p=p;
 		}
 		
-		public void windowGainedFocus(WindowEvent e) {
-			// TODO Auto-generated method stub
-			if(SOLLogin.islogin){
-				sollogin.remove(sollogin.loginoutpanel);
-				sollogin.add(sollogin.loginpanel);
-			}
-			else{
-				sollogin.remove(sollogin.loginpanel);
-				sollogin.add(sollogin.loginoutpanel);
-			}
-				
-		}
+		public void mouseClicked(MouseEvent e){
+			if(e.getClickCount() == 1){
+				int c=p.t.columnAtPoint(e.getPoint()); //获取点击的列
+				if(c!=p.t.getColumnCount()-1){
+					int r=p.t.rowAtPoint(e.getPoint()); //获取点击的行
+					int top=Integer.valueOf(p.t.GetOnceRowDataAtCloumn(2,r));//获取索引文件的法条总数
+					String file=p.t.GetOnceRowDataAtCloumn(1,r);
+					try {
+						new SOLShowRemoteLaws(file,top);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 
-		public void windowLostFocus(WindowEvent e) {
-			// TODO Auto-generated method stub
+			}
 			
 		}
+	}
 	
-	} 
-*/
+	/** 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-1-4
+	 * desc:向远处服务器请求索引文件时间，SOLSynchronizeIndex窗体_lbt事件
+	 * 
+	 */
+	
+	public static class CommitIndexEvent implements ActionListener{
+		
+		private SOLCommitIndex p;
+		
+		public CommitIndexEvent(SOLCommitIndex p){
+			this.p=p;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
+			try {
+				if(!file.isEmpty()){
+					p.SetSearchButtonEnable(false);
+					Map<String,int[]> m=new HashMap<String,int[]>();
+					for(int i=0;i<file.size();i++){
+						Vector<String> obj=p.t.GetDataID(file.get(i));
+						int[] res=p.CommitIndex(Path.urlpath,file.get(i),Path.indexpath);
+						m.put(file.get(i),res);
+						if(res[0]==res[1]){
+							p.RemoveData(obj);
+							p.t.RemoveDataID(file.get(i));
+						}
+					}
+					p.t.LoadData(p.GetData());
+			        p.t.InitTable(false);
+			        StringBuffer sb=new StringBuffer();
+			        for(Entry<String,int[]> entry:m.entrySet()){
+			        	sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
+			        	sb.append("\n");
+			        }
+			        JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
+			        p.SetSearchButtonEnable(true);
+				}
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+			
+	}
+	
+	/** 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-1-12
+	 * desc:向远处服务器请求索引文件时间，SOLSynchronizeIndex窗体_lbt事件
+	 * 
+	 */
+	
+	public static class DownloadIndexEvent implements ActionListener{
+		private SOLDownloadIndex p;
+		
+		public DownloadIndexEvent(SOLDownloadIndex p){
+			this.p=p;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
+			try {
+				if(!file.isEmpty()){
+					p.SetSearchButtonEnable(false);
+					//Map<String,int[]> m=new HashMap<String,int[]>();
+					for(int i=0;i<file.size();i++){
+						boolean f=p.DownloadIndex(Path.urlpath, file.get(i));
+						if(f){
+							Vector<String> obj=p.t.GetDataID(file.get(i));
+							p.RemoveData(obj);
+							p.t.RemoveDataID(file.get(i));
+						}	
+					}
+					p.t.LoadData(p.GetData());
+			        p.t.InitTable(false);
+			        //StringBuffer sb=new StringBuffer();
+			        //for(Entry<String,int[]> entry:m.entrySet()){
+			        	//sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
+			        	//sb.append("\n");
+			       // }
+			       // JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
+			        p.SetSearchButtonEnable(true);
+				}
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
+			}
+			
+		}
+		
+	}
+	
 }

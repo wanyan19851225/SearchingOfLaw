@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JOptionPane;
 
@@ -24,6 +25,7 @@ import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -390,6 +392,8 @@ public class HandleLucene {
 	 * 				取消top参数，改为默认使用索引文档中有效索引文档总数
 	 * Modiefied Date:2017-12-26
 	 * 				修改当索引文件有效文档数为0时，报错的bug
+	 * Modiefied Date:2018-1-23
+	 * 				删除捕捉IndexNotFoundException后，弹出提示框
 	 * 
 	 */
 	
@@ -400,11 +404,10 @@ public class HandleLucene {
 		try{
 		
 			this.CreateIndexReader(indexpath);
-		
-			Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
 			
-			if(indexreader!=null){	
-				IndexSearcher indexsearcher=new IndexSearcher(indexreader);
+				if(indexreader!=null){	
+					Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+					IndexSearcher indexsearcher=new IndexSearcher(indexreader);
 				//		Term term=new Term("law",keywords);
 				//		TermQuery termquery=new TermQuery(term);
 				//		模糊查询		
@@ -415,77 +418,69 @@ public class HandleLucene {
 				//		 PhraseQuery phrasequery=builder.build();
 				//		查询分析器	
 			
-				QueryParser parser=new QueryParser("law", analyzer);
+					QueryParser parser=new QueryParser("law", analyzer);
            
-				Query query=parser.parse(keywords.toString());
+					Query query=parser.parse(keywords.toString());
         
-				int top=indexreader.numDocs();		//获取索引文件中有效文档总数
+					int top=indexreader.numDocs();		//获取索引文件中有效文档总数
        
-				if(top==0){		//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回null
-					files=null;
-				}
-				else{
-					TopDocs topdocs=indexsearcher.search(query,top); 
+					if(top==0)	//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回null
+						files=null;
+					else{
+						TopDocs topdocs=indexsearcher.search(query,top); 
         
-					ScoreDoc[] hits=topdocs.scoreDocs;
+						ScoreDoc[] hits=topdocs.scoreDocs;
         
-					int num=hits.length;
+						int num=hits.length;
         
-					if(num==0){
-						return null;
-					}
+						if(num==0){
+							return null;
+						}
         
 					//此处加入的是搜索结果的高亮部分
-					SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
-					QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
+						SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
+						QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
 					//			Fragmenter fragmenter = new SimpleSpanFragmenter(scorer); //根据这个得分计算出一个片段
-					Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
+						Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
 					//      	 highlighter.setTextFragmenter(fragmenter); //设置一下要显示的片段		
-					for(int i=0;i<num;i++){	
-						Document hitdoc=indexsearcher.doc(hits[i].doc);
-						String temp=hitdoc.get("file");
-						String indexlaws[]=new String[2];
-						Integer index=Integer.valueOf(hitdoc.get("path"));		
-						indexlaws[0]="第"+index/100000+"章"+"&emsp";
-						index=index%100000;
-						indexlaws[0]+="第"+index/1000+"节";
-						String laws=hitdoc.get("law");
-						if(laws!=null){
-							TokenStream tokenStream = analyzer.tokenStream("laws",new StringReader(laws));
-							Fragmenter displaysize= new SimpleFragmenter(laws.length());
-							highlighter.setTextFragmenter(displaysize);
-							String highlaws=highlighter.getBestFragment(tokenStream,laws);
-							indexlaws[1]=highlaws;
-							if(i==0){
-								List<String[]> path=new ArrayList<String[]>();
-								path.add(indexlaws);
-								files.put(temp,path);
-							}else{
-								if(files.containsKey(temp)){
-									files.get(temp).add(indexlaws);
-								}else{
+						for(int i=0;i<num;i++){	
+							Document hitdoc=indexsearcher.doc(hits[i].doc);
+							String temp=hitdoc.get("file");
+							String indexlaws[]=new String[2];
+							Integer index=Integer.valueOf(hitdoc.get("path"));		
+							indexlaws[0]="第"+index/100000+"章"+"&emsp";
+							index=index%100000;
+							indexlaws[0]+="第"+index/1000+"节";
+							String laws=hitdoc.get("law");
+							if(laws!=null){
+								TokenStream tokenStream = analyzer.tokenStream("laws",new StringReader(laws));
+								Fragmenter displaysize= new SimpleFragmenter(laws.length());
+								highlighter.setTextFragmenter(displaysize);
+								String highlaws=highlighter.getBestFragment(tokenStream,laws);
+								indexlaws[1]=highlaws;
+								if(i==0){
 									List<String[]> path=new ArrayList<String[]>();
 									path.add(indexlaws);
 									files.put(temp,path);
-								}     		           	
-        			
+								}else{
+									if(files.containsKey(temp)){
+										files.get(temp).add(indexlaws);
+									}else{
+										List<String[]> path=new ArrayList<String[]>();
+										path.add(indexlaws);
+										files.put(temp,path);
+									}     		           	 			
+								}
 							}
-        		
 						}
-        	
 					}
-        
-				}
 
 				//      ramdir.close();
 				//      indexreader.close();
 				//      fsdir.close();
-			}
+				}	
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
-			if(e.getClass().getSimpleName().equals("IndexNotFoundException"))		//当没有找到索引文件时，catch异常，并弹框提示
-				JOptionPane.showMessageDialog(null, "未找到索引文件，请先创建索引文件", "警告", JOptionPane.ERROR_MESSAGE);
-			else
 				e.printStackTrace();
 		}
         return files;
@@ -892,6 +887,85 @@ public class HandleLucene {
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
 	 * All right reserved. 
 	 * @author: wanyan 
+	 * date: 2018-1-5 
+	 * 
+	 * 该方法与GetTermSearch功能一致，返回查询到的文档中所有法条，主要用于将法条提交的服务器
+	 *
+	 * @params indexpath
+	 * 				索引文件所在目录
+	 * 			keywords 
+	 * 				从JTextField获取用户输入的关键字
+	 * 			
+	 * @return Map<Stirng,List<String[]>>
+	 * 				将搜索结果以Map<文件名，[章节，法条]>的映射关系，返回查询结果
+	 * 
+	 * Modefied Date:2017-1-9
+	 * 			修复string[] indexlaws初始化位置   					  
+	 * 
+	 */
+	
+	public Map<String,List<String[]>> GetTermSearch(String indexpath,String keywords) throws IOException{
+		
+		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
+    	List<String[]> path=new ArrayList<String[]>();
+    	
+    	this.CreateIndexReader(indexpath);
+    	
+    	if(indexreader!=null){
+    	
+    		IndexSearcher indexsearcher=new IndexSearcher(indexreader);
+    		
+			int top=indexreader.numDocs();		//获取索引文件中有效文档总数
+		       
+			if(top==0)		//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回null
+				files=null;
+			else{
+		
+				Term term=new Term("file",keywords);
+				
+				TermQuery termquery=new TermQuery(term);
+		
+				SortField sortfield=new SortField("path",SortField.Type.INT,false);		//false为升序
+       
+				Sort sort=new Sort(sortfield);
+	
+				TopDocs topdocs=indexsearcher.search(termquery,top,sort); 
+        
+				ScoreDoc[] hits=topdocs.scoreDocs;
+ 
+				int num=hits.length;
+        
+				if(num==0)		//查询结果为空
+					files=null;
+				else{
+					String temp=null;
+					String laws;
+					for(int i=0;i<num;i++){
+						String indexlaws[]=new String[2];
+						Document hitdoc=indexsearcher.doc(hits[i].doc);
+						temp=hitdoc.get("file");	
+						indexlaws[0]=hitdoc.get("path");
+						laws=hitdoc.get("law");
+						if(laws!=null){
+							indexlaws[1]=laws;
+							path.add(indexlaws);						
+						}    
+					}  	
+					files.put(temp,path);			
+				}
+			
+			}
+    	
+    	}
+        return files;
+		
+	}
+	
+	/*
+	 *
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
 	 * date: 2017-11-10 
 	 * 
 	 * DeleteIndex方法根据给定文档名，删除索引
@@ -1137,7 +1211,7 @@ public class HandleLucene {
 				
 //				System.out.println(laws);
 				
-				Document doc=new Document();		//创建Document,每一个发条新建一个		
+				Document doc=new Document();		//创建Document,每一个法条新建一个		
 				FieldType fieldtype=new FieldType();
 				fieldtype.setIndexOptions(IndexOptions.DOCS);
 				fieldtype.setStored(true);		
@@ -1146,7 +1220,7 @@ public class HandleLucene {
 				doc.add(new NumericDocValuesField("path",key));
 				doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
 				doc.add(new StoredField("path",key));
-		    	doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//发条内容索引、分词，不存储
+		    	doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//发条内容索引、分词，存储
 		    	
 		    	ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
 			}
@@ -1177,6 +1251,101 @@ public class HandleLucene {
 	}
 
 	/*
+	 *
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-1-23 
+	 * 
+	 * AddIndex方法在根据传递的Map，将Map中的索引追加到已存在的索引文件中，如果没有索引文件，则创建索引文件
+	 *
+	 * @params content 
+	 * 				文档索引，以Map<文档名称，List<法条路径，法条内容>>形式传参
+	 * 				
+	 * 		   indexpath
+	 * 				索引文件路径
+	 * 
+	 * @return Integer
+	 * 				返回添加到索引文件中的法条数
+	 * 	   				
+	 */
+	
+	public Integer AddIndex(Map<String,List<String[]>> content,String indexpath) throws IOException{
+		
+		Path inpath=Paths.get(indexpath);
+
+		Analyzer analyzer = new StandardAnalyzer();		//鍒涘缓鏍囧噯鍒嗚瘝鍣?
+	
+		FSDirectory fsdir=FSDirectory.open(inpath);		//鍒涘缓纾佺洏绱㈠紩鏂囦欢
+		
+		RAMDirectory ramdir=new RAMDirectory();		//鍒涘缓鍐呭瓨绱㈠紩鏂囦欢
+	
+		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+		
+		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//鍒涘缓鍐呭瓨IndexWriter
+		
+		
+		int totalofindex=0;
+		List<String[]> laws=new ArrayList<String[]>();
+		
+		for(Entry<String, List<String[]>> entry:content.entrySet()){ 
+				
+				//FieldType filetype=new FieldType();
+				//filetype.setIndexOptions(IndexOptions.DOCS);
+				//filetype.setStored(true);		
+				//filetype.setTokenized(false);
+				//FieldType lawtype=new FieldType();
+				//lawtype.setIndexOptions(IndexOptions.NONE);
+				//lawtype.setStored(true);		
+				//lawtype.setTokenized(false);
+				
+				FieldType filetype=new FieldType();
+				filetype.setIndexOptions(IndexOptions.DOCS);
+				filetype.setStored(true);		
+				filetype.setTokenized(false);
+				
+				laws=entry.getValue();
+				int count=laws.size();
+				totalofindex=count;
+				for(int i=0;i<count;i++){
+					Document doc=new Document();		//鍒涘缓Document,姣忎竴涓彂鏉℃柊寤轰竴涓?
+					doc.add(new Field("file",entry.getKey(),filetype));		//鏂囨。鍚嶇О瀛樺偍锛屼笉鍒嗚瘝
+					//doc.add(new IntPoint("path",Integer.valueOf(laws.get(i)[0])));		//娉曟潯绱㈠紩浠nt绫诲瀷瀛樺偍
+					//doc.add(new StoredField("path",Integer.valueOf(laws.get(i)[0])));
+					doc.add(new NumericDocValuesField("path",Integer.valueOf(laws.get(i)[0])));
+					doc.add(new IntPoint("path",Integer.valueOf(laws.get(i)[0])));		//法条索引以Int类型存储
+					doc.add(new StoredField("path",Integer.valueOf(laws.get(i)[0])));
+					doc.add(new Field("law",laws.get(i)[1],TextField.TYPE_STORED));		//鍙戞潯鍐呭绱㈠紩銆佸垎璇嶏紝涓嶅瓨鍌?
+			    	ramiwriter.addDocument(doc);		//灏嗘硶鏉＄储寮曟坊鍔犲埌鍐呭瓨绱㈠紩涓?	
+				}	    		  
+			}
+	
+		ramiwriter.close();
+	
+		TieredMergePolicy ti=new TieredMergePolicy();
+		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+        IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+    	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+    	fsconfig.setMergePolicy(ti);
+//        IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
+//       fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+    	
+    	if(indexwriter!=null){
+    		if(indexwriter.isOpen())
+    			indexwriter.close();
+    	}
+        
+    	indexwriter=new IndexWriter(fsdir,fsconfig);  
+        indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+ 
+        indexwriter.commit();
+//        indexwriter.close();
+        
+        return totalofindex;
+	}
+	
+	
+	/*
  	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
 	 * All right reserved. 
 	 * @author: wanyan 
@@ -1187,41 +1356,46 @@ public class HandleLucene {
 	 * @params 
 	 * 		   indexpath
 	 * 				索引文件存储位置
-	 * @return IndexReader	
-	 * 				返回IndexReader
+	 * @return boolean	
+	 * 				如果创建IndexReader成功，返回true,如果为没有索引文件，则创建失败，返回false
 	 * Modefied Date:2018-1-2
 	 * 			修改为使用openifChange(DirectoryReader,IndexWriter)方法
+	 * Modefied Date:2018-1-23
+	 * 			修改为返回值为布尔类型，如果创建IndexReader成功，返回true,如果为没有索引文件，则创建失败，返回false
 	 *          
 	 */
 
-	public void CreateIndexReader(String indexpath) throws IOException{
+	public boolean CreateIndexReader(String indexpath) throws IOException{
+		boolean f = false;
 		try{
-		Path inpath=Paths.get(indexpath);
-		fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		IOContext iocontext=new IOContext();
-		ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
-		if(indexreader==null){
-			indexreader=DirectoryReader.open(ramdir);
-		}
-		else{
-			
-			if(indexwriter!=null){		//判断indexwriter是否实例化
-				IndexReader tr=DirectoryReader.openIfChanged((DirectoryReader)indexreader,indexwriter);	
-				if(tr!=null){	
-					indexreader.close();	
-					indexreader=tr;	
-				}
+			Path inpath=Paths.get(indexpath);
+			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+			IOContext iocontext=new IOContext();
+			ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
+			if(indexreader==null){
+				indexreader=DirectoryReader.open(ramdir);
 			}
+			else{
+			
+				if(indexwriter!=null){		//判断indexwriter是否实例化
+					IndexReader tr=DirectoryReader.openIfChanged((DirectoryReader)indexreader,indexwriter);	
+					if(tr!=null){	
+						indexreader.close();	
+						indexreader=tr;	
+					}
+				}
 		
-		}
-		
+			}
+			f=true;
 		}catch (IOException e) {
 		// TODO Auto-generated catch block
 			if(e.getClass().getSimpleName().equals("IndexNotFoundException"))		//当没有找到索引文件时，catch异常，并弹框提示
-				JOptionPane.showMessageDialog(null, "未找到索引文件，请先创建索引文件", "警告", JOptionPane.ERROR_MESSAGE);
+				//JOptionPane.showMessageDialog(null, "未找到索引文件，请先创建索引文件", "警告", JOptionPane.ERROR_MESSAGE);
+				f=false;
 			else
 				e.printStackTrace();
-		}		
+		}
+		return f;
 	}
 	
 	public static void CloseIndexReader() throws IOException{

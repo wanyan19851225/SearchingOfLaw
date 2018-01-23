@@ -18,7 +18,6 @@ import net.sf.json.JSONObject;
 
 public class IOHttp {
 	
-	private HttpURLConnection httpconn;
 	private String url;
 	
 	public IOHttp(String url){
@@ -40,12 +39,27 @@ public class IOHttp {
         
         try {
         	
-            // 设置是否向httpconn输出，因为这个是post请求，参数要放在http正文内，因此需要设为true, 默认情况下是false;
+           	URL rurl = new URL(url);
+        	URLConnection conn=rurl.openConnection();
+        	HttpURLConnection httpconn=(HttpURLConnection) conn;
         	
+//        	httpconn.setDoInput(true);
         	httpconn.setDoOutput(true);
         	httpconn.setDoInput(true);
-
+        	httpconn.setConnectTimeout(1000*60*5);
+        	httpconn.setReadTimeout(1000*60*5);
+        	httpconn.setUseCaches(false);
+        	httpconn.setRequestProperty("Accept-Charset","utf-8");
+        	httpconn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
         	httpconn.setRequestProperty("Content-Length", String.valueOf(body.length()));
+            httpconn.setRequestProperty("accept", "*/*");
+            httpconn.setRequestProperty("connection", "Keep-Alive");
+            
+            httpconn.connect();
+        	
+            // 设置是否向httpconn输出，因为这个是post请求，参数要放在http正文内，因此需要设为true, 默认情况下是false;
+        	
+
             
             outputstream = httpconn.getOutputStream();
             outputstreamwriter = new OutputStreamWriter(outputstream);
@@ -63,8 +77,6 @@ public class IOHttp {
             	reader = new BufferedReader(inputstreamreader);
             
             	String line;
-
-            
             	while ((line = reader.readLine()) != null)     	
             		result.append(line);            
          
@@ -95,16 +107,12 @@ public class IOHttp {
         
     }
 
-    public URLConnection GetConnect(){
-    	return httpconn;
-    }
-
     public Boolean Connect() throws IOException{
 		
     	Boolean f=null;
     	URL rurl = new URL(url);
     	URLConnection conn=rurl.openConnection();
-    	httpconn=(HttpURLConnection) conn;
+    	HttpURLConnection httpconn=(HttpURLConnection) conn;
     	
     	httpconn.setDoInput(true);
     	httpconn.setConnectTimeout(1000*5);
@@ -126,7 +134,7 @@ public class IOHttp {
         return f;  	
     }
     
-    public String Map2From(Map<String,String> param){
+    public String Map2String(Map<String,String> param){
 		StringBuffer sb=new StringBuffer();
 		
 		for (Map.Entry<String, String> e : param.entrySet()) {  
@@ -140,4 +148,7 @@ public class IOHttp {
         return sb.toString(); 	
     }
 
+    public JSONObject Map2Json(Map<String,String>m){
+    	return JSONObject.fromObject(m);
+    }
 }

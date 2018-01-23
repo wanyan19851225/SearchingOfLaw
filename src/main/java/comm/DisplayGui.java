@@ -84,10 +84,16 @@ public class DisplayGui extends JFrame{
 	    final JMenuItem createindex=new JMenuItem("新建索引");
 	    final JMenuItem addindex=new JMenuItem("添加索引");
 	    final JMenuItem showindex=new JMenuItem("查看索引");
+	    JMenuItem synchronizeindex=new JMenuItem("提交索引");
+	    JMenuItem downloadindex=new JMenuItem("导入索引");
+	    JMenuItem remoteindex=new JMenuItem("查看仓库");
 	    final JMenuItem aboutitem=new JMenuItem("关于");
 	    file.add(createindex);
 	    file.add(addindex);
 	    file.add(showindex);
+	    file.add(synchronizeindex);
+	    file.add(downloadindex);
+	    file.add(remoteindex);
 	    about.add(aboutitem);
 	    menubar.add(file);
 	    menubar.add(about);
@@ -454,6 +460,9 @@ public class DisplayGui extends JFrame{
 		createindex.addActionListener(new SOLEvents.ShowSOLCreateIndexEvent());
 		addindex.addActionListener(new SOLEvents.ShowSOLAddIndexEvent());
 		showindex.addActionListener(new SOLEvents.ShowSOLShowIndexEvent());
+		synchronizeindex.addActionListener(new SOLEvents.ShowSOLSynchronizeIndexEvent());
+		downloadindex.addActionListener(new SOLEvents.ShowSOLDownloadIndexEvent());
+		remoteindex.addActionListener(new SOLEvents.ShowSOLRemoteIndexEvent());
 		aboutitem.addActionListener(new SOLEvents.AboutEvent());
 		sbt.addMouseListener(new SOLEvents.SearchEvent(this));
 		other.addMouseListener(new SOLEvents.ShowSOLSelectIndexEvent());
