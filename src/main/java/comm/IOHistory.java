@@ -121,6 +121,9 @@ public class IOHistory {
 	 * 
 	 * @2017-11-24
 	 * 			修复读取sb容器里的数据时，总是读取第一个数据的bug,修改创建变量n的位置
+	 * 
+	 * @2018-1-31
+	 * 			修复当检索历史文件所在目录不存在时，报错的bug
 	 *
 	 */
 	
@@ -128,7 +131,14 @@ public class IOHistory {
 
 		long start,end;
 		
-		File file=new File(filename);
+		String filepath=filename.substring(0,filename.lastIndexOf("\\")+1);
+		File file=new File(filepath);
+		
+		if(!file.exists()){		//判断文件所在的目录是否存在，如果不存在则先创建该目录
+			file.mkdir();
+		}
+		
+		file=new File(filename);
 		
 		if(!file.exists()){   
 			file.createNewFile();

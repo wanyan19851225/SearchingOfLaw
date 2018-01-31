@@ -35,17 +35,17 @@ public class SOLShowRemoteLaws extends JFrame{
         
         try{
         	Map<String,List<String[]>> contentoflaw=this.GetRemoteLaws(Path.urlpath,file,top);
-        	//HandleLucene handle=new HandleLucene();
+
+        	if(!contentoflaw.isEmpty()){
+        		List<String[]> laws=contentoflaw.get(file);
         
-        	//contentoflaw=handle.GetTermSearch(Path.indexpath,file,top);
-        	List<String[]> laws=contentoflaw.get(file);
-        
-        	for(int i=0;i<laws.size();i++){
-        		Vector<String> line=new Vector<String>();
-        		line.add(String.valueOf(i));
-        		line.add(laws.get(i)[1]);
-        		line.add(laws.get(i)[0]);
-        		data.add(line);	
+        		for(int i=0;i<laws.size();i++){
+        			Vector<String> line=new Vector<String>();
+        			line.add(String.valueOf(i));
+        			line.add(laws.get(i)[1]);
+        			line.add(laws.get(i)[0]);
+        			data.add(line);	
+        		}
         	}
         }catch (Exception e) {
 			// TODO Auto-generated catch block

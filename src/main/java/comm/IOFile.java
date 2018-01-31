@@ -17,7 +17,13 @@ public class IOFile {
 	
 	public void Writer(String s,String filename) throws IOException{
 		
-		File file=new File(filename);
+		String filepath=filename.substring(0,filename.lastIndexOf("/")+1);
+		File file=new File(filepath);
+		if(!file.exists()){
+			file.mkdir();
+		}
+		
+		file=new File(filename);
 		
 		if(!file.exists()){   
 			file.createNewFile();

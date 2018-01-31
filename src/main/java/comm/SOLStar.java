@@ -3,7 +3,10 @@ package comm;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import javax.swing.JLabel;
@@ -29,13 +32,17 @@ public class SOLStar extends JPanel{
 //		sll.setBorder(BorderFactory.createLineBorder(Color.black));
 		
         
-        ImageIcon image = new ImageIcon("D:\\Lucene\\conf\\2ebba7e7e1e01966da176955d7206062.png"); 
-        image.setImage(image.getImage().getScaledInstance(24,24,Image.SCALE_DEFAULT)); 
-		rl=new JLabel(image);		//远程登录标签
+        //ImageIcon image = new ImageIcon("D:\\Lucene\\conf\\2ebba7e7e1e01966da176955d7206062.png"); 
+		//ImageIcon image = new ImageIcon(this.getClass().getClassLoader().getResource("wifi.png"));
 
-        image = new ImageIcon("D:\\Lucene\\conf\\login.png"); 		
-        image.setImage(image.getImage().getScaledInstance(24,24,Image.SCALE_DEFAULT)); 
+		ImageIcon image=new ImageIcon(this.getClass().getClassLoader().getResource("wifi.png"));	//将图片资源文件打到Jar包里，使用资源路径访问图片，修改日期：2018.1.30
+		image.setImage(image.getImage().getScaledInstance(24,24,Image.SCALE_DEFAULT));
+		rl=new JLabel(image);		//远程登录标签
+			
+		image = new ImageIcon(this.getClass().getClassLoader().getResource("login.png"));
+	    image.setImage(image.getImage().getScaledInstance(24,24,Image.SCALE_DEFAULT)); 
 		sl=new JLabel(image);		//登录状态标签
+
 		
 		sgin= new JLabel();		//登录名标签
 		this.SetLoginLabelText("Sign in");
