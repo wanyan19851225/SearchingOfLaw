@@ -48,7 +48,8 @@ public class IOHttp {
         	httpconn.setReadTimeout(1000*60*5);
         	httpconn.setUseCaches(false);
         	httpconn.setRequestProperty("Accept-Charset","utf-8");
-        	httpconn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+        	//httpconn.setRequestProperty("contentType","utf-8");
+        	httpconn.setRequestProperty("Content-Type","application/json;charset=utf-8");
         	httpconn.setRequestProperty("Content-Length", String.valueOf(body.length()));
             httpconn.setRequestProperty("accept", "*/*");
             httpconn.setRequestProperty("connection", "Keep-Alive");
@@ -57,10 +58,8 @@ public class IOHttp {
         	
             // 设置是否向httpconn输出，因为这个是post请求，参数要放在http正文内，因此需要设为true, 默认情况下是false;
         	
-
-            
             outputstream = httpconn.getOutputStream();
-            outputstreamwriter = new OutputStreamWriter(outputstream);
+            outputstreamwriter = new OutputStreamWriter(outputstream,"utf-8");
             outputstreamwriter.write(body);
             outputstreamwriter.flush();// 刷新
             
@@ -71,7 +70,7 @@ public class IOHttp {
             if (httpconn.getResponseCode() == HttpURLConnection.HTTP_OK){
             
             	inputstream = httpconn.getInputStream();
-            	inputstreamreader= new InputStreamReader(inputstream,"utf-8");
+            	inputstreamreader= new InputStreamReader(inputstream,"utf-8");		//设置编码格式utf-8,修改时间：2018-1-31
             	reader = new BufferedReader(inputstreamreader);
             
             	String line;

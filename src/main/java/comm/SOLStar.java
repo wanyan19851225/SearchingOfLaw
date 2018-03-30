@@ -16,6 +16,7 @@ import comm.SOLEvents.ShowSOLLoginEvent;
 
 public class SOLStar extends JPanel{
 	private JLabel sll,rl,sl,sgin;
+	private String username;
 	private static Boolean LoginStatus=false;
 	private static Boolean RemoteStatus=false;
 
@@ -112,6 +113,14 @@ public class SOLStar extends JPanel{
 	
 	public void RemoveShwoSOLLoginEvent(ShowSOLLoginEvent e){
 		sgin.removeMouseListener(e);
+	}
+	
+	public void SetUserName(String s){
+		username=s;
+	}
+	
+	public String GetUserName(){
+		return username;
 	}
 
 }

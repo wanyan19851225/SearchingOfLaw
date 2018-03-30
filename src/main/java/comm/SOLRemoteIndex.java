@@ -49,6 +49,8 @@ public class SOLRemoteIndex extends JFrame{
 		cname.add("序号");
 		cname.add("文件名");  
         cname.add("法条总数");
+        cname.add("作者");
+        cname.add("创建时间");
         cname.add("是否删除");
         data = new Vector<Vector<String>>();
     
@@ -75,6 +77,14 @@ public class SOLRemoteIndex extends JFrame{
 		
 		lbt=new JButton("删除");
 		lbt.setPreferredSize(new Dimension(60,35));
+		if(DisplayGui.star.GetLoginStatus()){	//判断是否处于登录状态，如果登录状态，则删除按钮启用，否则，删除按钮禁止，修改时间2018-2-1
+			if(DisplayGui.star.GetUserName().equals("wangyan"))
+				lbt.setEnabled(true);
+			else
+				lbt.setEnabled(false);
+		}
+		else
+			lbt.setEnabled(false);
 		
 		JScrollPane jsp=new JScrollPane();
 		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));
@@ -142,12 +152,13 @@ public class SOLRemoteIndex extends JFrame{
 	
 	public boolean DeleteRemoteIndex(String url,List<String> file) throws Exception{
 		boolean f;
+		String user=DisplayGui.star.GetUserName();
 				JSONObject body=new JSONObject();
 				JSONObject response=new JSONObject();
 				IOHttp http=new IOHttp(url);
 				body.accumulate("token","");
 				body.accumulate("command","104");
-				body.accumulate("user","wangyan");
+				body.accumulate("user",user);
 				JSONArray fileslist=new JSONArray();
 				for(int i=0;i<file.size();i++){
 					JSONObject tem=new JSONObject();

@@ -367,6 +367,8 @@ public class  SOLEvents {
 	 * 
 	 * 2017-12-21
 	 * 			优化登陆时判断用户名和密码的代码结构
+	 * 2018-2-1
+	 * 			增加登录成功后，设置star类中的username字段，存储用户名
 	 * 			
 	 */
 	
@@ -394,6 +396,7 @@ public class  SOLEvents {
 						DisplayGui.star.SetLoginMarkVisable(true);
 						DisplayGui.star.SetLoginStatus(true);
 						DisplayGui.star.SetLoginLabelText(user);
+						DisplayGui.star.SetUserName(user);
 					}
 					else if(m.get(user).equals(pwd)){		//判断用户名和密码是否正确，如果正确，则登陆成功
 						sollogin.HidePanel(sollogin.loginoutpanel);
@@ -401,6 +404,7 @@ public class  SOLEvents {
 						DisplayGui.star.SetLoginMarkVisable(true);
 						DisplayGui.star.SetLoginLabelText(user);
 						DisplayGui.star.SetLoginStatus(true);
+						DisplayGui.star.SetUserName(user);
 					}
 					else {		//用户名和密码如果不一致，则提示错误框
 						DisplayGui.star.SetLoginStatus(false);
