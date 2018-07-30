@@ -144,9 +144,11 @@ public class SOLShowRemoteLaws extends JFrame{
 	        List<String[]> laws=new ArrayList<String[]>();
 	        for(int i=0;i<objarry.size();i++){		
 	        	tem=objarry.getJSONObject(i);
-		        String[] law=new String[2];
+		        String[] law=new String[4];
 	        	law[0]=tem.getString("path");
 	        	law[1]=tem.getString("law");
+	        	law[2]=tem.getString("author");
+	        	law[3]=tem.getString("time");
 	        	laws.add(law);
 	        }
 	        r.put(response.getString("file"),laws);

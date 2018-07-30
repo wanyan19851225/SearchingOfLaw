@@ -82,7 +82,7 @@ public class SOLSelectIndex extends JFrame{
 		sbt1.setPreferredSize(new Dimension(60,35));
 		
 		JScrollPane jsp=new JScrollPane();
-		jsp.setPreferredSize(new Dimension(436,245));
+		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));	//修改于2018-7-26,自适应窗口大小
 		jsp.setViewportView(t);
 /*		
 		DefaultTableCellRenderer r = new DefaultTableCellRenderer();    

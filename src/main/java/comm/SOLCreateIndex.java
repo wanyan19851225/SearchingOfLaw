@@ -25,8 +25,8 @@ public class SOLCreateIndex extends JFrame{
 		Container contentpane=this.getContentPane();
 		contentpane.setLayout(new BorderLayout(3,3));
 		
-		stf=new JTextField(40);
-		stf.setPreferredSize(new Dimension(300,35));
+		stf=new JTextField(56);
+		stf.setPreferredSize(new Dimension(FrameSize.X-120,35));
 		stf.setFont(new Font("宋体",Font.PLAIN,15));
 		
 		JButton lbt=new JButton("浏览");
@@ -61,6 +61,7 @@ public class SOLCreateIndex extends JFrame{
 		JPanel cpane=new JPanel();
 	
 	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
+	    //cpane.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y));
 	    cpane.add(stf);
 	    cpane.add(lbt);
 	    cpane.add(sbt);

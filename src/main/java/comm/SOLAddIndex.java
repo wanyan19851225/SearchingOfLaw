@@ -30,7 +30,7 @@ public class SOLAddIndex extends JFrame{
 		Container contentpane=this.getContentPane();
 		contentpane.setLayout(new BorderLayout(3,3));
 		
-		stf=new JTextField(40);
+		stf=new JTextField(56);
 		stf.setPreferredSize(new Dimension(300,35));
 		stf.setFont(new Font("宋体",Font.PLAIN,15));
 		

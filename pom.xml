@@ -66,6 +66,11 @@
     	<artifactId>substance</artifactId>
     	<version>6.0</version>
     </dependency>
+    <dependency>
+    	<groupId>org.dom4j</groupId>
+    	<artifactId>dom4j</artifactId>
+    	<version>2.1.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -78,7 +83,7 @@
             <filtering>false</filtering>    
         </resource>    
         <resource>    
-            <directory>src/main/java</directory>    
+            <directory>/src/main/java</directory>    
             <includes>    
                 <include>**/*.*</include>    
             </includes>     
@@ -102,9 +107,8 @@
                     <descriptorRef>jar-with-dependencies</descriptorRef>  
                 </descriptorRefs>  
             </configuration>  
-        </plugin>  
-  
-    </plugins>   
+        </plugin>   	
+   </plugins>   
 </build>
 
 </project>

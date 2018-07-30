@@ -55,14 +55,17 @@ public class SOLRemoteIndex extends JFrame{
         data = new Vector<Vector<String>>();
     
 		try {
-			Map<String, Integer> rfre = this.GetRemoteIndex(Path.urlpath);
+			Map<String, String[]> rfre = this.GetRemoteIndex(Path.urlpath);
 	        if(!rfre.isEmpty()){
 	        	int i=0;
-	        	for(Entry<String,Integer> entry: rfre.entrySet()){
+	        	for(Entry<String,String[]> entry: rfre.entrySet()){
 	        		Vector<String> line=new Vector<String>();
 	        		line.add(String.valueOf(i++));
 	        		line.add(entry.getKey());
-	        		line.add(String.valueOf(entry.getValue()));
+	        		String[] info=entry.getValue();
+	        		line.add(info[2]);
+	        		line.add(info[0]);
+	        		line.add(info[1]);
 	        		data.add(line);
 	        	}
 	        }
@@ -126,8 +129,28 @@ public class SOLRemoteIndex extends JFrame{
 		lbt.setEnabled(f);
 	} 
 	
-	public Map<String,Integer> GetRemoteIndex(String url) throws Exception{
-		Map<String,Integer> fre=new HashMap<String,Integer>();
+	/*
+	 *
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-11-1 
+	 * 
+	 * GetRemoteIndex方法用于向服务器请求获取文档信息包括文档名称，作者，创建日期，法条总数
+	 *
+	 * @params url 
+	 * 				服务器地址
+	 * 				
+	 * @return Map<String,String[]>
+	 * 				检索结果以Map<文档名称，[作者，创建日期，法条总数]>的形式返回
+	 * 
+	 * Modeified Date:2018-7-26
+	 * 				修改方法返回结果，将文件信息以Map<文档名称，[作者，创建日期，法条总数]>的形式返回 			
+	 * 
+	 */
+	
+	public Map<String,String[]> GetRemoteIndex(String url) throws Exception{
+		Map<String,String[]> fre=new HashMap<String,String[]>();
 		Map<String,String> send=new HashMap<String,String>();
 		IOHttp http=new IOHttp(url);
 		JSONObject data,response;	
@@ -145,7 +168,11 @@ public class SOLRemoteIndex extends JFrame{
 	    JSONObject tem=new JSONObject();
 	    for(int i=0;i<objarry.size();i++){		
 	    	tem=objarry.getJSONObject(i);
-	        fre.put(tem.getString("file"),tem.getInt("lawnum")); 
+	    	String info[]=new String[3];
+	    	info[0]=tem.getString("author");
+	    	info[1]=tem.getString("time");
+	    	info[2]=String.valueOf(tem.getInt("lawnum"));
+	        fre.put(tem.getString("file"),info); 
 	    }
 		return fre;	
 	}
