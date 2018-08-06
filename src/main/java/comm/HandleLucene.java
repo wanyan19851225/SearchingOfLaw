@@ -209,6 +209,163 @@ public class HandleLucene {
         return totalofindex;
 	}
 	
+	
+	/*
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-08-03 
+	 *
+	 *该方法是对CreateIndex方法的优化，增加了使用超链接URL从网站抓取html文档，然后使用Jsoup工具解析html文档中的内容，并为解析的内容建立索引
+	 *
+	 * @params url
+	 * 				可以传入文件夹目录，也可以传入抓取html文档的url地址
+	 * 		   indexpath
+	 * 				索引文件存储位置
+	 * @return Integer	
+	 * 				返回所有文件的索引数
+	 *           
+	 */
+	
+	public Integer CreateIndexs(String url,String indexpath) throws IOException{
+		int totalofindex=0;
+		/*
+		if(url.length()<3){		//判断路径字符个数是否小于3，如果少于3个字符，totalofindex赋值-3，函数结束
+			totalofindex=-3;
+			return totalofindex;
+		}
+	*/
+		//String s=url.substring(0,7);		//截取路径url的第1到7个字符
+		if(url.matches("(http|https)://.*")){		//判断路径是否以http://开头，如果是，则抓取html文档，解析html文档内容
+			IOHtml html=new IOHtml();
+			Map<Integer,String> law=new HashMap<Integer,String>();
+			try{
+				law=html.GetIndexOflaw(url);		//捕捉异常，如果报异常，totalofindex赋值-1，不在建立索引文件
+				totalofindex=law.size();		//获取读到的法条总数
+				Path inpath=Paths.get(indexpath);
+				Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
+				FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+				RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
+				IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+				IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+				if(!law.isEmpty()){		//判断是否读取到了法条，如果有读到法条，则为每条法条创建索引
+					for (Integer key:law.keySet()){ 
+						Document doc=new Document();		//创建Document,每一个发条新建一个		
+						FieldType fieldtype=new FieldType();
+						fieldtype.setIndexOptions(IndexOptions.DOCS);
+						fieldtype.setStored(true);		
+						fieldtype.setTokenized(false);
+						doc.add(new Field("file","html",fieldtype));		//文档名称存储，不分词
+						doc.add(new NumericDocValuesField("path",key));
+						doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
+						doc.add(new StoredField("path",key));
+						doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//法条内容索引、分词，存储
+		    	
+						ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+					}
+				}
+				else if(totalofindex==0)		//如果没有读到法条，则totalofindex赋值-1
+					totalofindex=-1;
+				ramiwriter.close();		//法条索引创建完毕，关闭内存IndexWriter
+				TieredMergePolicy ti=new TieredMergePolicy();
+				ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+				IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+				fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+				fsconfig.setMergePolicy(ti);		//设置合并策略
+				if(indexwriter!=null){		//判断indexwriter是否处于打开状态，如果是，则关闭已释放资源
+					if(indexwriter.isOpen())
+						indexwriter.close();
+				}
+				indexwriter=new IndexWriter(fsdir,fsconfig);   
+				indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+				indexwriter.commit();	
+			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
+				totalofindex=-2;
+			}	
+		}else if(url.matches("[a-zA-Z]:\\\\[A-Za-z\\\\]*")){			//使用正在表达式判断路径是否是文件目录形式，如C:\,D:\
+			File[] files = new File(url).listFiles();
+			int filesnum=files.length;
+			if(filesnum!=0){		//判断文件夹下是否有法条文档，如果有文档，则为文档创建索引
+				Path inpath=Paths.get(indexpath);
+				Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
+				FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+				RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
+				IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+				IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+				IOWord ioword=new IOWord();
+				for(int i=0;i<files.length;i++){
+					String fname=files[i].getName().split("\\.")[0];		//获取文档名称
+					String check=fname.substring(fname.length()-2,fname.length());		//截取文档名称的最后两个字符
+					Map<Integer,String> law=new HashMap<Integer,String>();
+					if(check.contains("法")||check.contains("条例")||check.contains("草案")||check.contains("规则")||check.contains("通则")){		//使用文档名字最后两个字符，判断该文档是否是规范法条文档，如果是则调用GetIndexOflaw方法
+						law=ioword.GetIndexOflaw(files[i]);
+					}
+					else if(check.contains("M")){		//如果文档名称最后两个字符含有M标记，则调用GetIndexOfmarkdocment方法
+						law=ioword.GetIndexOfmarkdocment(files[i]);
+					}
+					else{			//如果文档既不是规范法条文档，也没有M标记，则调用GetIndexOfgeneraldocment方法
+						law=ioword.GetIndexOfgeneraldocment(files[i]);
+					}
+					if(totalofindex==-1)
+						totalofindex=0;
+					
+					totalofindex+=law.size();		//获取读到的法条总数
+					
+					if(!law.isEmpty()){		//判断是否读取到了法条，如果有读到法条，则为每条法条创建索引
+						for (Integer key:law.keySet()){ 
+//							String laws=law.get(302011);
+					
+//							System.out.println(laws);
+							Document doc=new Document();		//创建Document,每一个发条新建一个		
+							FieldType fieldtype=new FieldType();
+							fieldtype.setIndexOptions(IndexOptions.DOCS);
+							fieldtype.setStored(true);		
+							fieldtype.setTokenized(false);
+							doc.add(new Field("file",files[i].getName(),fieldtype));		//文档名称存储，不分词
+							doc.add(new NumericDocValuesField("path",key));
+							doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
+							doc.add(new StoredField("path",key));
+							doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//法条内容索引、分词，存储
+			    	
+							ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+						}
+					}
+					else if(totalofindex==0)		//如果没有读到法条，则totalofindex赋值-1
+						totalofindex=-1;
+				}	
+				ramiwriter.close();		//法条索引创建完毕，关闭内存IndexWriter
+				
+				TieredMergePolicy ti=new TieredMergePolicy();
+				ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+				IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+				fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+				fsconfig.setMergePolicy(ti);		//设置合并策略
+//				System.out.println(ti.getForceMergeDeletesPctAllowed());
+//				IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
+//				fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+				
+				if(indexwriter!=null){		//判断indexwriter是否处于打开状态，如果是，则关闭已释放资源
+					if(indexwriter.isOpen())
+						indexwriter.close();
+				}
+				
+				indexwriter=new IndexWriter(fsdir,fsconfig);   
+				indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+				
+				indexwriter.commit();
+				
+//				indexwriter.close();
+			}
+			else		//如果文件夹下没有文档，则totalofindex赋值-1
+				totalofindex=-1;
+			
+		}else{		//路径既不是以http://开头，也不是以文件目录形式，则totalofindex赋值-3
+			totalofindex=-3;
+		}	
+        return totalofindex;
+	}
+	
+	
 	/*
 	 *
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
