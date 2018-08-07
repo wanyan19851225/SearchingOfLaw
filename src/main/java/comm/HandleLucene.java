@@ -211,90 +211,88 @@ public class HandleLucene {
 	*/
 	
 	/*
-	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
 	 * All right reserved. 
 	 * @author: wanyan 
-	 * date: 2018-08-03 
+	 * date: 2017-11-1 
 	 *
-	 *该方法是对CreateIndex方法的优化，增加了使用超链接URL从网站抓取html文档，然后使用Jsoup工具解析html文档中的内容，并为解析的内容建立索引
+	 *该方法扫描文件，创建索引
+	 *该方法是对CreateIndex方法进行优化，增加了使用超链接URL从网站抓取html文档，然后使用Jsoup工具解析html文档中的内容，并为解析的内容建立索引
 	 *
-	 * @params url
-	 * 				可以传入文件夹目录，也可以传入抓取html文档的url地址
+	 * @param url
+	 * 				文件夹路径或者url地址
 	 * 		   indexpath
 	 * 				索引文件存储位置
 	 * @return Integer	
 	 * 				返回所有文件的索引数
 	 * 
-	 * Modefied Date:2018-8-6
-	 * 				修改为使用正则表达式过滤传入的url地址是否符合要求
-	 *           
+	 * @2017-11-1
+	 * 			修改返回参数为Integer,返回所有文件的索引数
+	 * @2017-11-7
+	 * 			增加对自定义文档和正式格式法条的判断  
+	 * @2017-11-10
+	 *          修改file字段的索引选项，由IndexOptions.NONE改为IndexOptions.DOCS,不建立索引改为只对doc建立索引，这样能够根据file字段删除索引
+	 * @2017-11-17
+	 * 			修复当文件夹中没有法条文档时，创建空索引的bug
+	 * 			增加调用GetIndexOflaw或者GetIndexOfdocment后，是否为空的判断，如果为空则跳过不建立索引
+	 *			增加对path字段，增加NumericDocValuesField字段，用于排序
+	 * Modified Date:2017-12-24
+	 * 			修改合并策略TieredMergePolicy，将删除索引时的默认合并策略值10%，修改为0，由于删除索引的默认合并策略10%，即删除的索引数达到总索引数(maxDo)的10%时，才会执行forceMergeDeletes
+	 * Modified Date:2017-12-26
+	 * 			增加读取法条文档时，读取全部内容，按照段落存储法条
+	 * Modified Date:2018-1-2
+	 * 			将indexwriter修改为类的私有类，以调用IndexReader的单例函数openifchange(Directory,IndexWriter方法)
+	 * 			将indexwriter更改为静态类，在创建前判断indexwriter是否处于打开状态，如果打开，则关闭以释放资源
+	 * Modified Date:2018-8-3
+	 * 			修改原参数fdir为url，可以传入文件夹路径或者url地址
+	 * Modified Date:2018-8-6
+	 * 			修改为使用正则表达式过滤传入的url地址是否符合要求
+	 * Modified Date:2018-8-7
+	 * 			修改为使用IOHtml的构造函数抓取html文档，并捕获异常
+	 *          
 	 */
 	
 	public Integer CreateIndexs(String url,String indexpath) throws IOException{
 		int totalofindex=0;
-		/*
-		if(url.length()<3){		//判断路径字符个数是否小于3，如果少于3个字符，totalofindex赋值-3，函数结束
-			totalofindex=-3;
-			return totalofindex;
-		}
-	*/
-		//String s=url.substring(0,7);		//截取路径url的第1到7个字符
+		Path inpath=Paths.get(indexpath);
+		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
+		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+		RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
+		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+		
 		if(url.matches("(http|https)://.*")){		//判断路径是否以http://开头，如果是，则抓取html文档，解析html文档内容
-			IOHtml html=new IOHtml();
-			Map<Integer,String> law=new HashMap<Integer,String>();
 			try{
-				law=html.GetIndexOflaw(url);		//捕捉异常，如果报异常，totalofindex赋值-1，不在建立索引文件
+				IOHtml html=new IOHtml(url);		//使用构造函数抓取html文档，捕捉异常，如果报异常，totalofindex赋值-1，不在建立索引文件
+				Map<Integer,String> law=html.GetIndexOflaw();
+				String fname=html.GetHtmlH();		//解析html文档标题
 				totalofindex=law.size();		//获取读到的法条总数
-				Path inpath=Paths.get(indexpath);
-				Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
-				FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-				RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
-				IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
-				IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+
 				if(!law.isEmpty()){		//判断是否读取到了法条，如果有读到法条，则为每条法条创建索引
-					for (Integer key:law.keySet()){ 
+					for (Map.Entry<Integer,String> e:law.entrySet()){ 
 						Document doc=new Document();		//创建Document,每一个发条新建一个		
 						FieldType fieldtype=new FieldType();
 						fieldtype.setIndexOptions(IndexOptions.DOCS);
 						fieldtype.setStored(true);		
 						fieldtype.setTokenized(false);
-						doc.add(new Field("file","html",fieldtype));		//文档名称存储，不分词
-						doc.add(new NumericDocValuesField("path",key));
-						doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
-						doc.add(new StoredField("path",key));
-						doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//法条内容索引、分词，存储
+						doc.add(new Field("file",fname,fieldtype));		//文档名称存储，不分词
+						doc.add(new NumericDocValuesField("path",e.getKey()));
+						doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
+						doc.add(new StoredField("path",e.getKey()));
+						doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//法条内容索引、分词，存储
 		    	
 						ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
 					}
 				}
 				else if(totalofindex==0)		//如果没有读到法条，则totalofindex赋值-1
 					totalofindex=-1;
-				ramiwriter.close();		//法条索引创建完毕，关闭内存IndexWriter
-				TieredMergePolicy ti=new TieredMergePolicy();
-				ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
-				IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
-				fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-				fsconfig.setMergePolicy(ti);		//设置合并策略
-				if(indexwriter!=null){		//判断indexwriter是否处于打开状态，如果是，则关闭已释放资源
-					if(indexwriter.isOpen())
-						indexwriter.close();
-				}
-				indexwriter=new IndexWriter(fsdir,fsconfig);   
-				indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-				indexwriter.commit();	
 			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
 				totalofindex=-2;
 			}	
-		}else if(url.matches("[a-zA-Z]:\\\\[A-Za-z\\\\]*")){			//使用正在表达式判断路径是否是文件目录形式，如C:\,D:\
+		}else if(url.matches("[a-zA-Z]:\\\\.*")){			//使用正在表达式判断路径是否是文件目录形式，如C:\,D:\
 			File[] files = new File(url).listFiles();
 			int filesnum=files.length;
 			if(filesnum!=0){		//判断文件夹下是否有法条文档，如果有文档，则为文档创建索引
-				Path inpath=Paths.get(indexpath);
-				Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
-				FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-				RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
-				IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
-				IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
 				IOWord ioword=new IOWord();
 				for(int i=0;i<files.length;i++){
 					String fname=files[i].getName().split("\\.")[0];		//获取文档名称
@@ -315,56 +313,46 @@ public class HandleLucene {
 					totalofindex+=law.size();		//获取读到的法条总数
 					
 					if(!law.isEmpty()){		//判断是否读取到了法条，如果有读到法条，则为每条法条创建索引
-						for (Integer key:law.keySet()){ 
-//							String laws=law.get(302011);
-					
-//							System.out.println(laws);
+						for (Map.Entry<Integer,String> e:law.entrySet()){ 
 							Document doc=new Document();		//创建Document,每一个发条新建一个		
 							FieldType fieldtype=new FieldType();
 							fieldtype.setIndexOptions(IndexOptions.DOCS);
 							fieldtype.setStored(true);		
 							fieldtype.setTokenized(false);
 							doc.add(new Field("file",files[i].getName(),fieldtype));		//文档名称存储，不分词
-							doc.add(new NumericDocValuesField("path",key));
-							doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
-							doc.add(new StoredField("path",key));
-							doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//法条内容索引、分词，存储
+							doc.add(new NumericDocValuesField("path",e.getKey()));
+							doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
+							doc.add(new StoredField("path",e.getKey()));
+							doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//法条内容索引、分词，存储
 			    	
 							ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
 						}
 					}
 					else if(totalofindex==0)		//如果没有读到法条，则totalofindex赋值-1
 						totalofindex=-1;
-				}	
-				ramiwriter.close();		//法条索引创建完毕，关闭内存IndexWriter
-				
-				TieredMergePolicy ti=new TieredMergePolicy();
-				ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
-				IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
-				fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-				fsconfig.setMergePolicy(ti);		//设置合并策略
-//				System.out.println(ti.getForceMergeDeletesPctAllowed());
-//				IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
-//				fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-				
-				if(indexwriter!=null){		//判断indexwriter是否处于打开状态，如果是，则关闭已释放资源
-					if(indexwriter.isOpen())
-						indexwriter.close();
 				}
-				
-				indexwriter=new IndexWriter(fsdir,fsconfig);   
-				indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-				
-				indexwriter.commit();
-				
-//				indexwriter.close();
 			}
 			else		//如果文件夹下没有文档，则totalofindex赋值-1
 				totalofindex=-1;
 			
 		}else{		//路径既不是以http://开头，也不是以文件目录形式，则totalofindex赋值-3
 			totalofindex=-3;
-		}	
+		}
+		
+		ramiwriter.close();		//法条索引创建完毕，关闭内存IndexWriter
+		TieredMergePolicy ti=new TieredMergePolicy();
+		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+		IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+		fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+		fsconfig.setMergePolicy(ti);		//设置合并策略
+		if(indexwriter!=null){		//判断indexwriter是否处于打开状态，如果是，则关闭已释放资源
+			if(indexwriter.isOpen())
+				indexwriter.close();
+		}
+		indexwriter=new IndexWriter(fsdir,fsconfig);   
+		indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+		indexwriter.commit();
+		
         return totalofindex;
 	}
 	
@@ -1295,11 +1283,12 @@ public class HandleLucene {
 	 * date: 2017-11-10 
 	 * 
 	 * AddIndex方法在根据传递的file字段，将法条文档追加到已存在的索引文件中，如果没有索引文件，则创建索引文件
+	 * AddIndex方法进行了优化，可以获取html文档内容追加索引到已存在的索引文件中
 	 *
-	 * @params fdir 
-	 * 				法条文档
+	 * @param url 
+	 * 				文件路径或者html文档的url地址
 	 * 				
-	 * 		   indexpath
+	 * @param indexpath
 	 * 				索引文件路径
 	 * 
 	 * @return Integer
@@ -1307,94 +1296,97 @@ public class HandleLucene {
 	 * 
 	 * @2017-12-19
 	 * 				增加对path字段，增加NumericDocValuesField字段，用于排序
-	 * Modeified Date:2017-12-26
+	 * Modified Date:2017-12-26
 	 * 				增加读取全部法条内容，按照段落存储法条
 	 * 				修改合并策略TieredMergePolicy，将删除索引时的默认合并策略值10%，修改为0，由于删除索引的默认合并策略10%，即删除的索引数达到总索引数(maxDo)的10%时，才会执行forceMergeDeletes
-	 * Modefied Date:2018-1-2
+	 * Modified Date:2018-1-2
 	 * 			将indexwriter修改为类的私有类，以调用IndexReader的单例函数openifchange(Directory,IndexWriter方法)
 	 * 			将indexwriter更改为静态类，在创建前判断indexwriter是否处于打开状态，如果打开，则关闭以释放资源 					   				
+	 * Modified Date:2018-8-7
+	 * 			修改原参数fdir为url,可以传入文件路径或者html文档的url地址
+	 * 			增加使用url地址获取html文档，为html文档内容创建索引
 	 * 
 	 */
 	
-	public Integer AddIndex(String fdir,String indexpath) throws IOException{
-		
-//		File[] files = new File(fdir).listFiles();
-		
-		File file=new File(fdir);
-		
+	public Integer AddIndexs(String url,String indexpath) throws IOException{
+		int totalofindex=0;
 		Path inpath=Paths.get(indexpath);
-				
 		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
-	
 		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-/*		
-		try{
-			lock=fsdir.obtainLock(IndexWriter.WRITE_LOCK_NAME);
-		}catch (LockObtainFailedException e) {
-			if(lock!=null)
-				lock.close();
-		}
-*/		
 		RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
-	
 		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
-		
 		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
 		
-		IOWord ioword=new IOWord();
-		
-		int totalofindex=0;
-		
-//		for(int i=0;i<files.length;i++){
-			
+		if(url.matches("(http|https)://.*")){
+			try{
+				IOHtml html=new IOHtml(url);		//使用构造函数抓取html文档，捕捉异常，如果报异常，totalofindex赋值-1，不在建立索引文件
+				Map<Integer,String> law=html.GetIndexOflaw();
+				String filename=html.GetHtmlH();		//解析html文档标题
+				totalofindex=law.size();		//获取读到的法条总数
+				if(!law.isEmpty()){		//判断是否读取到了法条，如果有读到法条，则为每条法条创建索引
+					for (Map.Entry<Integer,String> e:law.entrySet()){ 
+						Document doc=new Document();		//创建Document,每一个发条新建一个		
+						FieldType fieldtype=new FieldType();
+						fieldtype.setIndexOptions(IndexOptions.DOCS);
+						fieldtype.setStored(true);		
+						fieldtype.setTokenized(false);
+						doc.add(new Field("file",filename,fieldtype));		//文档名称存储，不分词
+						doc.add(new NumericDocValuesField("path",e.getKey()));
+						doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
+						doc.add(new StoredField("path",e.getKey()));
+						doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//法条内容索引、分词，存储
+						ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+					}
+				}
+				else		//如果没有读到段落，则totalofindex赋值-1
+					totalofindex=-1;
+			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
+				totalofindex=-2;
+			}	
+		}else if(url.matches("[a-zA-Z]:\\\\.*")){
+			File file=new File(url);
+			IOWord ioword=new IOWord();
 			String fname=file.getName().split("\\.")[0];
-			String check=fname.substring(fname.length()-2,fname.length());
+			//String check=fname.substring(fname.length()-2,fname.length());
 			Map<Integer,String> law=new HashMap<Integer,String>();
-			
-			if(check.contains("法")||check.contains("条例")||check.contains("草案")||check.contains("规则")||check.contains("通则")){		//规范的法条内容
-			
+			if(fname.matches("[\u4e00-\u9fa5《》]*(法|条例|草案|规则|通则)$")){		//规范的法条内容
+				
 				law=ioword.GetIndexOflaw(file);
 			}
-			else if(check.contains("M")){		//带$的法条内容
+			else if(fname.matches("[\u4e00-\u9fa5《》]*M$")){		//带$的法条内容
 				law=ioword.GetIndexOfmarkdocment(file);
 			}
 			else{		//按段落的法条内容
 				law=ioword.GetIndexOfgeneraldocment(file);
 			}
-				
-			
 			totalofindex+=law.size();
-			
-			for (Integer key:law.keySet()){ 
-				
-//				String laws=law.get(302011);
-				
-//				System.out.println(laws);
-				
-				Document doc=new Document();		//创建Document,每一个法条新建一个		
-				FieldType fieldtype=new FieldType();
-				fieldtype.setIndexOptions(IndexOptions.DOCS);
-				fieldtype.setStored(true);		
-				fieldtype.setTokenized(false);
-				doc.add(new Field("file",file.getName(),fieldtype));		//文档名称存储，不分词
-				doc.add(new NumericDocValuesField("path",key));
-				doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
-				doc.add(new StoredField("path",key));
-		    	doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//发条内容索引、分词，存储
-		    	
-		    	ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+			if(!law.isEmpty()){
+				for (Map.Entry<Integer,String> e:law.entrySet()){ 
+					Document doc=new Document();		//创建Document,每一个法条新建一个		
+					FieldType fieldtype=new FieldType();
+					fieldtype.setIndexOptions(IndexOptions.DOCS);
+					fieldtype.setStored(true);		
+					fieldtype.setTokenized(false);
+					doc.add(new Field("file",file.getName(),fieldtype));		//文档名称存储，不分词
+					doc.add(new NumericDocValuesField("path",e.getKey()));
+					doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
+					doc.add(new StoredField("path",e.getKey()));
+					doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//发条内容索引、分词，存储
+					ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+				}
 			}
+			else
+				totalofindex=-1;
+		}else{
+			totalofindex=-3;
+		}
 		
-//		}
 		ramiwriter.close();	
-		
 		TieredMergePolicy ti=new TieredMergePolicy();
 		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
         IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
     	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
     	fsconfig.setMergePolicy(ti);
-//        IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
-//       fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
     	
     	if(indexwriter!=null){
     		if(indexwriter.isOpen())
@@ -1405,10 +1397,103 @@ public class HandleLucene {
         indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
  
         indexwriter.commit();
-//        indexwriter.close();
         
         return totalofindex;
 	}
+	
+//	public Integer AddIndex(String fdir,String indexpath) throws IOException{
+		
+//		File[] files = new File(fdir).listFiles();
+		
+//		File file=new File(fdir);
+		
+//		Path inpath=Paths.get(indexpath);
+				
+//		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
+	
+//		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+/*		
+		try{
+			lock=fsdir.obtainLock(IndexWriter.WRITE_LOCK_NAME);
+		}catch (LockObtainFailedException e) {
+			if(lock!=null)
+				lock.close();
+		}
+*/		
+//		RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
+	
+//		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+		
+//		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+		
+//		IOWord ioword=new IOWord();
+		
+//		int totalofindex=0;
+		
+//		for(int i=0;i<files.length;i++){
+			
+//			String fname=file.getName().split("\\.")[0];
+//			String check=fname.substring(fname.length()-2,fname.length());
+//			Map<Integer,String> law=new HashMap<Integer,String>();
+			
+//			if(check.contains("法")||check.contains("条例")||check.contains("草案")||check.contains("规则")||check.contains("通则")){		//规范的法条内容
+//			
+//				law=ioword.GetIndexOflaw(file);
+//			}
+//			else if(check.contains("M")){		//带$的法条内容
+//				law=ioword.GetIndexOfmarkdocment(file);
+//			}
+//			else{		//按段落的法条内容
+//				law=ioword.GetIndexOfgeneraldocment(file);
+//			}
+//				
+//			
+//			totalofindex+=law.size();
+//			
+//			for (Integer key:law.keySet()){ 
+//				
+//				String laws=law.get(302011);
+				
+//				System.out.println(laws);
+//				
+//				Document doc=new Document();		//创建Document,每一个法条新建一个		
+//				FieldType fieldtype=new FieldType();
+//				fieldtype.setIndexOptions(IndexOptions.DOCS);
+//				fieldtype.setStored(true);		
+//				fieldtype.setTokenized(false);
+//				doc.add(new Field("file",file.getName(),fieldtype));		//文档名称存储，不分词
+//				doc.add(new NumericDocValuesField("path",key));
+//				doc.add(new IntPoint("path",key));		//法条索引以Int类型存储
+//				doc.add(new StoredField("path",key));
+//		    	doc.add(new Field("law",law.get(key),TextField.TYPE_STORED));		//发条内容索引、分词，存储
+//		    	
+//		    	ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+//			}
+//		
+//		}
+//		ramiwriter.close();	
+//		
+//		TieredMergePolicy ti=new TieredMergePolicy();
+//		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+//        IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+//    	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+//    	fsconfig.setMergePolicy(ti);
+//        IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
+//       fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+//    	
+//    	if(indexwriter!=null){
+//    		if(indexwriter.isOpen())
+//    			indexwriter.close();
+//    	}
+//        
+//    	indexwriter=new IndexWriter(fsdir,fsconfig);  
+//        indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+// 
+//        indexwriter.commit();
+//        indexwriter.close();
+//        
+//        return totalofindex;
+//	}
 
 	/*
 	 *

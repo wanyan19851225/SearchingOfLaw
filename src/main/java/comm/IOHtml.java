@@ -59,21 +59,39 @@ import org.jsoup.select.Elements;
  * 
  */
 
+/** 
+ * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+ * All right reserved. 
+ * @author: wanyan 
+ * date: 2018-8-2
+ */
+
 public class IOHtml {
 	
-
-	public Document GetDocoument(String url) throws IOException{
-		
+	private Document doc;
+	
+	/*
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-08-07 
+	 *
+	 *构造函数，使用url抓取网络上的html文档
+	 *
+	 * @params url
+	 * 				html文档的url地址 				
+	 *           
+	 */
+	
+	public IOHtml(String url) throws IOException{
 		Connection conn=Jsoup.connect(url);
 		conn.header("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9) Gecko/20080705 Firefox/3.0 Kapiko/3.0");// 设置 User-Agent
-		
-		Document doc=conn.timeout(3000).get();
-		return doc;
+		doc=conn.timeout(3000).get();
 	}
 	
-	public List<String> GetHtmlP(String url) throws IOException{
+	public List<String> GetHtmlP(){
 		List<String> paragraphs=new ArrayList<String>();
-		Document doc=this.GetDocoument(url);
+		//Document doc=this.GetDocoument(url);
 		Elements items =doc.getElementsByTag("p");
 		if(!items.isEmpty()){
 			for(Element item:items){
@@ -88,8 +106,8 @@ public class IOHtml {
 		return paragraphs;
 	}
 	
-	public void GetHtmlTitle(String url) throws IOException{
-		Document doc=this.GetDocoument(url);
+	public void GetHtmlTitle(){
+		//Document doc=this.GetDocoument(url);
 		Elements items;
 		String t=doc.select("meta[name=WebId]").attr("content");
 
@@ -138,11 +156,12 @@ public class IOHtml {
 	 * Modefied Date:2018-8-6
 	 * 				修改为解析<h1-6>标签内容后，只获取第一个<h1-6>的标签内容
 	 * 				增加方法返回值，将解析出来的内容，以String类型返回
-	 *           
+	 * Modefied Date:2018-8-7
+	 * 				删除参数url          
 	 */
 	
-	public String GetHtmlH(String url) throws IOException{
-		Document doc=this.GetDocoument(url);
+	public String GetHtmlH(){
+		//Document doc=this.GetDocoument(url);
 		Elements items;
 		items=doc.getElementsByTag("h1");
 		String s = null;
@@ -196,12 +215,13 @@ public class IOHtml {
 	 * 				增加了为普通段落创建索引号的代码段
 	 * 				增加解析章的判断，如果字符"第"和"章"之间的字符串是否包含"、""，""第""条"等字符，则不判断为章
 	 * 				修改使用正在表达式判断是否为普通段落，如果不是以"第*章","第*节","第*条"开头的段落，则判断为普通段落
+	 * 				删除参数url
 	 * 				           
 	 */
 	
-	public Map<Integer,String> GetIndexOflaw(String url) throws IOException{
+	public Map<Integer,String> GetIndexOflaw(){
 		
-		List<String> content=this.GetHtmlP(url);
+		List<String> content=this.GetHtmlP();
 		Map<Integer,String> chapter=new HashMap<Integer,String>();
 		Map<Integer,String> section=new HashMap<Integer,String>();
 		Map<Integer,String> item=new HashMap<Integer,String>();
@@ -317,10 +337,10 @@ public class IOHtml {
 	
 	public static void main(String[] args) throws Exception{
 		//IOSpider IOHtml=new IOHtml("http://www.panda.tv/agreement.html");
-		IOHtml html=new IOHtml();
+		IOHtml html=new IOHtml("http://www.bjrbj.gov.cn/xxgk/zcjd/201807/t20180727_74722.html");
 		//html.GetHtmlP();
 		//html.GetHtmlTitle();
-		String s=html.GetHtmlH("http://www.bjrbj.gov.cn/xxgk/zcjd/201807/t20180727_74722.html");
+		String s=html.GetHtmlH();
 		System.out.println(s);
 		//List<String> text=html.GetHtmlP("http://www.chinalaw.gov.cn/art/2018/6/20/art_11_208525.html");
 		
@@ -332,7 +352,7 @@ public class IOHtml {
 			//System.out.println(str);		
 		//}
 		
-		Map<Integer,String> item=html.GetIndexOflaw("http://www.bjrbj.gov.cn/xxgk/zcjd/201807/t20180727_74722.html");
+		Map<Integer,String> item=html.GetIndexOflaw();
 		for (Integer key : item.keySet()) 
 			
 			System.out.println(key+"-"+item.get(key));

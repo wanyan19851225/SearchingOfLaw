@@ -553,6 +553,10 @@ public class  SOLEvents {
 	 * date: 2017-12-21 
 	 * desc:窗口SOLAddIndex中的创建按钮_sbt的监听事件，添加索引文件
 	 * 
+	 * Modified Date:2018-8-7
+	 * 		改为调用AddIndexs方法，增加通过url地址抓取html文档，解析html文档内容，创建索引的功能
+	 * 		修改根据AddIndexs方法的返回值，进行不同的提示，-1：文件路径下没有文档，-2：URL地址无法访问，-3：输入路径格式有误
+	 * 
 	 */
 	
 	public static class AddIndexEvent implements ActionListener{
@@ -572,10 +576,15 @@ public class  SOLEvents {
 				try {
 		
 					long start=System.currentTimeMillis();
-					int totalofindex=handle.AddIndex(s,Path.indexpath);
+					//int totalofindex=handle.AddIndex(s,Path.indexpath);
+					int totalofindex=handle.AddIndexs(s,Path.indexpath);
 					long end=System.currentTimeMillis();
 					if(totalofindex==-1)
-						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, "没有检索到文档或网站中有段落", "警告", JOptionPane.ERROR_MESSAGE);
+					else if(totalofindex==-2)
+						JOptionPane.showMessageDialog(null, "请输入有效网址，或确认网站是否可以正常访问", "警告", JOptionPane.ERROR_MESSAGE);
+					else if(totalofindex==-3)
+						JOptionPane.showMessageDialog(null, "请输入有效格式的路径", "警告", JOptionPane.ERROR_MESSAGE);
 					else{
 						DisplayGui.defselect.clear();
 						jf.solstar.setStatusText("添加检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);

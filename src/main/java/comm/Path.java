@@ -11,6 +11,6 @@ public interface Path {
 	public static final String urlpath = "http://47.97.108.15:8080/swd/ServletDemo";
 	//public static final String commitindeurlpath = "http://192.168.1.138:8080/swd/CommitIndex";
 	//public static final String selectindeurlpath = "http://192.168.1.138:8080/swd/SelectIndex";
-	public static final String repositorypath  = "D:\\Lucene\\RemoteRepository\\index";
+	//public static final String repositorypath  = "D:\\Lucene\\RemoteRepository\\index";
 
 }
