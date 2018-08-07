@@ -122,70 +122,52 @@ public class IOHtml {
 		}
 	}
 	
-	public void GetHtmlH(String url) throws IOException{
+	/*
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-08-02 
+	 *
+	 *该方法针对抓取到的html文档，解析html文档中<h1-6>标签内容
+	 *
+	 * @params url
+	 * 				html文档的url地址
+	 * @return String
+	 * 				返回解析的<h1-6>标签内容	
+	 * 				
+	 * Modefied Date:2018-8-6
+	 * 				修改为解析<h1-6>标签内容后，只获取第一个<h1-6>的标签内容
+	 * 				增加方法返回值，将解析出来的内容，以String类型返回
+	 *           
+	 */
+	
+	public String GetHtmlH(String url) throws IOException{
 		Document doc=this.GetDocoument(url);
 		Elements items;
 		items=doc.getElementsByTag("h1");
-		if(!items.isEmpty()){
-			StringBuffer buffer =new StringBuffer();
-	    		for(Element item:items){
-	    			buffer.append(item.text().trim());
-	    			buffer.append("\r\n");
-	    		}
-	    		System.out.println(buffer.toString());
-			}
+		String s = null;
+		if(!items.isEmpty())
+	    		s=items.get(0).text().trim();
 		else{
 			items=doc.getElementsByTag("h2");
-			if(!items.isEmpty()){
-				StringBuffer buffer =new StringBuffer();
-		    		for(Element item:items){
-		    			buffer.append(item.text().trim());
-		    			buffer.append("\r\n");
-		    		}
-		    		System.out.println(buffer.toString());
-				}
+			if(!items.isEmpty())
+				s=items.get(0).text().trim();
 			else{
 				items=doc.getElementsByTag("h3");
-				if(!items.isEmpty()){
-					StringBuffer buffer =new StringBuffer();
-			    		for(Element item:items){
-			    			buffer.append(item.text().trim());
-			    			buffer.append("\r\n");
-			    		}
-			    		System.out.println(buffer.toString());
-					}
+				if(!items.isEmpty())
+					s=items.get(0).text().trim();
 				else{
 					items=doc.getElementsByTag("h4");
-					if(!items.isEmpty()){
-						StringBuffer buffer =new StringBuffer();
-				    		for(Element item:items){
-				    			buffer.append(item.text().trim());
-				    			buffer.append("\r\n");
-				    		}
-				    		System.out.println(buffer.toString());
-						}
+					if(!items.isEmpty())
+						s=items.get(0).text().trim();
 					else{
 						items=doc.getElementsByTag("h5");
-						if(!items.isEmpty()){
-							StringBuffer buffer =new StringBuffer();
-					    		for(Element item:items){
-					    			buffer.append(item.text().trim());
-					    			buffer.append("\r\n");
-					    		}
-					    		System.out.println(buffer.toString());
-							}
+						if(!items.isEmpty())
+							s=items.get(0).text().trim();
 						else{
 							items=doc.getElementsByTag("h6");
-							if(!items.isEmpty()){
-								StringBuffer buffer =new StringBuffer();
-						    		for(Element item:items){
-						    			buffer.append(item.text().trim());
-						    			buffer.append("\r\n");
-						    		}
-						    		System.out.println(buffer.toString());
-								}
-							else
-								System.out.println("未解析到文章标题");
+							if(!items.isEmpty())
+								s=items.get(0).text().trim();
 						}
 							
 					}
@@ -193,8 +175,29 @@ public class IOHtml {
 				}
 			}
 		}
-			
+		return s;	
 	}
+	
+	/*
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-08-02 
+	 *
+	 *通过GetHtmlP获取到html段落后，使用该方法为每个段落创建索引号
+	 *
+	 * @params url
+	 * 				html文档的url地址
+	 * @return Map<Integer,String>
+	 * 				按照Map<索引号，段落>结构返回段落索引号
+	 * 					
+	 * 				
+	 * Modefied Date:2018-8-7
+	 * 				增加了为普通段落创建索引号的代码段
+	 * 				增加解析章的判断，如果字符"第"和"章"之间的字符串是否包含"、""，""第""条"等字符，则不判断为章
+	 * 				修改使用正在表达式判断是否为普通段落，如果不是以"第*章","第*节","第*条"开头的段落，则判断为普通段落
+	 * 				           
+	 */
 	
 	public Map<Integer,String> GetIndexOflaw(String url) throws IOException{
 		
@@ -206,7 +209,7 @@ public class IOHtml {
 		StringBuffer buf=new StringBuffer();
 		StringBuffer temp=new StringBuffer();
 		UpdateString updatestring=new UpdateString();
-		int chapterindex=0,sectionindex=0,itemindex=0,inputitemindex=0,inputchapterindex=0,inputsectionindex=0;
+		int chapterindex=0,sectionindex=0,itemindex=0,inputitemindex=0,inputchapterindex=0,inputsectionindex=0,generalindex=0;
 		
 		if(content!=null){		
 			for(int i=0;i<content.size();i++){
@@ -215,7 +218,7 @@ public class IOHtml {
 				
 				/*** 读取章***/
 						
-				if(updatestring.IsInTop(temp1,"章")&&!updatestring.GetStringBetween(temp1,"章").contains("条")){
+				if(updatestring.IsInTop(temp1,"章")&&!updatestring.GetStringBetween(temp1,"章").matches(".*[、，第条].*")){		//使用正在表达式判断字符"第"和"章"之间的字符串是否包含"、""，""第""条"等字符，如果包含则判断为非正规法条，不走此分支
 					
 					if(updatestring.GetStringBetween(temp1,"章").equals("一"))	//针对文档中有目录的情况，当读取到正文中的第一章时，章索引号清零，重新开始计数索引号
 						chapterindex=0;
@@ -224,14 +227,11 @@ public class IOHtml {
 					chapterindex++;
 					chapter.put(chapterindex,content.get(i));	//添加到chapter里
 					
-
-					
 	/*** 暂时将读取到的法条追加到temp里，直到当读取到章时，才将暂存的发条添加到item中***/		
 					
 					if(itemindex!=0){
 						inputitemindex=itemindex;
 						Integer index=inputchapterindex*100000+sectionindex*1000+inputitemindex;		//计算法条的索引值
-//						System.out.println(index+"-"+temp.toString());
 						item.put(index,temp.toString());	//添加到tiem里
 						buf.delete(0,buf.length());		//清空buf,以继续读取下一个法条
 						temp.delete(0,temp.length());	//清空temp，以继续暂存下一个发条
@@ -252,7 +252,6 @@ public class IOHtml {
 					if(itemindex!=0){
 						inputitemindex=itemindex;
 						Integer index=chapterindex*100000+inputsectionindex*1000+inputitemindex;
-//						System.out.println(index+"-"+temp.toString());
 						item.put(index,temp.toString());
 						buf.delete(0,buf.length());
 						temp.delete(0,temp.length());
@@ -267,7 +266,6 @@ public class IOHtml {
 					if(itemindex!=1){		//非第一个法条走此分支
 						if(!f){		//判断法条的中文索引里是否已经有该法条，如果没有则作为新法条，走此分支，并将上一个法条存到法条索引中，如果有，则追加到到上一法条，成为上一法条内容
 							Integer index=chapterindex*100000+sectionindex*1000+inputitemindex;
-//							System.out.println(index+"-"+temp.toString());
 							item.put(index,temp.toString());
 							buf.delete(0,buf.length());
 							temp.delete(0,temp.length());
@@ -284,20 +282,25 @@ public class IOHtml {
 					else
 						temp.append(buf);
 					legal.put(updatestring.GetStringBetween(temp1,"条"),"");		//将法条的中文索引存储到内存
-				}else if(!updatestring.IsInTop(temp1,"章")&&!updatestring.IsInTop(temp1,"节")&&!updatestring.IsInTop(temp1,"条")){
+				}else if(!temp1.matches("^[(第。*章)(第。*节)(第。*条)].*")){			//使用正在表达式，判断段落是否以"第*章","第*节","第*条"开头,如果不是以这三个字符开头，则按照普通段落处理，走此分支
 					
-					/***法条下面的段落，属于同一发条的走此分支***/
+					/***法条下面的普通段落，属于同一法条的走此分支***/
 					
-					if(itemindex!=0){
-						buf.append(temp1);	//追加发条段落
+					if(itemindex!=0){		//itemindex不为零，说明扫描到了法条
+						buf.append(temp1);	//追加法条段落
 						temp.replace(0,temp.length(),buf.toString());	//覆盖原temp内容
+					}
+					
+					/***文档段落没有"章""节""条"字符时，按照普通段落处理，按照段落顺序排号建立索引存储在item中***/
+					if(itemindex==0){		//itemindex==0说明没有扫描到法条，既按照普通段落处理
+						Integer index=1*100000+1*1000+(++generalindex);		//普通段落索引号
+						item.put(index,temp1.toString());
 					}
 				}
 				
-				if(i==content.size()-1){	//文档的最后一个发条走此分支
+				if(i==content.size()-1&&itemindex!=0){	//文档的最后一个法条走此分支，并且法条索引号不为零的情况下，即扫描文档时已经扫描的法条，如果itemindex==0说明文档内容中没有法条，都按照普通段落处理
 					inputitemindex=itemindex;
 					Integer index=chapterindex*100000+sectionindex*1000+inputitemindex;
-//					System.out.println(index+"-"+temp.toString());
 					item.put(index,temp.toString());
 					buf.delete(0,buf.length());
 					temp.delete(0,temp.length());
@@ -317,19 +320,19 @@ public class IOHtml {
 		IOHtml html=new IOHtml();
 		//html.GetHtmlP();
 		//html.GetHtmlTitle();
-		//html.GetHtmlH();
-		
+		String s=html.GetHtmlH("http://www.bjrbj.gov.cn/xxgk/zcjd/201807/t20180727_74722.html");
+		System.out.println(s);
 		//List<String> text=html.GetHtmlP("http://www.chinalaw.gov.cn/art/2018/6/20/art_11_208525.html");
 		
 		//for(int i=0;i<text.size();i++){
-//			System.out.println(text.get(i));
-//			String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
-//			String str=text.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
+			//System.out.println(text.get(i));
+			//String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
+			//String str=text.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
 			//String str=text.get(i);
 			//System.out.println(str);		
 		//}
 		
-		Map<Integer,String> item=html.GetIndexOflaw("http://www.chinalaw.gov.cn/art/2018/6/20/art_11_208525.html");
+		Map<Integer,String> item=html.GetIndexOflaw("http://www.bjrbj.gov.cn/xxgk/zcjd/201807/t20180727_74722.html");
 		for (Integer key : item.keySet()) 
 			
 			System.out.println(key+"-"+item.get(key));

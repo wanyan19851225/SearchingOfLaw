@@ -103,7 +103,7 @@ public class HandleLucene {
 	 * 			将indexwriter更改为静态类，在创建前判断indexwriter是否处于打开状态，如果打开，则关闭以释放资源
 	 *          
 	 */
-	
+	/*
 	public Integer CreateIndex(String fdir,String indexpath) throws IOException{
 		
 		File[] files = new File(fdir).listFiles();
@@ -208,7 +208,7 @@ public class HandleLucene {
 			totalofindex=-1;
         return totalofindex;
 	}
-	
+	*/
 	
 	/*
 	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
@@ -224,6 +224,9 @@ public class HandleLucene {
 	 * 				索引文件存储位置
 	 * @return Integer	
 	 * 				返回所有文件的索引数
+	 * 
+	 * Modefied Date:2018-8-6
+	 * 				修改为使用正则表达式过滤传入的url地址是否符合要求
 	 *           
 	 */
 	
@@ -295,12 +298,12 @@ public class HandleLucene {
 				IOWord ioword=new IOWord();
 				for(int i=0;i<files.length;i++){
 					String fname=files[i].getName().split("\\.")[0];		//获取文档名称
-					String check=fname.substring(fname.length()-2,fname.length());		//截取文档名称的最后两个字符
+					//String check=fname.substring(fname.length()-2,fname.length());		//截取文档名称的最后两个字符
 					Map<Integer,String> law=new HashMap<Integer,String>();
-					if(check.contains("法")||check.contains("条例")||check.contains("草案")||check.contains("规则")||check.contains("通则")){		//使用文档名字最后两个字符，判断该文档是否是规范法条文档，如果是则调用GetIndexOflaw方法
+					if(fname.matches("[\u4e00-\u9fa5《》]*(法|条例|草案|规则|通则)$")){		//依据文档名称是否以法、条例、草案、规则、通则结尾，判断该文档是否是规范法条文档，如果是则调用GetIndexOflaw方法
 						law=ioword.GetIndexOflaw(files[i]);
 					}
-					else if(check.contains("M")){		//如果文档名称最后两个字符含有M标记，则调用GetIndexOfmarkdocment方法
+					else if(fname.matches("[\u4e00-\u9fa5《》]*M$")){		//依据文档名称是否以M结尾，则调用GetIndexOfmarkdocment方法
 						law=ioword.GetIndexOfmarkdocment(files[i]);
 					}
 					else{			//如果文档既不是规范法条文档，也没有M标记，则调用GetIndexOfgeneraldocment方法
