@@ -33,7 +33,7 @@ public class SOLStar extends JPanel{
 		
 		sll=new JLabel();
 //		sll.setPreferredSize(new Dimension(400,24));
-		sll.setPreferredSize(new Dimension(size.width*1/2,size.height));
+		sll.setPreferredSize(new Dimension(size.width*2/3,size.height));
 //		sll.setBorder(BorderFactory.createLineBorder(Color.red));
 		
         
@@ -55,6 +55,7 @@ public class SOLStar extends JPanel{
 		jpb = new JProgressBar();		//进度条
         jpb.setMinimum(0);  
         jpb.setMaximum(100); 
+		jpb.setPreferredSize(new Dimension(size.width*1/6,size.height-6));
         
         bl=new JLabel();		//进度条提示标签
 //        bl.setPreferredSize(new Dimension(size.width*2/3,size.height));
