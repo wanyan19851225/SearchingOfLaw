@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -34,6 +35,9 @@ public class SOLCreateIndex extends JFrame{
 		
 		sbt=new JButton("创建");
 		sbt.setPreferredSize(new Dimension(60,35));
+		
+		JLabel lb=new JLabel();
+		lb.setText("<html><font color=red face=\"微软雅黑\">提示：新建索引后，原索引（包括从远程仓库导入到本地的索引）将被强制清除！</font></html>");
 		
 		
 		solstar=new SOLStar(new Dimension(FrameSize.X-18,24));
@@ -65,6 +69,7 @@ public class SOLCreateIndex extends JFrame{
 	    cpane.add(stf);
 	    cpane.add(lbt);
 	    cpane.add(sbt);
+	    cpane.add(lb);
 	    
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(solstar,BorderLayout.SOUTH);

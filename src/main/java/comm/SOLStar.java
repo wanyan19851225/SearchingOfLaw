@@ -1,5 +1,6 @@
 package comm;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
@@ -7,15 +8,18 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 
 import comm.SOLEvents.ShowSOLLoginEvent;
 
 public class SOLStar extends JPanel{
-	private JLabel sll,rl,sl,sgin;
+	private JLabel sll,rl,sl,sgin,bl;
+	private JProgressBar jpb;
 	private String username;
 	private static Boolean LoginStatus=false;
 	private static Boolean RemoteStatus=false;
@@ -29,8 +33,8 @@ public class SOLStar extends JPanel{
 		
 		sll=new JLabel();
 //		sll.setPreferredSize(new Dimension(400,24));
-		sll.setPreferredSize(new Dimension(size.width*2/3,size.height));
-//		sll.setBorder(BorderFactory.createLineBorder(Color.black));
+		sll.setPreferredSize(new Dimension(size.width*1/2,size.height));
+//		sll.setBorder(BorderFactory.createLineBorder(Color.red));
 		
         
         //ImageIcon image = new ImageIcon("D:\\Lucene\\conf\\2ebba7e7e1e01966da176955d7206062.png"); 
@@ -48,20 +52,40 @@ public class SOLStar extends JPanel{
 		sgin= new JLabel();		//登录名标签
 		this.SetLoginLabelText("Sign in");
 		
-		JPanel status=new JPanel();			//远程标识、登录状态、登录按钮面板
+		jpb = new JProgressBar();		//进度条
+        jpb.setMinimum(0);  
+        jpb.setMaximum(100); 
+        
+        bl=new JLabel();		//进度条提示标签
+//        bl.setPreferredSize(new Dimension(size.width*2/3,size.height));
+        bl.setText("正在创建索引的文件: ");
+		
+		JPanel status=new JPanel();			//远程标识、登录状态、登录按钮标签面板
 //		status.setPreferredSize(new Dimension(335,24));
 		status.setPreferredSize(new Dimension(size.width*1/3,size.height-1));
-//		status.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		status.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		status.setLayout(new FlowLayout(FlowLayout.RIGHT,5,0));
 		status.add(rl);
 		status.add(sl);
 		status.add(sgin);
+
+		
+		JPanel jp=new JPanel();		//创建索引完毕提示、进度条、进度条提示标签面板
+		jp.setPreferredSize(new Dimension(size.width*2/3,size.height-1));
+//		jp.setBorder(BorderFactory.createLineBorder(Color.black));
+		jp.setLayout(new FlowLayout(FlowLayout.LEFT,5,0));
+		jp.add(sll);
+		jp.add(jpb);
+		jp.add(bl);
 		
 		this.SetLoginMarkVisable(false);
 		this.SetLoginLabelVisabel(false);
 		this.SetRemoteMarkVisable(false);
+		this.SetDoneLabelVisabel(false);
+		this.SetProgressBarVisabel(true);
+		this.SetProgressBarLabelVisabel(true);
 
-		this.add(sll);
+		this.add(jp);
 		this.add(status);
 		
 		this.setPreferredSize(size);
@@ -121,6 +145,18 @@ public class SOLStar extends JPanel{
 	
 	public String GetUserName(){
 		return username;
+	}
+	
+	public void SetDoneLabelVisabel(Boolean f){
+		sll.setVisible(f);
+	}
+	
+	public void SetProgressBarVisabel(Boolean f){
+		jpb.setVisible(f);
+	}
+	
+	public void SetProgressBarLabelVisabel(Boolean f){
+		bl.setVisible(f);
 	}
 
 }
