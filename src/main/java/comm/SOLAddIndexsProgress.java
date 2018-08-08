@@ -72,10 +72,10 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 				}
 			}
 		}
-		else{		//如果url不是文件夹,即或者是html的网址，或者是单个文件，则走此分支
+		else{		//如果url不是文件夹,即或者是html的网址，或者是单个文件，或者url格式有误，则走此分支
 			Integer t=handle.AddIndexs(url, Path.indexpath);
 			r.put(url,t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落；-2：网站地址无效或者无法访问；-3：输入路径url格式有误
-			publish("("+"1"+"/"+"1"+")"); 
+//			publish("("+"1"+"/"+"1"+")");		//html网址，或者单个文件，或者url地址有误时，传给pross的参数为空，不在显示动态进度
 		}
 		Long end=System.currentTimeMillis();
 		Long t=end-start;
@@ -84,12 +84,17 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 	}
 	
 	@Override  
-	protected void process(List<String> chunks) {  
+	protected void process(List<String> chunks) {
+		if(!chunks.isEmpty()){		
 	        jf.solstar.setProgeressBarLabelText(chunks.get(chunks.size()-1)); 
 	        int x=Integer.parseInt(chunks.get(chunks.size()-1).substring(chunks.get(chunks.size()-1).indexOf("(")+1,chunks.get(chunks.size()-1).indexOf("/")).trim()); 
 	        jf.solstar.setProgressBarValue(x);  
-	          
-	    }  
+		}
+		else{		//参数为空时，为html网址，或者单个文件，或者url地址有误，不显示动态进度
+			jf.solstar.setProgeressBarLabelText("正在创建索引...");
+			jf.solstar.setProgressBarValue(1);
+		}
+	}  
 	
 	@Override
 	protected void done() {

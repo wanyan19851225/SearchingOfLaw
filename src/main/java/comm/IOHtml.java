@@ -96,7 +96,7 @@ public class IOHtml {
 		if(!items.isEmpty()){
 			for(Element item:items){
 				String text=item.text().trim();
-				text=text.replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
+				text=text.replaceAll("[a-zA-Z:/.\"_\\\\　　　 ]","" );
 				if(text.length()>3)
 						paragraphs.add(text);
 			}	
@@ -337,20 +337,20 @@ public class IOHtml {
 	
 	public static void main(String[] args) throws Exception{
 		//IOSpider IOHtml=new IOHtml("http://www.panda.tv/agreement.html");
-		IOHtml html=new IOHtml("http://www.bjrbj.gov.cn/xxgk/zcjd/201807/t20180727_74722.html");
+		IOHtml html=new IOHtml("http://www.chinalaw.gov.cn/art/2018/4/28/art_11_208024.html");
 		//html.GetHtmlP();
 		//html.GetHtmlTitle();
 		String s=html.GetHtmlH();
 		System.out.println(s);
-		//List<String> text=html.GetHtmlP("http://www.chinalaw.gov.cn/art/2018/6/20/art_11_208525.html");
-		
-		//for(int i=0;i<text.size();i++){
-			//System.out.println(text.get(i));
-			//String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
-			//String str=text.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
-			//String str=text.get(i);
-			//System.out.println(str);		
-		//}
+//		List<String> text=html.GetHtmlP();
+//		
+//		for(int i=0;i<text.size();i++){
+//			System.out.println(text.get(i));
+//			String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
+//			String str=text.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
+//			String str=text.get(i);
+//			System.out.println(str);		
+//		}
 		
 		Map<Integer,String> item=html.GetIndexOflaw();
 		for (Integer key : item.keySet()) 

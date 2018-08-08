@@ -65,6 +65,8 @@ public class DisplayGui extends JFrame{
 	 * @2017-12-21
 	 * 				将该方法修改成构造函数
 	 * 				修改range\defselect为静态变量
+	 * Modified Date:2018-08-08
+	 * 				删除创建索引窗口及功能，统一使用SOLAddIndex窗口添加索引
 	 * 
 	 */
 	
@@ -81,14 +83,14 @@ public class DisplayGui extends JFrame{
 	    JMenuBar menubar=new JMenuBar();
 	    JMenu file=new JMenu("文件");
 	    JMenu about=new JMenu("关于");
-	    final JMenuItem createindex=new JMenuItem("新建索引");
+//	    final JMenuItem createindex=new JMenuItem("新建索引");
 	    final JMenuItem addindex=new JMenuItem("添加索引");
 	    final JMenuItem showindex=new JMenuItem("查看索引");
 	    JMenuItem synchronizeindex=new JMenuItem("提交索引");
 	    JMenuItem downloadindex=new JMenuItem("导入索引");
 	    JMenuItem remoteindex=new JMenuItem("查看仓库");
 	    final JMenuItem aboutitem=new JMenuItem("关于");
-	    file.add(createindex);
+//	    file.add(createindex);
 	    file.add(addindex);
 	    file.add(showindex);
 	    file.add(synchronizeindex);
@@ -457,7 +459,7 @@ public class DisplayGui extends JFrame{
 		contentpane.add(searchpanel,BorderLayout.EAST);
 		contentpane.add(solhis,BorderLayout.WEST);
 		
-		createindex.addActionListener(new SOLEvents.ShowSOLCreateIndexEvent());
+//		createindex.addActionListener(new SOLEvents.ShowSOLCreateIndexEvent());
 		addindex.addActionListener(new SOLEvents.ShowSOLAddIndexEvent());
 		showindex.addActionListener(new SOLEvents.ShowSOLShowIndexEvent());
 		synchronizeindex.addActionListener(new SOLEvents.ShowSOLSynchronizeIndexEvent());

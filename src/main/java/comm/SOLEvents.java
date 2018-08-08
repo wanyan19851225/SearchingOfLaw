@@ -487,47 +487,49 @@ public class  SOLEvents {
 	 * Modified Date:2018-08-03
 	 * 		改为调用CreateIndexs方法，增加通过url地址抓取html文档，解析html文档内容，创建索引的功能
 	 * 		修改根据CreateIndexs方法的返回值，进行不同的提示，-1：文件路径下没有文档，-2：URL地址无法访问，-3：输入路径格式有误
+	 * Modified Date:2018-08-08
+	 * 		删除创建索引事件，统一使用AddIndexEvent事件添加索引
 	 * 
 	 */
 	
-	public static class CreateIndexEvent implements ActionListener{
-		
-		private SOLCreateIndex jf;
-		
-		public CreateIndexEvent(SOLCreateIndex jf){
-			this.jf=jf;
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			String s=jf.GetFilePath();
-			jf.sbt.setEnabled(false);
-			if(!s.isEmpty()){
-				HandleLucene handle=new HandleLucene();
-				try {
-					long start=System.currentTimeMillis();
-					//int totalofindex=handle.CreateIndex(s,Path.indexpath);
-					int totalofindex=handle.CreateIndexs(s,Path.indexpath);		//调用CreateIndexs方法，增加通过url抓取html功能
-					long end=System.currentTimeMillis();
-					if(totalofindex==-1)
-						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
-					else if(totalofindex==-2)
-						JOptionPane.showMessageDialog(null, "请输入有效网址，或确认网站是否可以正常访问", "警告", JOptionPane.ERROR_MESSAGE);
-					else if(totalofindex==-3)
-						JOptionPane.showMessageDialog(null, "请输入有效格式的路径", "警告", JOptionPane.ERROR_MESSAGE);
-					else{
-						DisplayGui.defselect.clear();	//清空defselect，打开SelectIndex窗口时，重新对其进行判断赋值
-						jf.solstar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
-					}
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-			else
-				JOptionPane.showMessageDialog(null, "请选择要创建索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
-			jf.sbt.setEnabled(true);
-		}
-	}
+//	public static class CreateIndexEvent implements ActionListener{
+//		
+//		private SOLCreateIndex jf;
+//		
+//		public CreateIndexEvent(SOLCreateIndex jf){
+//			this.jf=jf;
+//		}
+//		
+//		public void actionPerformed(ActionEvent e) {
+//			String s=jf.GetFilePath();
+//			jf.sbt.setEnabled(false);
+//			if(!s.isEmpty()){
+//				HandleLucene handle=new HandleLucene();
+//				try {
+//					long start=System.currentTimeMillis();
+//					//int totalofindex=handle.CreateIndex(s,Path.indexpath);
+//					int totalofindex=handle.CreateIndexs(s,Path.indexpath);		//调用CreateIndexs方法，增加通过url抓取html功能
+//					long end=System.currentTimeMillis();
+//					if(totalofindex==-1)
+//						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
+//					else if(totalofindex==-2)
+//						JOptionPane.showMessageDialog(null, "请输入有效网址，或确认网站是否可以正常访问", "警告", JOptionPane.ERROR_MESSAGE);
+//					else if(totalofindex==-3)
+//						JOptionPane.showMessageDialog(null, "请输入有效格式的路径", "警告", JOptionPane.ERROR_MESSAGE);
+//					else{
+//						DisplayGui.defselect.clear();	//清空defselect，打开SelectIndex窗口时，重新对其进行判断赋值
+//						jf.solstar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
+//					}
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}
+//			else
+//				JOptionPane.showMessageDialog(null, "请选择要创建索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
+//			jf.sbt.setEnabled(true);
+//		}
+//	}
 	
 	
 	/** 
@@ -537,14 +539,17 @@ public class  SOLEvents {
 	 * date: 2017-12-13
 	 * desc:DispalyGui窗口中新建索引菜单项_createindex的监听事件，打开创建索引窗口
 	 * 
+	 * Modified Date:2018-08-08
+	 * 			删除创建索引的监听事件
+	 * 
 	 */
 	
-	public static class ShowSOLCreateIndexEvent implements ActionListener{
-		public void actionPerformed(ActionEvent e) {
-			new SOLCreateIndex();
-		}
-	}
-	
+//	public static class ShowSOLCreateIndexEvent implements ActionListener{
+//		public void actionPerformed(ActionEvent e) {
+//			new SOLCreateIndex();
+//		}
+//	}
+//	
 	
 	/** 
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 

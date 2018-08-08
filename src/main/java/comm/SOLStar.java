@@ -81,7 +81,7 @@ public class SOLStar extends JPanel{
 		this.SetLoginMarkVisable(false);
 		this.SetLoginLabelVisabel(false);
 		this.SetRemoteMarkVisable(false);
-		this.SetDoneLabelVisabel(false);
+		this.SetDoneLabelVisabel(true);
 		this.SetProgressBarVisabel(false);
 		this.SetProgressBarLabelVisabel(false);
 
@@ -169,7 +169,6 @@ public class SOLStar extends JPanel{
 	
 	public void setProgeressBarLabelText(String s){
 		bl.setText(s);
-		System.out.println("");
 	}
 
 }
