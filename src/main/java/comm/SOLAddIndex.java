@@ -52,7 +52,7 @@ public class SOLAddIndex extends JFrame{
 				
 				JFileChooser fcdlg = new JFileChooser();
 				fcdlg.setDialogTitle("请选择待搜索文档");
-				fcdlg.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				fcdlg.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 				int returnval=fcdlg.showOpenDialog(null);
 				if(returnval==JFileChooser.APPROVE_OPTION){
 					String path=fcdlg.getSelectedFile().getPath();
