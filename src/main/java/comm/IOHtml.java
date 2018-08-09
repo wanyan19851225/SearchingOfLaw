@@ -96,7 +96,7 @@ public class IOHtml {
 		if(!items.isEmpty()){
 			for(Element item:items){
 				String text=item.text().trim();
-				text=text.replaceAll("[a-zA-Z:/.\"_\\\\　　　 ]","" );
+				text=text.replaceAll("[:/.\"_\\\\　　　 ]","" );
 				if(text.length()>3)
 						paragraphs.add(text);
 			}	
@@ -216,6 +216,9 @@ public class IOHtml {
 	 * 				增加解析章的判断，如果字符"第"和"章"之间的字符串是否包含"、""，""第""条"等字符，则不判断为章
 	 * 				修改使用正在表达式判断是否为普通段落，如果不是以"第*章","第*节","第*条"开头的段落，则判断为普通段落
 	 * 				删除参数url
+	 * Modefied Date:2018-8-9
+	 * 				修改当没有章段落，只有法条段落时，不存储法条段落的bug
+	 * 				修改使用正在表达式判断"第*章","第*节","第*条"开头的段落的bug
 	 * 				           
 	 */
 	
@@ -279,11 +282,13 @@ public class IOHtml {
 					
 					itemindex=0;
 				}
-				else if(updatestring.IsInTop(temp1,"条")&&chapterindex!=0){		//增加chapterindex章索引号的判断，当章索引号为零时，即第一章之前读取到的法条不走此分支
+				else if(temp1.matches("(第[0-9一二三四五六七八九十零〇百十]{1,5}条).*")){		//判断段落是否以"第*条"开头，如果是，则当成正规法条，无论是否读到章段落，走次分支，
 					inputitemindex=itemindex;
 					itemindex++;
+					if(chapterindex==0)		//判断是否有章段落，如果没有章段落，则默认设置成第1章
+						chapterindex=1;		
 					boolean f=legal.containsKey(updatestring.GetStringBetween(temp1,"条"));
-					if(itemindex!=1){		//非第一个法条走此分支
+					if(itemindex!=1){		//从第2个法条开始走此分支，当读到法条段落时，将上一个法条段落存储在item中，并清空buf和temp缓存内容，然后存储将第2个法条存储在buf和temp中
 						if(!f){		//判断法条的中文索引里是否已经有该法条，如果没有则作为新法条，走此分支，并将上一个法条存到法条索引中，如果有，则追加到到上一法条，成为上一法条内容
 							Integer index=chapterindex*100000+sectionindex*1000+inputitemindex;
 							item.put(index,temp.toString());
@@ -294,15 +299,13 @@ public class IOHtml {
 						
 					}
 					
-					/***章下面的第一个发条（没有节）或者节下面的第一个发条走此分支***/
-					
-					buf.append(temp1);
+					buf.append(temp1);		//将读到到的当前法条存储在buf缓存中
 					if(f)	
 						temp.replace(0,temp.length(),buf.toString());
 					else
 						temp.append(buf);
 					legal.put(updatestring.GetStringBetween(temp1,"条"),"");		//将法条的中文索引存储到内存
-				}else if(!temp1.matches("^[(第。*章)(第。*节)(第。*条)].*")){			//使用正在表达式，判断段落是否以"第*章","第*节","第*条"开头,如果不是以这三个字符开头，则按照普通段落处理，走此分支
+				}else if(!temp1.matches("(第[0-9一二三四五六七八九十零〇百十]{1,5}[章节条]).*")){			//使用正在表达式，判断段落是否以"第*章","第*节","第*条"开头,如果不是以这三个字符开头，则按照普通段落处理，走此分支
 					
 					/***法条下面的普通段落，属于同一法条的走此分支***/
 					
@@ -312,7 +315,7 @@ public class IOHtml {
 					}
 					
 					/***文档段落没有"章""节""条"字符时，按照普通段落处理，按照段落顺序排号建立索引存储在item中***/
-					if(itemindex==0){		//itemindex==0说明没有扫描到法条，既按照普通段落处理
+					if(itemindex==0){		//itemindex==0说明没有扫描到法条段落，既按照普通段落处理
 						Integer index=1*100000+1*1000+(++generalindex);		//普通段落索引号
 						item.put(index,temp1.toString());
 					}
@@ -337,7 +340,7 @@ public class IOHtml {
 	
 	public static void main(String[] args) throws Exception{
 		//IOSpider IOHtml=new IOHtml("http://www.panda.tv/agreement.html");
-		IOHtml html=new IOHtml("http://www.chinalaw.gov.cn/art/2018/4/28/art_11_208024.html");
+		IOHtml html=new IOHtml("https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_9649642107855613972%22%7D&n_type=0&p_from=1");
 		//html.GetHtmlP();
 		//html.GetHtmlTitle();
 		String s=html.GetHtmlH();
