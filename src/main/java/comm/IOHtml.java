@@ -148,44 +148,26 @@ public class IOHtml {
 	 * 				修改为解析<h1-6>标签内容后，只获取第一个<h1-6>的标签内容
 	 * 				增加方法返回值，将解析出来的内容，以String类型返回
 	 * Modefied Date:2018-8-7
-	 * 				删除参数url          
+	 * 				删除参数url
+	 * Modified Date:2018-8-10
+	 * 				修改当html文档有<h>标签，但标签文本内容为空时，获取空值的bug         
 	 */
 	
 	public String GetHtmlH(){
 		//Document doc=this.GetDocoument(url);
+		String[] h={"h1","h2","h3","h4","h5","h6"};
 		Elements items;
-		items=doc.getElementsByTag("h1");
-		String s = null;
-		if(!items.isEmpty())
-	    		s=items.get(0).text().trim();
-		else{
-			items=doc.getElementsByTag("h2");
-			if(!items.isEmpty())
+		String s=null;
+		for(int i=0;i<h.length;i++){
+			items=doc.getElementsByTag(h[i]);
+			if(!items.isEmpty()){
 				s=items.get(0).text().trim();
-			else{
-				items=doc.getElementsByTag("h3");
-				if(!items.isEmpty())
-					s=items.get(0).text().trim();
-				else{
-					items=doc.getElementsByTag("h4");
-					if(!items.isEmpty())
-						s=items.get(0).text().trim();
-					else{
-						items=doc.getElementsByTag("h5");
-						if(!items.isEmpty())
-							s=items.get(0).text().trim();
-						else{
-							items=doc.getElementsByTag("h6");
-							if(!items.isEmpty())
-								s=items.get(0).text().trim();
-						}
-							
-					}
-						
-				}
+				if(!s.isEmpty())
+					break;
 			}
+				
 		}
-		return s;	
+		return s;
 	}
 	
 	/*
@@ -331,7 +313,7 @@ public class IOHtml {
 	
 	public static void main(String[] args) throws Exception{
 		//IOSpider IOHtml=new IOHtml("http://www.panda.tv/agreement.html");
-		IOHtml html=new IOHtml("http://www.panda.tv/agreement.html");
+		IOHtml html=new IOHtml("http://www.chinalaw.gov.cn/art/2017/7/5/art_11_205603.html");
 		//html.GetHtmlP();
 		//html.GetHtmlTitle();
 		String s=html.GetHtmlH();
