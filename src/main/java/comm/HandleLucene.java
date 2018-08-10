@@ -73,6 +73,7 @@ public class HandleLucene {
 	private static FSDirectory fsdir;
 	private static RAMDirectory ramdir;
 	private static IndexWriter indexwriter;
+	private static IndexWriter ramwriter;
 	
 	/*
 	 * 扫描文件，建立索引文件
@@ -463,59 +464,59 @@ public class HandleLucene {
 	 * 
 	 */
 
-	public List<String[]> GetContentOfLawByIndex(Map<String,List<Integer>> resultset,String fdir) throws IOException{
-		
-		Map<String,List<Integer>> temp=resultset;
-		if(temp==null){
-			return null;
-		}
-		List<String[]> contentoflaw=new ArrayList<String[]>();
-		
-		IOWord iword=new IOWord();
-		
-		File[] files = new File(fdir).listFiles();
-		
-/*		
-		for(String key:temp.keySet()){
-			StringBuffer filepath=new StringBuffer(fdir);
-			String filename=filepath.append(key).toString();
-			File file=new File(filename);
-			Map<Integer,String> law=iword.CreateIndexOfLaw(file);
-			List<Integer> indexoflaw=temp.get(key);
-			for(int j=0;j<indexoflaw.size();j++){
-				String[] content=new String[4];
-				content[0]=filename;
-				Integer index=indexoflaw.get(j);
-				content[1]="第"+index/100000+"章";
-				index=index%100000;
-				content[2]="第"+index/1000+"节";
-				content[3]=law.get(indexoflaw.get(j));
-				contentoflaw.add(content);//can i help you?呵呵，你们还没下班啊。正准备走呢，看你电脑自己在动！我电脑不是黑屏待机么，怎么亮了，奇怪。不晓得呀！bye。王老师嗯，好的
-			}
-			filepath.delete(0,filepath.length());
-		}
-*/	
-
-		for(int i=0;i<files.length;i++){
-			String filename=files[i].getName();
-			if(temp.containsKey(filename)){
-				Map<Integer,String> law=iword.CreateIndexOfLaw(files[i]);
-				List<Integer> indexoflaw=temp.get(filename);
-				for(int j=0;j<indexoflaw.size();j++){
-					String[] content=new String[4];
-					content[0]=new UpdateString().addBookTitleMark(filename);
-					Integer index=indexoflaw.get(j);
-					content[1]="第"+index/100000+"章";
-					index=index%100000;
-					content[2]="第"+index/1000+"节";
-					content[3]=law.get(indexoflaw.get(j));
-					contentoflaw.add(content);
-				}
-			}
-			
-		}
-		return contentoflaw;		
-	}
+//	public List<String[]> GetContentOfLawByIndex(Map<String,List<Integer>> resultset,String fdir) throws IOException{
+//		
+//		Map<String,List<Integer>> temp=resultset;
+//		if(temp==null){
+//			return null;
+//		}
+//		List<String[]> contentoflaw=new ArrayList<String[]>();
+//		
+//		IOWord iword=new IOWord();
+//		
+//		File[] files = new File(fdir).listFiles();
+//		
+///*		
+//		for(String key:temp.keySet()){
+//			StringBuffer filepath=new StringBuffer(fdir);
+//			String filename=filepath.append(key).toString();
+//			File file=new File(filename);
+//			Map<Integer,String> law=iword.CreateIndexOfLaw(file);
+//			List<Integer> indexoflaw=temp.get(key);
+//			for(int j=0;j<indexoflaw.size();j++){
+//				String[] content=new String[4];
+//				content[0]=filename;
+//				Integer index=indexoflaw.get(j);
+//				content[1]="第"+index/100000+"章";
+//				index=index%100000;
+//				content[2]="第"+index/1000+"节";
+//				content[3]=law.get(indexoflaw.get(j));
+//				contentoflaw.add(content);//can i help you?呵呵，你们还没下班啊。正准备走呢，看你电脑自己在动！我电脑不是黑屏待机么，怎么亮了，奇怪。不晓得呀！bye。王老师嗯，好的
+//			}
+//			filepath.delete(0,filepath.length());
+//		}
+//*/	
+//
+//		for(int i=0;i<files.length;i++){
+//			String filename=files[i].getName();
+//			if(temp.containsKey(filename)){
+//				Map<Integer,String> law=iword.CreateIndexOfLaw(files[i]);
+//				List<Integer> indexoflaw=temp.get(filename);
+//				for(int j=0;j<indexoflaw.size();j++){
+//					String[] content=new String[4];
+//					content[0]=new UpdateString().addBookTitleMark(filename);
+//					Integer index=indexoflaw.get(j);
+//					content[1]="第"+index/100000+"章";
+//					index=index%100000;
+//					content[2]="第"+index/1000+"节";
+//					content[3]=law.get(indexoflaw.get(j));
+//					contentoflaw.add(content);
+//				}
+//			}
+//			
+//		}
+//		return contentoflaw;		
+//	}
 	
 	/*
 	 *
@@ -544,6 +545,8 @@ public class HandleLucene {
 	 * 				修改当索引文件有效文档数为0时，报错的bug
 	 * Modiefied Date:2018-1-23
 	 * 				删除捕捉IndexNotFoundException后，弹出提示框
+	 * Modified Date:2018-8-9
+	 * 				判断章段落索引号是否为999，如果是，则表明没有章段落，章段落索引号设置为0
 	 * 
 	 */
 	
@@ -598,7 +601,10 @@ public class HandleLucene {
 							String temp=hitdoc.get("file");
 							String indexlaws[]=new String[2];
 							Integer index=Integer.valueOf(hitdoc.get("path"));		
-							indexlaws[0]="第"+index/100000+"章"+"&emsp";
+				    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，表明没有章段落，索引号设置为0
+				    			indexlaws[0]="第"+0+"章"+"&emsp";
+				    		else
+				    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
 							index=index%100000;
 							indexlaws[0]+="第"+index/1000+"节";
 							String laws=hitdoc.get("law");
@@ -663,6 +669,8 @@ public class HandleLucene {
 	 * 			修改使用查询分析器QueryParser实现多域、多字段、多条件查询
 	 * @2017-11-16
 	 * 			修改使用MultiFieldQueryParser类实现多字段、多条件查询
+	 * @2018-8-9
+	 * 			修改判断章段落索引号，如果章段落索引号为999时，标明没有章段落
 	 * 
 	 */
 	
@@ -755,8 +763,11 @@ public class HandleLucene {
         	
     		String temp=hitdoc.get("file");
     		String indexlaws[]=new String[2];
-    		Integer index=Integer.valueOf(hitdoc.get("path"));		
-    		indexlaws[0]="第"+index/100000+"章"+"&emsp";
+    		Integer index=Integer.valueOf(hitdoc.get("path"));
+    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
+    			indexlaws[0]="第"+0+"章"+"&emsp";
+    		else
+    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
     		index=index%100000;
     		indexlaws[0]+="第"+index/1000+"节";
     		String laws=hitdoc.get("law");
@@ -811,9 +822,10 @@ public class HandleLucene {
 	 * @2017-11-18
 	 * 			增加List<String>参数，用于指定在哪些文档内查询法条
 	 * 			修改keywords参数类型为String	
-	 * Modeified Date:2017-12-25
-	 * 			取消top参数，改为默认使用索引文档中有效文档总数					  
-	 * 
+	 * @Modified Date:2017-12-25
+	 * 			取消top参数，改为默认使用索引文档中有效文档总数	
+	 * @Modified Date:2018-8-9			  
+	 * 			判断章段落索引号是否为999，如果是，则标明没有章段落
 	 */
 
 	public Map<String,List<String[]>> GetMultipleSearch(String indexpath,String[] fields,List<String> range,String keywords) throws IOException, ParseException, InvalidTokenOffsetsException{
@@ -905,8 +917,11 @@ public class HandleLucene {
 					Document hitdoc=indexsearcher.doc(hits[i].doc);
 					String temp=hitdoc.get("file");
 					String indexlaws[]=new String[2];
-					Integer index=Integer.valueOf(hitdoc.get("path"));		
-					indexlaws[0]="第"+index/100000+"章"+"&emsp";
+					Integer index=Integer.valueOf(hitdoc.get("path"));
+		    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
+		    			indexlaws[0]="第"+0+"章"+"&emsp";
+		    		else
+		    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
 					index=index%100000;
 					indexlaws[0]+="第"+index/1000+"节";
 					String laws=hitdoc.get("law");
@@ -962,6 +977,8 @@ public class HandleLucene {
 	 * 				将搜索结果以Map<文件名，[章节，法条]>的映射关系，返回查询结果		   
 	 * @2017-11-17
 	 * 			使用SortField和Sort调用IndexSearch方法,对搜索结果用path字段升序排序						  
+	 * @2018-8-9
+	 * 			增加判断章段落索引号是否为999，如果是，则表明没有章段落，索引号设置为0
 	 * 
 	 */
 	
@@ -1013,8 +1030,11 @@ public class HandleLucene {
         	
     		temp=hitdoc.get("file");
     		String indexlaws[]=new String[2];
-    		Integer index=Integer.valueOf(hitdoc.get("path"));		
-    		indexlaws[0]="第"+index/100000+"章"+" ";
+    		Integer index=Integer.valueOf(hitdoc.get("path"));
+    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
+    			indexlaws[0]="第"+0+"章"+" ";
+    		else
+    			indexlaws[0]="第"+index/100000+"章"+" ";
     		index=index%100000;
     		indexlaws[0]+="第"+index/1000+"节";
     		String laws=hitdoc.get("law");
@@ -1312,12 +1332,13 @@ public class HandleLucene {
 	
 	public Integer AddIndexs(String url,String indexpath) throws IOException{
 		int totalofindex=0;
-		Path inpath=Paths.get(indexpath);
-		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
-		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
-		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
-		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+//		Path inpath=Paths.get(indexpath);
+//		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
+//		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+//		RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
+//		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+//		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+		this.CreateIndexWriter(indexpath);
 		
 		if(url.matches("(http|https)://.*")){
 			try{
@@ -1337,7 +1358,7 @@ public class HandleLucene {
 						doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
 						doc.add(new StoredField("path",e.getKey()));
 						doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//法条内容索引、分词，存储
-						ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+						ramwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
 					}
 				}
 				else		//如果没有读到段落，则totalofindex赋值-1
@@ -1374,7 +1395,7 @@ public class HandleLucene {
 					doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
 					doc.add(new StoredField("path",e.getKey()));
 					doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//发条内容索引、分词，存储
-					ramiwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+					ramwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
 				}
 			}
 			else
@@ -1383,21 +1404,21 @@ public class HandleLucene {
 			totalofindex=-3;
 		}
 		
-		ramiwriter.close();	
-		TieredMergePolicy ti=new TieredMergePolicy();
-		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
-        IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
-    	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-    	fsconfig.setMergePolicy(ti);
-    	
-    	if(indexwriter!=null){
-    		if(indexwriter.isOpen())
-    			indexwriter.close();
-    	}
+		ramwriter.close();	
+//		TieredMergePolicy ti=new TieredMergePolicy();
+//		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+//        IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+//    	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+//    	fsconfig.setMergePolicy(ti);
+//    	
+//    	if(indexwriter!=null){
+//    		if(indexwriter.isOpen())
+//    			indexwriter.close();
+//    	}
+//        
+//    	indexwriter=new IndexWriter(fsdir,fsconfig);  
         
-    	indexwriter=new IndexWriter(fsdir,fsconfig);  
-        indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
- 
+		indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
         indexwriter.commit();
         
         return totalofindex;
@@ -1609,17 +1630,22 @@ public class HandleLucene {
 	 * 			修改为使用openifChange(DirectoryReader,IndexWriter)方法
 	 * Modefied Date:2018-1-23
 	 * 			修改为返回值为布尔类型，如果创建IndexReader成功，返回true,如果为没有索引文件，则创建失败，返回false
-	 *          
+	 * @Modified Data:2018-8-10
+	 * 			修改为先判断IndexReader是否已经创建，如果已经创建，则不再创建磁盘索引fsdir和内存索引ramdir
+	 *          增加创建磁盘索引fsdir和内存索引ramdir前先判断是否已经创建，如果创建则先close后，再创建
 	 */
 
 	public boolean CreateIndexReader(String indexpath) throws IOException{
 		boolean f = false;
 		try{
-			Path inpath=Paths.get(indexpath);
-			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-			IOContext iocontext=new IOContext();
-			ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
 			if(indexreader==null){
+				Path inpath=Paths.get(indexpath);
+				if(fsdir==null)		//判断是否已经创建，如果没有创建则新建，否则复用
+					fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+				IOContext iocontext=new IOContext();
+				if(ramdir!=null)		//如果已经创建，则关闭
+					ramdir.close();
+				ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
 				indexreader=DirectoryReader.open(ramdir);
 			}
 			else{
@@ -1645,16 +1671,87 @@ public class HandleLucene {
 		return f;
 	}
 	
+	/*
+ 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2017-12-29 
+	 *
+	 * 销毁indexwriter,indexreader,ramdir,fsdir,该方法在关闭程序事件中调用
+	 *
+	 * @params 
+	 * 		    				
+	 * @return void	
+	 * 				
+	 * Modefied Date:2018-8-10
+	 * 			修改为先关闭indexwriter后，在关闭ramdir和fsdir
+	 * 			增加关闭前indexwrtier前，先判断是否处于打开状态
+
+	 */
+	
 	public static void CloseIndexReader() throws IOException{
-		if(fsdir!=null)
-			fsdir.close();
-		if(ramdir!=null)
-			ramdir.close();
+		if(indexwriter!=null)
+			if(indexwriter.isOpen())
+				indexwriter.close();
 		if(indexreader!=null)
 			indexreader.close();
-		if(indexwriter!=null)
-			indexwriter.close();
+		if(ramdir!=null)
+			ramdir.close();
+		if(fsdir!=null)
+			fsdir.close();
 	}
+	
+	/*
+ 	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-9 
+	 *
+	 * 该方法创建IndexWriter，如果已经创建则不在创建，如果未创建，则创建
+	 *
+	 * @params 
+	 * 		   indexpath
+	 * 				索引文件存储位置
+	 * @return void	
+	 * 				
+	 * Modefied Date:2018-8-10
+	 * 			修改返回值为空
+	 *          
+	 */
+	public void CreateIndexWriter(String indexpath) throws IOException{
+		
+//		Boolean f=true;
+		
+		Path inpath=Paths.get(indexpath);
+		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
+		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
+			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+		if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
+			ramdir.close();
+		ramdir=new RAMDirectory();		//创建内存索引文件
+		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+		ramwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+		
+		if(indexwriter==null){
+			TieredMergePolicy ti=new TieredMergePolicy();
+			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+			fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+			fsconfig.setMergePolicy(ti);
+			indexwriter=new IndexWriter(fsdir,fsconfig); 
+		}
+    	
+//    	if(indexwriter!=null){
+//    		if(indexwriter.isOpen())
+//    			indexwriter.close();
+//    	}
+        
+    	 
+		
+//		return f;
+		
+	}
+	
 
 	public static void main(String[] args) throws Exception{
 		HandleLucene handle=new HandleLucene();
