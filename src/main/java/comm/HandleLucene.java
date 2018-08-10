@@ -1158,31 +1158,32 @@ public class HandleLucene {
 
 	public void DeleteIndex(String filename,String indexpath) throws IOException{
 		
-		Path inpath=Paths.get(indexpath);
-		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+//		Path inpath=Paths.get(indexpath);
+//		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+//		
+////		IOContext iocontext=new IOContext();
+//
+////		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
+//		
+//		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+//		
+////		IndexWriterConfig ramconfig=new IndexWriterConfig(analyzer);
+//		
+////		IndexWriter ramiwriter=new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+//		
+//	    IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer);
+//		TieredMergePolicy ti=new TieredMergePolicy();
+//		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
+//		fsconfig.setMergePolicy(ti);		//设置合并策略
+////		System.out.println(ti.getForceMergeDeletesPctAllowed());
+////	    IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig); 
+//		if(indexwriter!=null){
+//			if(indexwriter.isOpen())
+//				indexwriter.close();
+//		}
+//		indexwriter=new IndexWriter(fsdir,fsconfig);
 		
-//		IOContext iocontext=new IOContext();
-
-//		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
-		
-		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
-		
-//		IndexWriterConfig ramconfig=new IndexWriterConfig(analyzer);
-		
-//		IndexWriter ramiwriter=new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
-		
-	    IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer);
-		TieredMergePolicy ti=new TieredMergePolicy();
-		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
-		fsconfig.setMergePolicy(ti);		//设置合并策略
-//		System.out.println(ti.getForceMergeDeletesPctAllowed());
-//	    IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig); 
-		if(indexwriter!=null){
-			if(indexwriter.isOpen())
-				indexwriter.close();
-		}
-		indexwriter=new IndexWriter(fsdir,fsconfig);
-		
+		this.CreateDeleteIndexWriter(indexpath);
 		Term t=new Term("file",filename);
 		
 
@@ -1338,7 +1339,7 @@ public class HandleLucene {
 //		RAMDirectory ramdir=new RAMDirectory();		//创建内存索引文件
 //		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
 //		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
-		this.CreateIndexWriter(indexpath);
+		this.CreateAddIndexWriter(indexpath);
 		
 		if(url.matches("(http|https)://.*")){
 			try{
@@ -1707,7 +1708,7 @@ public class HandleLucene {
 	 * @author: wanyan 
 	 * date: 2018-8-9 
 	 *
-	 * 该方法创建IndexWriter，如果已经创建则不在创建，如果未创建，则创建
+	 * 该方法创建AddIndexWriter，如果已经创建则不在创建，如果未创建，则创建
 	 *
 	 * @params 
 	 * 		   indexpath
@@ -1718,7 +1719,7 @@ public class HandleLucene {
 	 * 			修改返回值为空
 	 *          
 	 */
-	public void CreateIndexWriter(String indexpath) throws IOException{
+	public void CreateAddIndexWriter(String indexpath) throws IOException{
 		
 //		Boolean f=true;
 		
@@ -1750,6 +1751,38 @@ public class HandleLucene {
 		
 //		return f;
 		
+	}
+	
+	/*
+ 	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-10 
+	 *
+	 * 该方法创建DeleteIndexWriter，如果已经创建则不在创建，如果未创建，则创建
+	 *
+	 * @params 
+	 * 		   indexpath
+	 * 				索引文件存储位置
+	 * @return void	
+	 * 				
+	 */
+	
+	public void CreateDeleteIndexWriter(String indexpath) throws IOException{
+		
+		Path inpath=Paths.get(indexpath);
+		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
+			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+		
+		if(indexwriter==null){
+			Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+			TieredMergePolicy ti=new TieredMergePolicy();
+			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
+			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer);
+			fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+			fsconfig.setMergePolicy(ti);		//设置合并策略
+			indexwriter=new IndexWriter(fsdir,fsconfig);
+		}	
 	}
 	
 
