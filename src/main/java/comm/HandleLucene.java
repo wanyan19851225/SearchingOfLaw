@@ -1536,25 +1536,28 @@ public class HandleLucene {
 	 * 
 	 * @return Integer
 	 * 				返回添加到索引文件中的法条数
+	 * @Modified 2018-8-13
+	 * 				修改为调用CreateAddIndexWriter方法，实现IndexWriter单例化
 	 * 	   				
 	 */
 	
 	public Integer AddIndex(Map<String,List<String[]>> content,String indexpath) throws IOException{
 		
-		Path inpath=Paths.get(indexpath);
-
-		Analyzer analyzer = new StandardAnalyzer();		//鍒涘缓鏍囧噯鍒嗚瘝鍣?
-	
-		FSDirectory fsdir=FSDirectory.open(inpath);		//鍒涘缓纾佺洏绱㈠紩鏂囦欢
-		
-		RAMDirectory ramdir=new RAMDirectory();		//鍒涘缓鍐呭瓨绱㈠紩鏂囦欢
-	
-		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
-		
-		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//鍒涘缓鍐呭瓨IndexWriter
-		
+//		Path inpath=Paths.get(indexpath);
+//
+//		Analyzer analyzer = new StandardAnalyzer();		//鍒涘缓鏍囧噯鍒嗚瘝鍣?
+//	
+//		FSDirectory fsdir=FSDirectory.open(inpath);		//鍒涘缓纾佺洏绱㈠紩鏂囦欢
+//		
+//		RAMDirectory ramdir=new RAMDirectory();		//鍒涘缓鍐呭瓨绱㈠紩鏂囦欢
+//	
+//		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+//		
+//		IndexWriter ramiwriter = new IndexWriter(ramdir,ramconfig);		//鍒涘缓鍐呭瓨IndexWriter
 		
 		int totalofindex=0;
+		this.CreateAddIndexWriter(indexpath);
+		
 		List<String[]> laws=new ArrayList<String[]>();
 		
 		for(Entry<String, List<String[]>> entry:content.entrySet()){ 
@@ -1585,26 +1588,26 @@ public class HandleLucene {
 					doc.add(new IntPoint("path",Integer.valueOf(laws.get(i)[0])));		//法条索引以Int类型存储
 					doc.add(new StoredField("path",Integer.valueOf(laws.get(i)[0])));
 					doc.add(new Field("law",laws.get(i)[1],TextField.TYPE_STORED));		//鍙戞潯鍐呭绱㈠紩銆佸垎璇嶏紝涓嶅瓨鍌?
-			    	ramiwriter.addDocument(doc);		//灏嗘硶鏉＄储寮曟坊鍔犲埌鍐呭瓨绱㈠紩涓?	
+			    	ramwriter.addDocument(doc);		//灏嗘硶鏉＄储寮曟坊鍔犲埌鍐呭瓨绱㈠紩涓?	
 				}	    		  
 			}
 	
-		ramiwriter.close();
-	
-		TieredMergePolicy ti=new TieredMergePolicy();
-		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
-        IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
-    	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-    	fsconfig.setMergePolicy(ti);
-//        IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
-//       fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-    	
-    	if(indexwriter!=null){
-    		if(indexwriter.isOpen())
-    			indexwriter.close();
-    	}
-        
-    	indexwriter=new IndexWriter(fsdir,fsconfig);  
+		ramwriter.close();
+//	
+//		TieredMergePolicy ti=new TieredMergePolicy();
+//		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+//        IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+//    	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+//    	fsconfig.setMergePolicy(ti);
+////        IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
+////       fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+//    	
+//    	if(indexwriter!=null){
+//    		if(indexwriter.isOpen())
+//    			indexwriter.close();
+//    	}
+//        
+//    	indexwriter=new IndexWriter(fsdir,fsconfig);  
         indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
  
         indexwriter.commit();
