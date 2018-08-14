@@ -92,25 +92,37 @@ public class  SOLEvents {
 	} 
 
 	public static class SelEvent implements ActionListener{
-		SOLSelectIndex p;
-		
-		public SelEvent(SOLSelectIndex p){
+		Object p;
+		public SelEvent(Object p){
 			this.p=p;
 		}
 		
 		public void actionPerformed(ActionEvent e) {
-			p.SelectAll();
+			if(p instanceof SOLSelectIndex) {
+				SOLSelectIndex dd=(SOLSelectIndex)this.p;
+				dd.SelectAll();
+			}
+			else if(p instanceof SOLShowIndex) {
+				SOLShowIndex dd=(SOLShowIndex)this.p;
+				dd.SelectAll();
+			}
 		}
 	}
 
 	public static class UnselEvent implements ActionListener{
-		SOLSelectIndex p;
-		
-		public UnselEvent(SOLSelectIndex p){
+		Object p;
+		public UnselEvent(Object p){
 			this.p=p;
 		}
 		public void actionPerformed(ActionEvent e) {
-			p.SelectInvert();
+			if(p instanceof SOLSelectIndex) {
+				SOLSelectIndex dd=(SOLSelectIndex)this.p;
+				dd.SelectInvert();
+			}
+			else if(p instanceof SOLShowIndex) {
+				SOLShowIndex dd=(SOLShowIndex)this.p;
+				dd.SelectInvert();
+			}
 		}
 	}
 	
