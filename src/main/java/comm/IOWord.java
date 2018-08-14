@@ -34,6 +34,8 @@ public class IOWord{
 	 * 		修复当File是目录时，报错的bug
 	 * Modified Date:2017-12-26
 	 * 		修复读入流is,docx,doc没有关闭的问题
+	 * @Modified Date:2018-8-14
+	 * 		新增对软回车字符的判断，如果有软回车字符，则按照软回车字符使用split方法分隔成段落
 	 * 
 	 */
 	
@@ -42,7 +44,7 @@ public class IOWord{
 		
 		List<String> paragraphs=new ArrayList<String>();
 		if(file.isFile()){
-		
+			String specialchar="[a-zA-Z:/.\"_\\\\　　 ]";
 			String filename=file.getName();
 			String filetype=filename.substring(filename.lastIndexOf(".") + 1,filename.length()).toLowerCase();
 
@@ -57,10 +59,18 @@ public class IOWord{
 
 					for(int i=0;i<lip.size();i++){
 						String text=lip.get(i).getParagraphText().trim();
-						text=text.replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
-//						int ll=text.length();
-						if(text.length()>3)
-	    						paragraphs.add(text);
+						text=text.replaceAll(specialchar,"" );
+						if(!text.contains("")){		//判断是否包含软回车，如果包含软回车，则使用split方法分隔成段落
+							if(text.length()>3)
+	    							paragraphs.add(text);
+						}
+						else{
+							String[] pa=text.split("");
+							for(int j=0;j<pa.length;j++){
+								if(pa[j].length()>0)
+									paragraphs.add(pa[j]);
+							}
+						}
 					}
 					docx.close();
 	  	     	
@@ -72,9 +82,18 @@ public class IOWord{
 					
 					for(int i=0;i<range.numParagraphs();i++){
 						String text=range.getParagraph(i).text().trim();
-						text=text.replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
-						if(text.length()>3)
-							paragraphs.add(text);	
+						text=text.replaceAll(specialchar,"" );
+						if(!text.contains("")){		//判断是否包含软回车，如果包含软回车，则使用split方法分隔成段落
+							if(text.length()>3)
+	    							paragraphs.add(text);
+						}
+						else{
+							String[] pa=text.split("");
+							for(int j=0;j<pa.length;j++){
+								if(pa[j].length()>0)
+									paragraphs.add(pa[j]);
+							}
+						}	
 					}
 					doc.close();
 	    		
@@ -412,37 +431,61 @@ public class IOWord{
 	public static void main(String[] args) throws Exception{
 		
 		IOWord word=new IOWord();
-//		UpdateString us=new UpdateString();
+		UpdateString us=new UpdateString();
 		
-		File file=new File("D:\\Lucene\\src\\（资料）变更劳动合同.doc");//劳动人事争议仲裁办案规则（新）.doc   中华人民共和国劳动合同法.doc  （资料）变更劳动合同.doc  中华人民共和国劳动法.doc 北京市劳动局关于解除劳动合同计发经济补偿金有关问题处理意见的通知.doc
+//		List<String> paragraphs=new ArrayList<String>();
+//		
+//		FileInputStream is = new FileInputStream(new File("D:\\Lucene\\src\\北京市劳动局关于转发劳动部办公厅关于职工应征入伍后与企业劳动关系的复函》的通知.doc"));
+//		POIFSFileSystem myFileSystem = new POIFSFileSystem(is);    
+//		HWPFDocument doc = new HWPFDocument(myFileSystem);
+//		Range range=doc.getRange();
+//		
+//		for(int i=0;i<range.numParagraphs();i++){
+//			String text=range.getParagraph(i).text().trim();
+//			text=text.replaceAll("[a-zA-Z:/.\"_\\\\　　 ]","" );
+//			if(!text.contains("")){
+//				if(text.length()>3)
+//					paragraphs.add(text);
+//			}
+//			else{
+//				String[] pa=text.split("");
+//				for(int j=0;j<pa.length;j++){
+//					if(pa[j].length()>0)
+//						paragraphs.add(pa[j]);
+//				}
+//			}
+//		}
+//		doc.close();
 		
-/*		
-		List<String> text=word.GetParagraphText(file);
+//		File file=new File("D:\\Lucene\\src\\《企业职工患病或非因 工负伤医疗期规定》的通知.doc");//劳动人事争议仲裁办案规则（新）.doc   中华人民共和国劳动合同法.doc  （资料）变更劳动合同.doc  中华人民共和国劳动法.doc 北京市劳动局关于解除劳动合同计发经济补偿金有关问题处理意见的通知.doc
+//		
+//		
+//		List<String> paragraphs=word.GetParagraphText(file);
+//		
+//		for(int i=0;i<paragraphs.size();i++){
+////			System.out.println(text.get(i));
+////			String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
+//			String str=paragraphs.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );//
+//			System.out.println(str);
+////			System.out.println(str+us.IsInTop(str,"章")+us.CalChars(str, "章")+":"+us.GetStringBetween(str, "章"));		
+//		}
 		
-		for(int i=0;i<text.size();i++){
-//			System.out.println(text.get(i));
-//			String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
-//			String str=text.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );
-			String str=text.get(i);
-			System.out.println(str+us.IsInTop(str,"章")+us.CalChars(str, "章")+":"+us.GetStringBetween(str, "章"));		
-		}
-*/		
 		
 		
 //		Map<Integer,String> item=word.GetIndexOflaw(file);
 //		Map<Integer,String> item=word.GetIndexOfnotice(file);
-		Map<Integer,String> item=word.GetIndexOfmarkdocment(file);
-		
-		
+//		Map<Integer,String> item=word.GetIndexOfmarkdocment(file);
+//		
+//		
 //		System.out.println(item.get(301006));
-		
-		for (Integer key : item.keySet()) 
-			
-			System.out.println(key+"-"+item.get(key));
-	
-		
-		System.out.println(item.size());
-		
+//		
+//		for (Integer key : item.keySet()) 
+//			
+//			System.out.println(key+"-"+item.get(key));
+//	
+//		
+//		System.out.println(item.size());
+//		
 	}
 
 }
