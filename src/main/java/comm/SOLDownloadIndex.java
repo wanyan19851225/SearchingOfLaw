@@ -66,6 +66,10 @@ public class SOLDownloadIndex extends JFrame{
 		
 		lbt=new JButton("提交");
 		lbt.setPreferredSize(new Dimension(60,35));
+		JButton sbt=new JButton("全选");
+		sbt.setPreferredSize(new Dimension(60,35));
+		JButton sbt1=new JButton("反选");
+		sbt1.setPreferredSize(new Dimension(60,35));
 		
 		JScrollPane jsp=new JScrollPane();
 		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));
@@ -73,6 +77,8 @@ public class SOLDownloadIndex extends JFrame{
 
 		
 		lbt.addActionListener(new SOLEvents.DownloadIndexEvent(this));
+		sbt.addActionListener(new SOLEvents.SelEvent(this));
+		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
 		
 		//t.addMouseListener(new SOLEvents.ShowSOLShowLawsEvent(this));
 		
@@ -82,6 +88,8 @@ public class SOLDownloadIndex extends JFrame{
 		
 		
 		cpane.add(jsp);
+		spane.add(sbt);
+		spane.add(sbt1);
 		spane.add(lbt);
 		
 		contentpane.add(cpane,BorderLayout.CENTER);
@@ -207,4 +215,23 @@ public class SOLDownloadIndex extends JFrame{
 		lbt.setEnabled(f);
 	}
 	
+	public void SelectAll(){
+		int cnum=t.getColumnCount();
+		int rnum=t.getRowCount();
+		for(int i=0;i<rnum;i++){
+			t.setValueAt(true,i,cnum-1);
+		}
+	}
+	
+	public void SelectInvert(){
+		int cnum=t.getColumnCount();
+		int rnum=t.getRowCount();
+		for(int i=0;i<rnum;i++){
+			
+			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
+				t.setValueAt(false,i,cnum-1);
+			else
+				t.setValueAt(true,i,cnum-1);
+		}	
+	}
 }

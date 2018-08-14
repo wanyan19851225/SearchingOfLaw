@@ -106,6 +106,14 @@ public class  SOLEvents {
 				SOLShowIndex dd=(SOLShowIndex)this.p;
 				dd.SelectAll();
 			}
+			else if(p instanceof SOLCommitIndex) {
+				SOLCommitIndex dd=(SOLCommitIndex)this.p;
+				dd.SelectAll();
+			}
+			else if(p instanceof SOLDownloadIndex) {
+				SOLDownloadIndex dd=(SOLDownloadIndex)this.p;
+				dd.SelectAll();
+			}
 		}
 	}
 
@@ -122,6 +130,14 @@ public class  SOLEvents {
 			else if(p instanceof SOLShowIndex) {
 				SOLShowIndex dd=(SOLShowIndex)this.p;
 				dd.SelectInvert();
+			}
+			else if(p instanceof SOLCommitIndex) {
+				SOLCommitIndex dd=(SOLCommitIndex)this.p;
+				dd.SelectInvert();;
+			}
+			else if(p instanceof SOLDownloadIndex) {
+				SOLDownloadIndex dd=(SOLDownloadIndex)this.p;
+				dd.SelectInvert();;
 			}
 		}
 	}
