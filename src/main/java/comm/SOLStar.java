@@ -170,5 +170,9 @@ public class SOLStar extends JPanel{
 	public void setProgeressBarLabelText(String s){
 		bl.setText(s);
 	}
+	
+	public void setProgeressBarIndeterminate(Boolean f){
+		jpb.setIndeterminate(f);
+	}
 
 }

@@ -343,6 +343,9 @@ public class SOLHistory extends JPanel{
 	 * 						  
 	 * @2017-10-31
 	 * 				新增setToolTip,鼠标悬浮框,显示检索具体时间和全文
+	 * @Modified 2018-8-14
+	 * 				新增使用检索记录检索文档时，实现进度条功能
+	 * 				在SearchEvent鼠标事件中，改为调用SOLSearchIndexsProgress类，实现进度条功能
 	 * 
 	 */
 	
@@ -359,27 +362,29 @@ public class SOLHistory extends JPanel{
 		class SearchEvent extends MouseAdapter{
 			public void mouseClicked(MouseEvent e){ 
 				JLabel jj=(JLabel)e.getSource();
-				HandleLucene handle=new HandleLucene();
+//				HandleLucene handle=new HandleLucene();
 				UpdateString us=new UpdateString();
-				Map<String, List<String[]>> content=new HashMap<String, List<String[]>>();
+//				Map<String, List<String[]>> content=new HashMap<String, List<String[]>>();
 				String dd=us.DelHtmlString(jj.getText());
 				jj.setEnabled(false);
-				long start=System.currentTimeMillis();
-				try {
-					content = handle.GetSearch("D:\\Lucene\\index\\",dd);
-				} catch (org.apache.lucene.queryparser.classic.ParseException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InvalidTokenOffsetsException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				long end=System.currentTimeMillis();
-				long total=p.solresult.UpdateText(content);
-				DisplayGui.star.setStatusText("检索完毕!"+" "+"耗时："+String.valueOf(end-start)+"ms"+" "+"共搜索到："+total);
+				SOLSearchIndexsProgress pb=new SOLSearchIndexsProgress(p,dd);
+				pb.execute();
+//				long start=System.currentTimeMillis();
+//				try {
+//					content = handle.GetSearch("D:\\Lucene\\index\\",dd);
+//				} catch (org.apache.lucene.queryparser.classic.ParseException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				} catch (InvalidTokenOffsetsException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//				long end=System.currentTimeMillis();
+//				long total=p.solresult.UpdateText(content);
+//				DisplayGui.star.setStatusText("检索完毕!"+" "+"耗时："+String.valueOf(end-start)+"ms"+" "+"共搜索到："+total);
 				jj.setEnabled(true);
 			}
 			

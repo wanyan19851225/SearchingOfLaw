@@ -139,7 +139,7 @@ public class  SOLEvents {
 //		SOLResult res;
 //		SOLStar star;
 		DisplayGui p;
-		private HandleLucene handle=new HandleLucene();
+//		private HandleLucene handle=new HandleLucene();
 
 		public SearchEvent(DisplayGui p){
 			
@@ -189,7 +189,7 @@ public class  SOLEvents {
 		public void mouseClicked(MouseEvent e){
 
 
-			Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
+//			Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
 			String keywords=p.GetKeywordsInputText(p.GetFuzzyMode());
 			Date date=new Date(System.currentTimeMillis());
 			DateFormat dformat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -197,7 +197,6 @@ public class  SOLEvents {
 			p.SetSearchButtonEnable(false);
 			
 			try {
-	
 				if(p.GetRage())
 					DisplayGui.range.clear();
 				
@@ -207,43 +206,45 @@ public class  SOLEvents {
 					iolist.add("Date@"+ndate+" "+keywords,p.GethTmpHis());
 					iolist.add("Date@"+ndate+" "+keywords,p.GetHistory());
 					p.solhis.UpdateHistory(p.GethTmpHis());
-//					int top=p.GetTop();
-					Boolean f=p.GetIsRemote();
-					long start=System.currentTimeMillis();
-					if(DisplayGui.range.isEmpty()){
-						if(f){
-							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
-						}
-						else
-							content=handle.GetSearch(Path.indexpath,keywords);
-					}
-					else{					
-//						多条件查询，指定在某个法条文档中查询	
-						if(f){
-							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
-						}
-						else{
-							String[] fields=new String[]{"file","law"};
-							content=handle.GetMultipleSearch(Path.indexpath,fields,DisplayGui.range,keywords);
-						}
-					}
-							
-					long end=System.currentTimeMillis();
-					long total=p.solresult.UpdateText(content);
-					p.SetStatusText(String.valueOf(end-start),total);
-					
+					SOLSearchIndexsProgress pb=new SOLSearchIndexsProgress(p,keywords);
+					pb.execute();
+////					int top=p.GetTop();
+//					Boolean f=p.GetIsRemote();
+//					long start=System.currentTimeMillis();
+//					if(DisplayGui.range.isEmpty()){
+//						if(f){
+//							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
+//						}
+//						else
+//							content=handle.GetSearch(Path.indexpath,keywords);
+//					}
+//					else{					
+////						多条件查询，指定在某个法条文档中查询	
+//						if(f){
+//							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
+//						}
+//						else{
+//							String[] fields=new String[]{"file","law"};
+//							content=handle.GetMultipleSearch(Path.indexpath,fields,DisplayGui.range,keywords);
+//						}
+//					}
+//							
+//					long end=System.currentTimeMillis();
+//					long total=p.solresult.UpdateText(content);
+//					p.SetStatusText(String.valueOf(end-start),total);
+//					
 				}else
 					JOptionPane.showMessageDialog(null, "关键词不允许为空", "警告", JOptionPane.ERROR_MESSAGE);
 
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (ParseException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InvalidTokenOffsetsException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+//			} catch (IOException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (ParseException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (InvalidTokenOffsetsException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
 			} catch (java.text.ParseException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
