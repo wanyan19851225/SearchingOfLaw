@@ -4,32 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.Map.Entry;
 
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 
 
 public class SOLShowIndex extends JFrame{
@@ -108,10 +93,9 @@ public class SOLShowIndex extends JFrame{
 */		
 		t.addMouseListener(new SOLEvents.ShowSOLShowLawsEvent(this));
 		
-		JPanel cpane=new JPanel();
-	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
-	    JPanel spane=new JPanel();
-		
+		JPanel cpane=new JPanel();		//列表面板
+	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));	
+	    JPanel spane=new JPanel();		//状态栏面板
 		
 		cpane.add(jsp);
 		spane.add(lbt);
