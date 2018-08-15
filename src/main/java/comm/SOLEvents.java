@@ -930,7 +930,10 @@ public class  SOLEvents {
 	 * All right reserved. 
 	 * @author: wanyan 
 	 * date: 2018-1-4
-	 * desc:向远处服务器请求索引文件时间，SOLSynchronizeIndex窗体_lbt事件
+	 * desc:向远处服务器上传索引文件，SOLCommitIndex窗体_lbt事件
+	 * 
+	 * @2018-8-15
+	 * 		修改当上传失败后，提交按钮无法恢复使用的bug
 	 * 
 	 */
 	
@@ -966,13 +969,14 @@ public class  SOLEvents {
 			        	sb.append("\n");
 			        }
 			        JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
-			        p.SetSearchButtonEnable(true);
+
 				}
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
 			}
+	        p.SetSearchButtonEnable(true);
 		}
 			
 	}

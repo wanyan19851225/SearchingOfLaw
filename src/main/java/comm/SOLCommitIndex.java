@@ -123,6 +123,8 @@ public class SOLCommitIndex extends JFrame{
         
         
         JSONObject body=http.Map2Json(send);
+//		GZipUntils gzip=new GZipUntils();
+//		String sends=gzip.S2Gzip(body.toString());
 		response=http.sendPost(body.toString());
 	    JSONArray objarry=response.getJSONArray("FileList");
 	    JSONObject tem=new JSONObject();
@@ -160,7 +162,10 @@ public class SOLCommitIndex extends JFrame{
 					lawslist.add(tem);
 				}
 				body.accumulate("lawslist",lawslist);
-			//	System.out.println(body.toString());
+//				System.out.println(body.toString());
+//				GZipUntils gzip=new GZipUntils();
+//				String sends=gzip.S2Gzip(body.toString());
+//				System.out.println(sends);
 				response=http.sendPost(body.toString());
 				
 				int total=response.getInt("result");		//获取服务器写入索引文件成功的法条总数
