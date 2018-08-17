@@ -161,9 +161,11 @@ public class SOLRemoteIndex extends JFrame{
         send.put("token","");		
         send.put("data",data.toString());
         
-        
+
         JSONObject body=http.Map2Json(send);
-		response=http.sendPost(body.toString());
+		GZipUntils gzip=new GZipUntils();
+		String sends=gzip.S2Gzip(body.toString());
+		response=http.sendPost(sends);
 	    JSONArray objarry=response.getJSONArray("FileList");
 	    JSONObject tem=new JSONObject();
 	    for(int i=0;i<objarry.size();i++){		
@@ -193,7 +195,9 @@ public class SOLRemoteIndex extends JFrame{
 					fileslist.add(tem);
 				}
 				body.accumulate("fileslist",fileslist);
-				response=http.sendPost(body.toString());
+				GZipUntils gzip=new GZipUntils();
+				String sends=gzip.S2Gzip(body.toString());
+				response=http.sendPost(sends);
 				
 				int res=response.getInt("result");		//获取服务器写入索引文件成功的法条总数
 				if(res==1)

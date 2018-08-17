@@ -132,9 +132,11 @@ public class SOLShowRemoteLaws extends JFrame{
 		body.accumulate("user","tmp");
 		body.accumulate("file",file);
 		body.accumulate("top",top);
+		GZipUntils gzip=new GZipUntils();
+		String sends=gzip.S2Gzip(body.toString());
 		JSONObject response=new JSONObject();
 		IOHttp http=new IOHttp(url);
-		response=http.sendPost(body.toString());
+		response=http.sendPost(sends);
 		
 		int res=response.getInt("result");		//获取服务器写入索引文件成功的法条总数
 		if(res==1){
