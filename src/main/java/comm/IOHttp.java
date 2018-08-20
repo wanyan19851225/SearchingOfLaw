@@ -33,6 +33,7 @@ public class IOHttp {
     	
     	JSONObject obj=new JSONObject();
     	StringBuffer result=new StringBuffer();
+    	String s=null;
 
         
         try {
@@ -76,7 +77,8 @@ public class IOHttp {
             	String line;
             	while ((line = reader.readLine()) != null)     	
             		result.append(line);            
-         
+            	GZipUntils gz=new GZipUntils();
+            	s=gz.Gzip2S(result.toString());
             }
             
         }
@@ -99,7 +101,8 @@ public class IOHttp {
         }
         
 //        obj=(JSONObject) JSONObject.stringToValue(result.toString());
-        obj=JSONObject.fromObject(result.toString());
+        if(s!=null)
+        	obj=JSONObject.fromObject(s);
         return obj;
         
     }
