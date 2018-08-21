@@ -159,65 +159,13 @@ public class  SOLEvents {
 
 	public static class SearchEvent extends MouseAdapter{
 		
-//		JButton sbt;
-//		JTextField adr,port;
-//		JPanel npaneofcenter;
-//		List<String> tmphis,history;
-//		SOLHistory solhis;
-//		SOLResult res;
-//		SOLStar star;
 		DisplayGui p;
-//		private HandleLucene handle=new HandleLucene();
 
 		public SearchEvent(DisplayGui p){
-			
-//			this.npaneofnorth=npaneofnorth;
-//			this.npaneofcenter=npaneofcenter;
-//			this.tmphis=tmphis;
-//			this.history=history;
-//			this.solhis=solhis;
-//			this.res=res;
-//			this.star=star;
-			this.p=p;
-/*			
-			int c=npaneofnorth.getComponentCount();
-			
-			for(int i=0;i<c;i++){
-			    Object obj =npaneofnorth.getComponent(i);
-			    if (obj instanceof JTextField){
-			    	//this.stf=(JTextField)obj;
-			    }
-			    if(obj instanceof JButton){
-			    	//this.sbt=(JButton)obj;  
-			    }
-			}
-			
-			int s=npaneofcenter.getComponentCount();
-			for(int i=0;i<s;i++){
-			    Object obj =npaneofcenter.getComponent(i);
-			    JPanel jp=(JPanel)obj;
-			    int a=jp.getComponentCount();
-			    for(int j=0;j<a;j++){
-				    Object obj1 =jp.getComponent(j);    
-				    if(obj1 instanceof JTextField){
-				    	JTextField jt=(JTextField)obj1;
-				    	if(jt.getName().equals("adr")){
-				    		//this.adr=jt;
-				    	}
-				    	else if(jt.getName().equals("port")){
-				    		//this.port=jt;
-				    	}
-				    } 
-			    }
-
-			}
-*/		
+			this.p=p;		
 		}
 		
 		public void mouseClicked(MouseEvent e){
-
-
-//			Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
 			String keywords=p.GetKeywordsInputText(p.GetFuzzyMode());
 			Date date=new Date(System.currentTimeMillis());
 			DateFormat dformat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -236,137 +184,14 @@ public class  SOLEvents {
 					p.solhis.UpdateHistory(p.GethTmpHis());
 					SOLSearchIndexsProgress pb=new SOLSearchIndexsProgress(p,keywords);
 					pb.execute();
-////					int top=p.GetTop();
-//					Boolean f=p.GetIsRemote();
-//					long start=System.currentTimeMillis();
-//					if(DisplayGui.range.isEmpty()){
-//						if(f){
-//							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
-//						}
-//						else
-//							content=handle.GetSearch(Path.indexpath,keywords);
-//					}
-//					else{					
-////						多条件查询，指定在某个法条文档中查询	
-//						if(f){
-//							JOptionPane.showMessageDialog(null,"keywords:"+keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
-//						}
-//						else{
-//							String[] fields=new String[]{"file","law"};
-//							content=handle.GetMultipleSearch(Path.indexpath,fields,DisplayGui.range,keywords);
-//						}
-//					}
-//							
-//					long end=System.currentTimeMillis();
-//					long total=p.solresult.UpdateText(content);
-//					p.SetStatusText(String.valueOf(end-start),total);
-//					
 				}else
 					JOptionPane.showMessageDialog(null, "关键词不允许为空", "警告", JOptionPane.ERROR_MESSAGE);
-
-//			} catch (IOException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (ParseException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (InvalidTokenOffsetsException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
 			} catch (java.text.ParseException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}					
 			p.SetSearchButtonEnable(true);
-		}
-/*	
-		public Boolean IsRange(JPanel npaneofcenter){
-			
-			Boolean f=true;		
-			int s=npaneofcenter.getComponentCount();
-			for(int i=0;i<s;i++){
-			    Object obj =npaneofcenter.getComponent(i);
-			    JPanel jp=(JPanel)obj;
-			    int a=jp.getComponentCount();
-			    for(int j=0;j<a;j++){
-				    Object obj1 =jp.getComponent(j);
-				    if (obj1 instanceof JRadioButton){
-				    	JRadioButton rb=(JRadioButton)obj1;
-				    		if(rb.getName().equals("other")){
-						    	if(rb.isSelected()){
-				    			f=false;
-				    			break;
-						    	}
-				    		}
-				    }
-			    }
-			}
-			
-			return f;
-			
-		}
-		
-		public Boolean IsRemote(JPanel npaneofcenter){
-			Boolean f=true;		
-			int s=npaneofcenter.getComponentCount();
-			for(int i=0;i<s;i++){
-			    Object obj =npaneofcenter.getComponent(i);
-			    JPanel jp=(JPanel)obj;
-			    int a=jp.getComponentCount();
-			    for(int j=0;j<a;j++){
-				    Object obj1 =jp.getComponent(j);
-				    if (obj1 instanceof JRadioButton){
-				    	JRadioButton rb=(JRadioButton)obj1;
-				    		if(rb.getName().equals("remote")){
-						    	if(rb.isSelected()){
-				    			f=false;
-				    			break;
-						    	}
-				    		}
-				    }
-			    }
-			}
-			
-			return f;
-			
-		}
-	
-		public int GetTop(JPanel npaneofcenter){
-			int top=1000;
-			
-			int s=npaneofcenter.getComponentCount();
-			for(int i=0;i<s;i++){
-			    Object obj =npaneofcenter.getComponent(i);
-			    JPanel jp=(JPanel)obj;
-			    int a=jp.getComponentCount();
-			    for(int j=0;j<a;j++){
-				    Object obj1 =jp.getComponent(j);
-				    if (obj1 instanceof JRadioButton){
-				    	JRadioButton rb=(JRadioButton)obj1;
-				    		if(rb.getName().equals("1000")){
-						    	if(rb.isSelected()){
-				    			top=1000;
-				    			break;
-						    	}
-				    		}else if(rb.getName().equals("2000")){
-						    	if(rb.isSelected()){
-				    			top=2000;
-				    			break;
-						    	}
-				    		}else if(rb.getName().equals("3000")){
-						    	if(rb.isSelected()){
-				    			top=3000;
-				    			break;
-						    	}
-				    		}
-				    }
-			    }
-			}
-			
-			
-			return top;
-		}
-*/		
+		}		
 	}
 	
 	public static class RemoteEvent extends MouseAdapter{
@@ -503,138 +328,6 @@ public class  SOLEvents {
 			
 		}			
 	}
-
-	/** 
-	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
-	 * All right reserved. 
-	 * @author: wanyan 
-	 * date: 2017-12-21 
-	 * desc:窗口SOLCreateIndex中的创建按钮_sbt的监听事件，创建索引文件
-	 * 
-	 * Modified Date:2017-12-24
-	 * 		修复当创建索引成功后，将Displaygui的defselect清空
-	 * Modified Date:2018-08-03
-	 * 		改为调用CreateIndexs方法，增加通过url地址抓取html文档，解析html文档内容，创建索引的功能
-	 * 		修改根据CreateIndexs方法的返回值，进行不同的提示，-1：文件路径下没有文档，-2：URL地址无法访问，-3：输入路径格式有误
-	 * Modified Date:2018-08-08
-	 * 		删除创建索引事件，统一使用AddIndexEvent事件添加索引
-	 * 
-	 */
-	
-//	public static class CreateIndexEvent implements ActionListener{
-//		
-//		private SOLCreateIndex jf;
-//		
-//		public CreateIndexEvent(SOLCreateIndex jf){
-//			this.jf=jf;
-//		}
-//		
-//		public void actionPerformed(ActionEvent e) {
-//			String s=jf.GetFilePath();
-//			jf.sbt.setEnabled(false);
-//			if(!s.isEmpty()){
-//				HandleLucene handle=new HandleLucene();
-//				try {
-//					long start=System.currentTimeMillis();
-//					//int totalofindex=handle.CreateIndex(s,Path.indexpath);
-//					int totalofindex=handle.CreateIndexs(s,Path.indexpath);		//调用CreateIndexs方法，增加通过url抓取html功能
-//					long end=System.currentTimeMillis();
-//					if(totalofindex==-1)
-//						JOptionPane.showMessageDialog(null, "未找到法条文档或者文档中未发现法条，请先将有法条内容的文档放入该目录下", "警告", JOptionPane.ERROR_MESSAGE);
-//					else if(totalofindex==-2)
-//						JOptionPane.showMessageDialog(null, "请输入有效网址，或确认网站是否可以正常访问", "警告", JOptionPane.ERROR_MESSAGE);
-//					else if(totalofindex==-3)
-//						JOptionPane.showMessageDialog(null, "请输入有效格式的路径", "警告", JOptionPane.ERROR_MESSAGE);
-//					else{
-//						DisplayGui.defselect.clear();	//清空defselect，打开SelectIndex窗口时，重新对其进行判断赋值
-//						jf.solstar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
-//					}
-//				} catch (IOException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//			}
-//			else
-//				JOptionPane.showMessageDialog(null, "请选择要创建索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
-//			jf.sbt.setEnabled(true);
-//		}
-//	}
-	
-	
-	/** 
-	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
-	 * All right reserved. 
-	 * @author: wanyan 
-	 * date: 2017-12-13
-	 * desc:DispalyGui窗口中新建索引菜单项_createindex的监听事件，打开创建索引窗口
-	 * 
-	 * Modified Date:2018-08-08
-	 * 			删除创建索引的监听事件
-	 * 
-	 */
-	
-//	public static class ShowSOLCreateIndexEvent implements ActionListener{
-//		public void actionPerformed(ActionEvent e) {
-//			new SOLCreateIndex();
-//		}
-//	}
-//	
-	
-	/** 
-	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
-	 * All right reserved. 
-	 * @author: wanyan 
-	 * date: 2017-12-21 
-	 * desc:窗口SOLAddIndex中的创建按钮_sbt的监听事件，添加索引文件
-	 * 
-	 * Modified Date:2018-8-7
-	 * 		改为调用AddIndexs方法，增加通过url地址抓取html文档，解析html文档内容，创建索引的功能
-	 * 		修改根据AddIndexs方法的返回值，进行不同的提示，-1：文件路径下没有文档，-2：URL地址无法访问，-3：输入路径格式有误
-	 * Modified Date:2018-8-8
-	 * 		修改为使用SOLProgressBar类，在该类的doInBackground方法中调用HandleLucene.AddIndexs创建索引，并调用进度条
-	 *  
-	 */
-	
-//	public static class AddIndexEvent implements ActionListener{
-//		
-//		private SOLAddIndex jf;
-//		
-//		public AddIndexEvent(SOLAddIndex jf){
-//			this.jf=jf;
-//		}
-//		
-//		public void actionPerformed(ActionEvent e) {
-//			String s=jf.GetFilePath();
-//			jf.sbt.setEnabled(false);
-//
-//			if(!s.isEmpty()){
-//				HandleLucene handle=new HandleLucene();
-//				try {
-//		
-//					long start=System.currentTimeMillis();
-//					//int totalofindex=handle.AddIndex(s,Path.indexpath);
-//					int totalofindex=handle.AddIndexs(s,Path.indexpath);
-//					long end=System.currentTimeMillis();
-//					if(totalofindex==-1)
-//						JOptionPane.showMessageDialog(null, "没有检索到文档或网站中有段落", "警告", JOptionPane.ERROR_MESSAGE);
-//					else if(totalofindex==-2)
-//						JOptionPane.showMessageDialog(null, "请输入有效网址，或确认网站是否可以正常访问", "警告", JOptionPane.ERROR_MESSAGE);
-//					else if(totalofindex==-3)
-//						JOptionPane.showMessageDialog(null, "请输入有效格式的路径", "警告", JOptionPane.ERROR_MESSAGE);
-//					else{
-//						DisplayGui.defselect.clear();
-//						jf.solstar.setStatusText("添加检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
-//					}
-//				} catch (IOException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//			}
-//			else
-//				JOptionPane.showMessageDialog(null, "请选择要添加索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
-//			jf.sbt.setEnabled(true);	
-//		}
-//	}
 	
 	public static class AddIndexEvent implements ActionListener{
 		
@@ -1014,22 +707,32 @@ public class  SOLEvents {
 					}
 					p.t.LoadData(p.GetData());
 			        p.t.InitTable(false);
-			        //StringBuffer sb=new StringBuffer();
-			        //for(Entry<String,int[]> entry:m.entrySet()){
-			        	//sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
-			        	//sb.append("\n");
-			       // }
-			       // JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
 			        p.SetSearchButtonEnable(true);
 				}
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
-			}
-			
+			}	
+		}	
+	}
+	
+	public static class FilterEvent implements ActionListener{
+		Object p;
+		public FilterEvent(Object p){
+			this.p=p;
 		}
 		
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			if(p instanceof SOLShowIndex){
+				SOLShowIndex showindex=(SOLShowIndex)this.p;
+				String keywords=showindex.GetKeywordsInputText(false);		//使用模糊搜索
+				if(!keywords.isEmpty()){		//判断输入框是否为空
+					System.out.println(keywords);
+				}
+			}
+		}	
 	}
 	
 }

@@ -15,17 +15,18 @@ import javax.swing.JFrame;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 
 public class SOLShowIndex extends JFrame{
 	
 	public IOTable t;
 	private Vector<Vector<String>> data;
-//	public Map<String,Integer> id;
+	private JTextField stf;
 	
 	public SOLShowIndex(){
 		Container contentpane=this.getContentPane();
-		contentpane.setLayout(new BorderLayout(3,3));
+		contentpane.setLayout(new BorderLayout(3,1));
 		
 		final HandleLucene handle=new HandleLucene();
 		Map<String,Integer> fre=new HashMap<String,Integer>();
@@ -53,38 +54,51 @@ public class SOLShowIndex extends JFrame{
         
         t=new IOTable(cname,data);
         t.InitTable(false);
+        
+        stf=new JTextField(50);
+		stf.setPreferredSize(new Dimension(300,30));
+		
+		JButton sbt2=new JButton("搜索");
+		sbt2.setPreferredSize(new Dimension(60,30));
 		
 		final JButton lbt=new JButton("删除");
-		lbt.setPreferredSize(new Dimension(60,35));
+		lbt.setPreferredSize(new Dimension(60,30));
 		
 		JButton sbt=new JButton("全选");
-		sbt.setPreferredSize(new Dimension(60,35));
+		sbt.setPreferredSize(new Dimension(60,30));
 		
 		JButton sbt1=new JButton("反选");
-		sbt1.setPreferredSize(new Dimension(60,35));
+		sbt1.setPreferredSize(new Dimension(60,30));
 		
 		JScrollPane jsp=new JScrollPane();
-		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));
+		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-100));
 		jsp.setViewportView(t);
 
 		
 		lbt.addActionListener(new SOLEvents.DeleteIndexEvent(this));
-		
 		sbt.addActionListener(new SOLEvents.SelEvent(this));
-		
 		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
-
+		sbt2.addActionListener(new SOLEvents.FilterEvent(this));
 		t.addMouseListener(new SOLEvents.ShowSOLShowLawsEvent(this));
 		
+		JPanel npane=new JPanel();		//搜索框、搜索按钮面板
+//		npane.setBorder(BorderFactory.createLineBorder(Color.red));
+	    npane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
 		JPanel cpane=new JPanel();		//列表面板
-	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));	
-	    JPanel spane=new JPanel();		//状态栏面板
+	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
+//	    cpane.setBorder(BorderFactory.createLineBorder(Color.black));
+	    JPanel spane=new JPanel();		//全选、反选、删除按钮面板
+	    spane.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
+//	    spane.setBorder(BorderFactory.createLineBorder(Color.blue));
 		
-		cpane.add(jsp);
+		npane.add(stf);
+		npane.add(sbt2);
+	    cpane.add(jsp);
 		spane.add(sbt);
 		spane.add(sbt1);
 		spane.add(lbt);
 		
+		contentpane.add(npane,BorderLayout.NORTH);
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
 		
@@ -122,5 +136,43 @@ public class SOLShowIndex extends JFrame{
 			else
 				t.setValueAt(true,i,cnum-1);
 		}	
+	}
+	
+	public String GetKeywordsInputText(Boolean f){		//参数f判断是否使用模糊搜索方式
+
+		StringBuffer s=new StringBuffer();
+		String[] k=this.InputText2Keywords();
+		if(k!=null){		//判断输入框是否为空
+			if(k.length!=0){
+				if(f)		//使用模糊搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append(k[i]);
+						else
+							s.append(k[i]+" AND ");
+					}
+				else		//使用精确搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append("\""+k[i]+"\"");
+						else
+							s.append("\""+k[i]+"\""+" AND ");
+						
+					}
+//					s.append("\""+k+"\"");
+			}
+		}
+		return s.toString();
+	}
+	
+	public String[] InputText2Keywords(){
+		String s=stf.getText().trim();
+		String[] keywords=null;
+		if(!s.isEmpty()){		//判断输入框是否为空
+			UpdateString us=new UpdateString();
+			String fk=us.FilterDoubleString(s," ");
+			keywords=fk.split(" ");
+		}
+		return keywords;
 	}
 }
