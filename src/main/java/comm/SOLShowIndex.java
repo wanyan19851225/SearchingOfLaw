@@ -74,33 +74,6 @@ public class SOLShowIndex extends JFrame{
 		
 		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
 
-		/*					
-		class MouseEvents extends MouseAdapter{
-			public void mouseClicked(MouseEvent e){
-				if(e.getClickCount() == 1){
-					int column=jt.columnAtPoint(e.getPoint()); //获取点击的列
-		            if(column!=2){
-		            	int row=jt.rowAtPoint(e.getPoint()); //获取点击的行
-		            	int top=Integer.valueOf(jt.getValueAt(row,1).toString());
-		            	String file=jt.getValueAt(row,0).toString();
-		            	ShowLaws showlaws=new ShowLaws();
-		            	try {
-		            		showlaws.dispaly(file,top);
-		            	} catch (IOException e1) {
-		            		// TODO Auto-generated catch block
-		            		e1.printStackTrace();
-		            	} catch (ParseException e1) {
-		            		// TODO Auto-generated catch block
-		            		e1.printStackTrace();
-		            	} catch (InvalidTokenOffsetsException e1) {
-		            		// TODO Auto-generated catch block
-		            		e1.printStackTrace();
-		            	}
-					}
-				}
-			}
-		}
-*/		
 		t.addMouseListener(new SOLEvents.ShowSOLShowLawsEvent(this));
 		
 		JPanel cpane=new JPanel();		//列表面板
