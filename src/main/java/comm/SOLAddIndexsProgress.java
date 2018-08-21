@@ -65,7 +65,7 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 				r.put(url,-1);
 			else{
 				for(int i=0; i<size; i++){		//为文件夹下的文件添加索引
-					Integer t=handle.AddIndexs(f[i].getPath(), Path.indexpath);
+					Integer t=handle.AddIndexs(f[i].getPath(), Path.indexpath,Path.filepath);
 					r.put(f[i].getPath(),t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落。由于在GetFile方法中已经对传入的url进行了判断，只要走到此分支，必然不会出现返回-2和-3的情况
 					String dd="("+(i+1)+"/"+size+")";
 					publish(dd);   
@@ -73,7 +73,7 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 			}
 		}
 		else{		//如果url不是文件夹,即或者是html的网址，或者是单个文件，或者url格式有误，则走此分支
-			Integer t=handle.AddIndexs(url, Path.indexpath);
+			Integer t=handle.AddIndexs(url, Path.indexpath,Path.filepath);
 			r.put(url,t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落；-2：网站地址无效或者无法访问；-3：输入路径url格式有误
 //			publish("("+"1"+"/"+"1"+")");		//html网址，或者单个文件，或者url地址有误时，传给pross的参数为空，不在显示动态进度
 		}
