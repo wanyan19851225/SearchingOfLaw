@@ -1,6 +1,7 @@
 package comm;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -11,7 +12,9 @@ import java.util.Map.Entry;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -19,6 +22,7 @@ import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
@@ -29,10 +33,19 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.index.TieredMergePolicy;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.highlight.Fragmenter;
+import org.apache.lucene.search.highlight.Highlighter;
+import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
+import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.SimpleFragmenter;
+import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.RAMDirectory;
@@ -45,6 +58,73 @@ public class FileIndexs {
 	private static RAMDirectory ramdir;
 	private static IndexWriter indexwriter;
 	private static IndexWriter ramwriter;
+	
+	/*
+ 	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-9 
+	 *
+	 * 该方法创建AddIndexWriter，如果已经创建则不在创建，如果未创建，则创建
+	 *
+	 * @params 
+	 * 		   indexpath
+	 * 				索引文件存储位置
+	 * @return void	
+	 *          
+	 */
+	public void CreateAddIndexWriter(String indexpath) throws IOException{
+		
+		Path inpath=Paths.get(indexpath);
+		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
+		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
+			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+		if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
+			ramdir.close();
+		ramdir=new RAMDirectory();		//创建内存索引文件
+		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+		ramwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+		
+		if(indexwriter==null){
+			TieredMergePolicy ti=new TieredMergePolicy();
+			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
+			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
+			fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+			fsconfig.setMergePolicy(ti);
+			indexwriter=new IndexWriter(fsdir,fsconfig); 
+		}	
+	}
+	
+	/*
+ 	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-10 
+	 *
+	 * 该方法创建DeleteIndexWriter，如果已经创建则不在创建，如果未创建，则创建
+	 *
+	 * @params 
+	 * 		   indexpath
+	 * 				索引文件存储位置
+	 * @return void	
+	 * 				
+	 */
+	public void CreateDeleteIndexWriter(String indexpath) throws IOException{
+		
+		Path inpath=Paths.get(indexpath);
+		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
+			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+		
+		if(indexwriter==null){
+			Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+			TieredMergePolicy ti=new TieredMergePolicy();
+			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
+			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer);
+			fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+			fsconfig.setMergePolicy(ti);		//设置合并策略
+			indexwriter=new IndexWriter(fsdir,fsconfig);
+		}	
+	}
 	
 	/*
  	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
@@ -118,45 +198,32 @@ public class FileIndexs {
 	public Boolean AddFiles(Map<String,String[]> file,String indexpath){
 		Boolean f=true;
 		try {
-			Path path=Paths.get(indexpath);
-			Analyzer analyzer = new StandardAnalyzer();	
-			FSDirectory fdir = FSDirectory.open(path);
-			RAMDirectory rdir=new RAMDirectory();		
-			IndexWriterConfig rconf = new IndexWriterConfig(analyzer);
-			IndexWriter rw = new IndexWriter(rdir,rconf);
-
+			this.CreateAddIndexWriter(indexpath);
 			FieldType type=new FieldType();
 			type.setIndexOptions(IndexOptions.DOCS);
 			type.setStored(true);		
-			type.setTokenized(true);
+			type.setTokenized(false);
 			
-			FieldType dtype=new FieldType();
-			dtype.setIndexOptions(IndexOptions.DOCS);
-			dtype.setStored(true);		
-			dtype.setTokenized(false);
+			FieldType itype=new FieldType();
+			itype.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+			itype.setStored(true);		
+			itype.setTokenized(true);
 			
 			for(Entry<String, String[]> entry:file.entrySet()){
 				String[] finfo=entry.getValue();
 				Document doc=new Document();		
 				doc.add(new Field("file",entry.getKey(),type));		//文档名称字段
+				doc.add(new Field("fname",entry.getKey(),itype));		//文档名称检索字段
 				doc.add(new Field("author",finfo[0],type));		//文档作者字段
-				doc.add(new Field("time",finfo[1],dtype));		//创建日期字段
+				doc.add(new Field("time",finfo[1],type));		//创建日期字段
 				doc.add(new NumericDocValuesField("segments",Integer.valueOf(finfo[2])));
 				doc.add(new IntPoint("segments",Integer.valueOf(finfo[2])));		//段落总数以Int类型存储
 				doc.add(new StoredField("segments",Integer.valueOf(finfo[2])));
-			    rw.addDocument(doc);			
+				ramwriter.addDocument(doc);			
 			}
-			rw.close();
-		
-			TieredMergePolicy ti=new TieredMergePolicy();
-			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
-		    IndexWriterConfig fconf=new IndexWriterConfig(analyzer); 
-		    fconf.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-		    fconf.setMergePolicy(ti);
-		    IndexWriter fw=new IndexWriter(fdir,fconf);   
-		    fw.addIndexes(rdir); 		//程序结束后，将内存索引写入到磁盘索引中
-		    fw.commit();
-		    fw.close();
+			ramwriter.close();	
+			indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+	        indexwriter.commit();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			f=false;
@@ -253,5 +320,105 @@ public class FileIndexs {
 		}
 		
 		return finfo;
+	}
+	
+	/*
+	 *
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-21 
+	 * 
+	 * DeleteIndex方法根据给定文档名，删除索引
+	 *
+	 * @params filename
+	 * 				文档名称
+	 * 			indexpath 
+	 * 				文档信息索引文件存放目录	
+	 * @return void	   				
+	 * 
+	 */
+	public void DeleteIndex(String filename,String indexpath){
+		try {
+			this.CreateDeleteIndexWriter(indexpath);
+			Term t=new Term("file",filename);
+
+			indexwriter.deleteDocuments(t);
+			indexwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
+			indexwriter.commit();  	
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 *
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-21 
+	 * 
+	 * 单条件查询
+	 *
+	 * @params indexpath
+	 * 				索引文件所在目录
+	 * 			keywords 
+	 * 				从JTextField获取用户输入的关键字
+	 * 			
+	 * @return Map<Stirng,String[]>
+	 * 				将搜索结果以Map<文档名称，[文档作者，创建时间，段落总数]>的映射关系，返回查询结果		   
+	 * 
+	 */
+	public Map<String,String[]> QueryFiles(String indexpath,String keywords){
+		Map<String,String[]> finfo=new LinkedMap<String,String[]>();
+		try{
+			this.CreateIndexReader(indexpath);
+			if(indexreader!=null){	
+				Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+				IndexSearcher indexsearcher=new IndexSearcher(indexreader);
+				QueryParser parser=new QueryParser("fname", analyzer);
+				Query query=parser.parse(keywords.toString());
+				
+				int top=indexreader.numDocs();		//获取索引文件中有效文档总数
+				
+				if(top==0)	//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回null
+					return finfo;
+				TopDocs topdocs=indexsearcher.search(query,top); 
+				ScoreDoc[] hits=topdocs.scoreDocs;
+				int num=hits.length;
+				if(num==0)
+					return finfo;
+				SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<font color=red>","</font>"); //如果不指定参数的话，默认是加粗，即<b><b/>
+				QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
+				Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);	
+				
+				for(int i=0;i<num;i++){	
+					Document hitdoc=indexsearcher.doc(hits[i].doc);
+					String file=hitdoc.get("file");
+					String infos[]=new String[4];
+					infos[0]=hitdoc.get("author");
+					infos[1]=hitdoc.get("time");
+					infos[2]=hitdoc.get("segments");
+					String fname=hitdoc.get("fname");
+					if(fname!=null){
+						TokenStream tokenStream = analyzer.tokenStream("fname",new StringReader(fname));
+						String highlaws=highlighter.getBestFragment(tokenStream,fname);
+						infos[3]=highlaws;
+					}
+					finfo.put(file, infos);				
+				}
+			}	
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+				e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidTokenOffsetsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+       return finfo;	
 	}
 }

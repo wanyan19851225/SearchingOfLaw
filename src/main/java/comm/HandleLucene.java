@@ -539,32 +539,22 @@ public class HandleLucene {
 	 * 			使用SortField和Sort调用IndexSearch方法,对搜索结果用path字段升序排序						  
 	 * @2018-8-9
 	 * 			增加判断章段落索引号是否为999，如果是，则表明没有章段落，索引号设置为0
+	 * @2018-8-22
+	 * 			修改当检索结果为空时，将原来返回null，改为返回files
 	 * 
 	 */
 	
 	public Map<String,List<String[]>> GetTermSearch(String indexpath,String keywords,int top) throws IOException{
 		
+		String s=keywords.replaceAll("<[^>]+>","");
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
     	List<String[]> path=new ArrayList<String[]>();
-/*		
-		Path inpath=Paths.get(indexpath);
-		
-		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		
-		IOContext iocontext=new IOContext();
-
-		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
-		
-//		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
-
-		IndexReader indexreader=DirectoryReader.open(ramdir);
-*/
     	
     	this.CreateIndexReader(indexpath);
     	
 		IndexSearcher indexsearcher=new IndexSearcher(indexreader);
 		
-		Term term=new Term("file",keywords);
+		Term term=new Term("file",s);
 		
 		TermQuery termquery=new TermQuery(term);
 		
@@ -580,9 +570,8 @@ public class HandleLucene {
         
         int num=hits.length;
         
-        if(num==0){
-        	return null;
-        }
+        if(num==0)
+        	return files;
         
         for(int i=0;i<num;i++){
         	
@@ -605,11 +594,7 @@ public class HandleLucene {
         }
     	files.put(temp,path);
 		
-//        ramdir.close();
-//        indexreader.close();
-//        fsdir.close();
-        return files;
-		
+        return files;	
 	}
 	
 	/*
@@ -704,6 +689,8 @@ public class HandleLucene {
 	 * 				文档名称
 	 * 			indexpath 
 	 * 				索引文件存放目录	
+	 * 			filepath
+	 * 				文档信息索引路径
 	 * @return void
 	 * 
 	 * @2017-11-15
@@ -713,54 +700,29 @@ public class HandleLucene {
 	 * Modefied Date:2018-1-2
 	 * 			将indexwriter修改为类的私有类，以调用IndexReader的单例函数openifchange(Directory,IndexWriter方法)
 	 * 			将indexwriter更改为静态类，在创建前判断indexwriter是否处于打开状态，如果打开，则关闭以释放资源		   				
-	 * 
+	 * Modefied Date:2018-8-21
+	 * 			修改删除文档内容索引后，调用findexs.DeleteIndex删除文档信息索引
+	 * Modefied Date:2018-8-22
+	 * 			增加当filename有html标签时，删除html标签的功能
 	 */
 
-	public void DeleteIndex(String filename,String indexpath) throws IOException{
-		
-//		Path inpath=Paths.get(indexpath);
-//		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-//		
-////		IOContext iocontext=new IOContext();
-//
-////		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
-//		
-//		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
-//		
-////		IndexWriterConfig ramconfig=new IndexWriterConfig(analyzer);
-//		
-////		IndexWriter ramiwriter=new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
-//		
-//	    IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer);
-//		TieredMergePolicy ti=new TieredMergePolicy();
-//		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
-//		fsconfig.setMergePolicy(ti);		//设置合并策略
-////		System.out.println(ti.getForceMergeDeletesPctAllowed());
-////	    IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig); 
-//		if(indexwriter!=null){
-//			if(indexwriter.isOpen())
-//				indexwriter.close();
-//		}
-//		indexwriter=new IndexWriter(fsdir,fsconfig);
-		
-		this.CreateDeleteIndexWriter(indexpath);
-		Term t=new Term("file",filename);
-		
+	public void DeleteIndex(String filename,String indexpath,String filepath){
+		String s=filename.replaceAll("<[^>]+>","");	
+		try {
+			this.CreateDeleteIndexWriter(indexpath);
+			Term t=new Term("file",s);
 
+			indexwriter.deleteDocuments(t);
+			indexwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
+			indexwriter.commit();  
+			
+			FileIndexs findexs=new FileIndexs();
+			findexs.DeleteIndex(s, filepath);	
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	
-//		fsiwriter.deleteDocuments(t);
-//		fsiwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除	
-//		fsiwriter.commit();		
-//		fsiwriter.close();
-		
-		indexwriter.deleteDocuments(t);
-		indexwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
-		indexwriter.commit();
-//		indexwriter.close();
-		
-  
-//	    fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-//	    fsiwriter.close();	        	
 	}
 
 	/*

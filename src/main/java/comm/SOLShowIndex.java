@@ -28,8 +28,8 @@ public class SOLShowIndex extends JFrame{
 		Container contentpane=this.getContentPane();
 		contentpane.setLayout(new BorderLayout(3,1));
 		
-		final HandleLucene handle=new HandleLucene();
-		Map<String,Integer> fre=new HashMap<String,Integer>();
+		FileIndexs findexs=new FileIndexs();
+		Map<String,String[]> finfo=findexs.GetFileInfo(Path.filepath);
 
 		Vector<String> cname = new Vector<String>();
 		cname.add("序号");
@@ -37,17 +37,15 @@ public class SOLShowIndex extends JFrame{
         cname.add("法条总数");
         cname.add("是否删除");
         data = new Vector<Vector<String>>();
-    
-        fre=handle.GetTermFreq(Path.indexpath);
-        if(!fre.isEmpty()){
+        
+        if(!finfo.isEmpty()){
         	int i=0;
- //       	id=new HashMap<String,Integer>();
-        	for(Entry<String,Integer> entry: fre.entrySet()){
+        	for(Entry<String,String[]> entry: finfo.entrySet()){
         		Vector<String> line=new Vector<String>();
+        		String[] infos=entry.getValue();
         		line.add(String.valueOf(i++));
         		line.add(entry.getKey());
-        		line.add(String.valueOf(entry.getValue()));
-//        		id.put(entry.getKey(),i++);
+        		line.add(infos[2]);
         		data.add(line);
         	}
         }

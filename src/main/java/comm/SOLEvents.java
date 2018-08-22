@@ -426,12 +426,7 @@ public class  SOLEvents {
 					Vector<String> obj=p.t.GetDataID(file.get(i));
 					p.RemoveData(obj);
 					p.t.RemoveDataID(file.get(i));
-					try {
-						handle.DeleteIndex(file.get(i),Path.indexpath);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}	
+					handle.DeleteIndex(file.get(i),Path.indexpath,Path.filepath);	
 				}
 
 				p.t.LoadData(p.GetData());
@@ -728,8 +723,40 @@ public class  SOLEvents {
 			if(p instanceof SOLShowIndex){
 				SOLShowIndex showindex=(SOLShowIndex)this.p;
 				String keywords=showindex.GetKeywordsInputText(false);		//使用模糊搜索
+				FileIndexs findexs=new FileIndexs();
 				if(!keywords.isEmpty()){		//判断输入框是否为空
-					System.out.println(keywords);
+					Map<String,String[]> finfo=findexs.QueryFiles(Path.filepath, keywords);
+					Vector<Vector<String>> data = new Vector<Vector<String>>();
+			        if(!finfo.isEmpty()){
+			        	int i=0;
+			        	for(Entry<String,String[]> entry: finfo.entrySet()){
+			        		Vector<String> line=new Vector<String>();
+			        		String[] infos=entry.getValue();
+			        		line.add(String.valueOf(i++));
+			        		line.add("<html>"+infos[3]+"</html>");
+			        		line.add(infos[2]);
+			        		data.add(line);
+			        	}
+			        }
+			       showindex.t.LoadData(data);
+			       showindex.t.InitTable(false);
+				}
+				else{
+					Map<String,String[]> finfo=findexs.GetFileInfo(Path.filepath);
+					Vector<Vector<String>> data = new Vector<Vector<String>>();
+				       if(!finfo.isEmpty()){
+				        	int i=0;
+				        	for(Entry<String,String[]> entry: finfo.entrySet()){
+				        		Vector<String> line=new Vector<String>();
+				        		String[] infos=entry.getValue();
+				        		line.add(String.valueOf(i++));
+				        		line.add(entry.getKey());
+				        		line.add(infos[2]);
+				        		data.add(line);
+				        	}
+				        }
+			       showindex.t.LoadData(data);
+			       showindex.t.InitTable(false);
 				}
 			}
 		}	

@@ -36,15 +36,17 @@ public class SOLShowLaws extends JFrame{
 		HandleLucene handle=new HandleLucene();
         
         contentoflaw=handle.GetTermSearch(Path.indexpath,file,top);
-        List<String[]> laws=contentoflaw.get(file);
+        String s=file.replaceAll("<[^>]+>","");		//删除html标签
+        List<String[]> laws=contentoflaw.get(s);
         
-        for(int i=0;i<laws.size();i++){
-    		Vector<String> line=new Vector<String>();
-    		line.add(String.valueOf(i));
-    		line.add(laws.get(i)[1]);
-    		line.add(laws.get(i)[0]);
-    		data.add(line);
-        	
+        if(laws!=null){
+        	for(int i=0;i<laws.size();i++){
+        		Vector<String> line=new Vector<String>();
+        		line.add(String.valueOf(i));
+        		line.add(laws.get(i)[1]);
+        		line.add(laws.get(i)[0]);
+        		data.add(line);	
+        	}
         }
         
         IOTable t=new IOTable(cname,data);
@@ -110,7 +112,7 @@ public class SOLShowLaws extends JFrame{
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
 		
-	    this.setTitle("Searching Of Laws-"+file);//窗体标签  
+	    this.setTitle("Searching Of Laws-"+s);//窗体标签  
 	    this.setSize(WindowSize.X,WindowSize.Y);//窗体大小  
 	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
 	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  

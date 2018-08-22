@@ -110,7 +110,8 @@ public class IOTable extends JTable{
 	}
 	
 	public Vector<String> GetDataID(String s){
-		return id.get(s);
+		String src=s.replaceAll("<[^>]+>","");		//删除html标签
+		return id.get(src);
 	}
 	
 	public void RemoveDataID(String s){
