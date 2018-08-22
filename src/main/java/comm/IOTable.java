@@ -91,6 +91,7 @@ public class IOTable extends JTable{
 			}
 			if(i==1){
 				this.getColumnModel().getColumn(i).setPreferredWidth((new Double(size*0.61)).intValue());
+				this.getColumnModel().getColumn(i).setCellRenderer(new JCell());		//设置显示复选框框体
 			}
 			if(i>1){
 				this.getColumnModel().getColumn(i).setPreferredWidth((new Double(size*0.15)).intValue());
