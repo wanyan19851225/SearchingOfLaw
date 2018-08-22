@@ -33,12 +33,15 @@ public class SOLDownloadIndex extends JFrame{
 		cname.add("序号");
 		cname.add("文件名");  
         cname.add("法条总数");
-        cname.add("是否提交");
+        cname.add("作者");
+        cname.add("创建时间");
+        cname.add("是否导入");
         data = new Vector<Vector<String>>();
 		try {
-			Map<String, Integer> rfre = this.GetRemoteIndex(Path.urlpath);
-			HandleLucene handle=new HandleLucene();
-			Map<String,Integer> lfre=handle.GetTermFreq(Path.indexpath);
+			Map<String, String[]> rfre = this.GetRemoteIndex(Path.urlpath);
+//			HandleLucene handle=new HandleLucene();
+			FileIndexs findexs=new FileIndexs();
+			Map<String,String[]> lfre=findexs.GetFileInfo(Path.filepath);
 		    if(!lfre.isEmpty()&&!rfre.isEmpty()){	
 		    	for(String key:lfre.keySet()){
 		        	if(rfre.containsKey(key))	
@@ -47,11 +50,14 @@ public class SOLDownloadIndex extends JFrame{
 		    }
 	        if(!rfre.isEmpty()){
 	        	int i=0;
-	        	for(Entry<String,Integer> entry: rfre.entrySet()){
+	        	for(Entry<String,String[]> entry: rfre.entrySet()){
 	        		Vector<String> line=new Vector<String>();
 	        		line.add(String.valueOf(i++));
 	        		line.add(entry.getKey());
-	        		line.add(String.valueOf(entry.getValue()));
+	        		String[] info=entry.getValue();
+	        		line.add(info[2]);
+	        		line.add(info[0]);
+	        		line.add(info[1]);
 	        		data.add(line);
 	        	}
 	        }
@@ -64,7 +70,7 @@ public class SOLDownloadIndex extends JFrame{
         t=new IOTable(cname,data);
         t.InitTable(true);
 		
-		lbt=new JButton("提交");
+		lbt=new JButton("导入");
 		lbt.setPreferredSize(new Dimension(60,35));
 		JButton sbt=new JButton("全选");
 		sbt.setPreferredSize(new Dimension(60,35));
@@ -103,8 +109,8 @@ public class SOLDownloadIndex extends JFrame{
 	    this.setResizable(false); //锁定窗体
 
 }
-	public Map<String,Integer> GetRemoteIndex(String url) throws Exception{
-		Map<String,Integer> fre=new HashMap<String,Integer>();
+	public Map<String,String[]> GetRemoteIndex(String url) throws Exception{
+		Map<String,String[]> fre=new HashMap<String,String[]>();
 		Map<String,String> send=new HashMap<String,String>();
 		IOHttp http=new IOHttp(url);
 		JSONObject data,response;	
@@ -124,7 +130,11 @@ public class SOLDownloadIndex extends JFrame{
 	    JSONObject tem=new JSONObject();
 	    for(int i=0;i<objarry.size();i++){		
 	    	tem=objarry.getJSONObject(i);
-	        fre.put(tem.getString("file"),tem.getInt("lawnum")); 
+	    	String info[]=new String[3];
+	    	info[0]=tem.getString("author");
+	    	info[1]=tem.getString("time");
+	    	info[2]=String.valueOf(tem.getInt("lawnum"));
+	        fre.put(tem.getString("file"),info); 
 	    }
 		return fre;	
 	}

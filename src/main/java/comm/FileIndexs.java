@@ -367,7 +367,9 @@ public class FileIndexs {
 	 * 				从JTextField获取用户输入的关键字
 	 * 			
 	 * @return Map<Stirng,String[]>
-	 * 				将搜索结果以Map<文档名称，[文档作者，创建时间，段落总数]>的映射关系，返回查询结果		   
+	 * 				将搜索结果以Map<文档名称，[文档作者，创建时间，段落总数]>的映射关系，返回查询结果
+	 * Modified Data:2018-8-22
+	 * 				将搜索结果以Map<文档名称，[文档作者，创建时间，段落总数，文档名称检索]>的映射关系，返回查询结果	   
 	 * 
 	 */
 	public Map<String,String[]> QueryFiles(String indexpath,String keywords){

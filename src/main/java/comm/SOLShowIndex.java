@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.Map.Entry;
