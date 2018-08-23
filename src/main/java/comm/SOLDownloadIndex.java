@@ -149,7 +149,24 @@ public class SOLDownloadIndex extends JFrame{
 		return fre;	
 	}
 	
-	public Map<String,String[]> GetRemoteFileInfo(String url){
+	/*
+	 *
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-23 
+	 * 
+	 * 使用关键词，检索服务器端的文档信息
+	 *
+	 * @params urlpath
+	 * 				服务器地址
+	 * 			keywords
+	 * 				关键词
+	 * @return Map<Stirng,List<String[]>>
+	 * 				将搜索结果以Map<文档名称，[文档作者，创建日期，段落总数，文档名称检索]>的映射关系，返回查询结果		   
+	 *
+	 */
+	public Map<String,String[]> GetRemoteFileInfo(String url,String keywords){
 		Map<String,String[]> fre=new HashMap<String,String[]>();
 		JSONObject send=new JSONObject();
 		IOHttp http=new IOHttp(url);
@@ -159,7 +176,7 @@ public class SOLDownloadIndex extends JFrame{
 			send.accumulate("command","107");
 			send.accumulate("token","");		
 			send.accumulate("user","");
-        
+			send.accumulate("keywords",keywords);
 			List<String> file=this.GetFiles();
 			if(file.isEmpty())
 				send.accumulate("FileList",list);
@@ -174,18 +191,18 @@ public class SOLDownloadIndex extends JFrame{
 			System.out.println(send.toString());
 			GZipUntils gzip=new GZipUntils();
 			String body = gzip.S2Gzip(send.toString());
-//			response=http.sendPost(body);
-//		    JSONArray objarry=response.getJSONArray("FileList");
-//		    JSONObject tem=new JSONObject();
-//		    for(int i=0;i<objarry.size();i++){		
-//		    	tem=objarry.getJSONObject(i);
-//		    	String infos[]=new String[4];
-//		    	infos[0]=tem.getString("author");
-//		    	infos[1]=tem.getString("time");
-//		    	infos[2]=String.valueOf(tem.getInt("lawnum"));
-//		    	infos[3]=tem.getString("fileindex");
-//		        fre.put(tem.getString("file"),infos); 
-//		    }
+			response=http.sendPost(body);
+		    JSONArray objarry=response.getJSONArray("FileList");
+		    JSONObject tem=new JSONObject();
+		    for(int i=0;i<objarry.size();i++){		
+		    	tem=objarry.getJSONObject(i);
+		    	String infos[]=new String[4];
+		    	infos[0]=tem.getString("author");
+		    	infos[1]=tem.getString("time");
+		    	infos[2]=String.valueOf(tem.getInt("segments"));
+		    	infos[3]=tem.getString("findex");
+		        fre.put(tem.getString("file"),infos); 
+		    }
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
