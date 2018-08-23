@@ -35,6 +35,8 @@ import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.index.TieredMergePolicy;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -422,5 +424,91 @@ public class FileIndexs {
 			e.printStackTrace();
 		}
        return finfo;	
+	}
+	
+	/*
+	 *
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-23 
+	 * 
+	 * 使用多条件组合查询
+	 *
+	 * @params indexpath
+	 * 				索引文件所在目录
+	 * 			fields
+	 * 				指定从哪几个字段查询，使用String[]方式传参数
+	 * 			range
+	 * 				指定从哪些文档里搜索keywords
+	 * 			keywords 
+	 * 				从JTextField获取用户输入的多个关键字,使用String方式传递
+	 * 			
+	 * @return Map<Stirng,List<String[]>>
+	 * 				将搜索结果以Map<文档名称，[文档作者，创建日期，段落总数，文档名称检索]>的映射关系，返回查询结果		   
+	 *
+	 */
+	public Map<String,String[]> QueryFiles(String indexpath,String[] fields,List<String> range,String keywords){
+		Map<String,String[]> finfo=new LinkedMap<String,String[]>();
+		try {
+			this.CreateIndexReader(indexpath);
+			if(indexreader!=null){
+				Analyzer analyzer=new StandardAnalyzer();
+				IndexSearcher indexsearcher=new IndexSearcher(indexreader);
+				BooleanQuery.Builder fbuilder=new BooleanQuery.Builder();
+				int rnum=range.size();
+				for(int i=0;i<rnum;i++){
+					Term term=new Term(fields[0],range.get(i));
+					TermQuery termquery=new TermQuery(term);
+					fbuilder.add(termquery,BooleanClause.Occur.SHOULD);
+				}
+				BooleanQuery  fbooleanquery=fbuilder.build();
+				BooleanQuery.Builder lbuilder=new BooleanQuery.Builder();
+				QueryParser parser=new QueryParser(fields[1], analyzer);  
+				Query query=parser.parse(keywords);
+				lbuilder.add(query,BooleanClause.Occur.MUST);
+				BooleanQuery  lbooleanquery=lbuilder.build();
+				BooleanQuery.Builder builder=new BooleanQuery.Builder();
+				builder.add(fbooleanquery,BooleanClause.Occur.MUST);
+				builder.add(lbooleanquery,BooleanClause.Occur.MUST);
+				BooleanQuery  booleanquery=builder.build();
+				int top=indexreader.numDocs();		//获取有效索引文档总数
+				if(top==0)	//判断有效索引文档数是否为0，如果为零则退出该方法，返回null
+					return finfo;
+				TopDocs topdocs=indexsearcher.search(booleanquery,top); 
+				ScoreDoc[] hits=topdocs.scoreDocs;
+			    int num=hits.length;
+			    if(num==0)
+			        return finfo;
+			    SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<font color=red>","</font>"); //如果不指定参数的话，默认是加粗，即<b><b/>
+				QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
+				Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
+				for(int i=0;i<num;i++){	
+					Document hitdoc=indexsearcher.doc(hits[i].doc);
+					String file=hitdoc.get("file");
+					String infos[]=new String[4];
+					infos[0]=hitdoc.get("author");
+					infos[1]=hitdoc.get("time");
+					infos[2]=hitdoc.get("segments");
+					String fname=hitdoc.get("fname");
+					if(fname!=null){
+						TokenStream tokenStream = analyzer.tokenStream("fname",new StringReader(fname));
+						String highlaws=highlighter.getBestFragment(tokenStream,fname);
+						infos[3]=highlaws;
+					}
+					finfo.put(file, infos);	
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidTokenOffsetsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return finfo;	
 	}
 }

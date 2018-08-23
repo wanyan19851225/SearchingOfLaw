@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -24,10 +26,11 @@ public class SOLDownloadIndex extends JFrame{
 	public IOTable t;
 	private Vector<Vector<String>> data;
 	private JButton lbt;
+	private JTextField stf;
 	
 	public SOLDownloadIndex(){
 		Container contentpane=this.getContentPane();
-		contentpane.setLayout(new BorderLayout(3,3));
+		contentpane.setLayout(new BorderLayout(3,1));
 
 		Vector<String> cname = new Vector<String>();
 		cname.add("序号");
@@ -70,34 +73,41 @@ public class SOLDownloadIndex extends JFrame{
         t=new IOTable(cname,data);
         t.InitTable(true);
 		
+        stf=new JTextField(50);
+		stf.setPreferredSize(new Dimension(300,30));
+		JButton sbt2=new JButton("搜索");
+		sbt2.setPreferredSize(new Dimension(60,30));
 		lbt=new JButton("导入");
-		lbt.setPreferredSize(new Dimension(60,35));
+		lbt.setPreferredSize(new Dimension(60,30));
 		JButton sbt=new JButton("全选");
-		sbt.setPreferredSize(new Dimension(60,35));
+		sbt.setPreferredSize(new Dimension(60,30));
 		JButton sbt1=new JButton("反选");
-		sbt1.setPreferredSize(new Dimension(60,35));
-		
+		sbt1.setPreferredSize(new Dimension(60,30));
 		JScrollPane jsp=new JScrollPane();
-		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));
+		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-100));
 		jsp.setViewportView(t);
 
-		
 		lbt.addActionListener(new SOLEvents.DownloadIndexEvent(this));
 		sbt.addActionListener(new SOLEvents.SelEvent(this));
 		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
-		
+		sbt2.addActionListener(new SOLEvents.FilterEvent(this));
 		//t.addMouseListener(new SOLEvents.ShowSOLShowLawsEvent(this));
 		
-		JPanel cpane=new JPanel();
-	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
-	    JPanel spane=new JPanel();
+		JPanel npane=new JPanel();		//搜索框、搜索按钮面板
+	    npane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
+		JPanel cpane=new JPanel();		//列表面板
+	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
+	    JPanel spane=new JPanel();		//全选，反选，删除按钮面板
+	    spane.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
 		
-		
+		npane.add(stf);
+		npane.add(sbt2);
 		cpane.add(jsp);
 		spane.add(sbt);
 		spane.add(sbt1);
 		spane.add(lbt);
 		
+		contentpane.add(npane,BorderLayout.NORTH);
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
 		
@@ -136,6 +146,53 @@ public class SOLDownloadIndex extends JFrame{
 	    	info[2]=String.valueOf(tem.getInt("lawnum"));
 	        fre.put(tem.getString("file"),info); 
 	    }
+		return fre;	
+	}
+	
+	public Map<String,String[]> GetRemoteFileInfo(String url){
+		Map<String,String[]> fre=new HashMap<String,String[]>();
+		JSONObject send=new JSONObject();
+		IOHttp http=new IOHttp(url);
+		JSONObject response;
+		JSONArray list=new JSONArray();
+		try {
+			send.accumulate("command","107");
+			send.accumulate("token","");		
+			send.accumulate("user","");
+        
+			List<String> file=this.GetFiles();
+			if(file.isEmpty())
+				send.accumulate("FileList",list);
+			else{
+				for(int i=0;i<file.size();i++){
+					JSONObject tem=new JSONObject();
+					tem.accumulate("fname",file.get(i));
+					list.add(tem);
+				}
+				send.accumulate("FileList",list);
+			}
+			System.out.println(send.toString());
+			GZipUntils gzip=new GZipUntils();
+			String body = gzip.S2Gzip(send.toString());
+//			response=http.sendPost(body);
+//		    JSONArray objarry=response.getJSONArray("FileList");
+//		    JSONObject tem=new JSONObject();
+//		    for(int i=0;i<objarry.size();i++){		
+//		    	tem=objarry.getJSONObject(i);
+//		    	String infos[]=new String[4];
+//		    	infos[0]=tem.getString("author");
+//		    	infos[1]=tem.getString("time");
+//		    	infos[2]=String.valueOf(tem.getInt("lawnum"));
+//		    	infos[3]=tem.getString("fileindex");
+//		        fre.put(tem.getString("file"),infos); 
+//		    }
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return fre;	
 	}
 	
@@ -184,6 +241,16 @@ public class SOLDownloadIndex extends JFrame{
 	public Vector<Vector<String>> GetData(){
 		return data;
 	}
+	
+	public List<String> GetFiles(){
+		List<String> file=new ArrayList<String>();
+		int n=data.size();
+		for(int i=0;i<n;i++){
+			String fname=data.elementAt(i).elementAt(1);
+			file.add(fname);
+		}
+		return file;
+	}
 
 	public void SetSearchButtonEnable(Boolean f){
 		lbt.setEnabled(f);
@@ -207,5 +274,42 @@ public class SOLDownloadIndex extends JFrame{
 			else
 				t.setValueAt(true,i,cnum-1);
 		}	
+	}
+	
+	public String GetKeywordsInputText(Boolean f){		//参数f判断是否使用模糊搜索方式
+
+		StringBuffer s=new StringBuffer();
+		String[] k=this.InputText2Keywords();
+		if(k!=null){		//判断输入框是否为空
+			if(k.length!=0){
+				if(f)		//使用模糊搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append(k[i]);
+						else
+							s.append(k[i]+" AND ");
+					}
+				else		//使用精确搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append("\""+k[i]+"\"");
+						else
+							s.append("\""+k[i]+"\""+" AND ");
+						
+					}
+			}
+		}
+		return s.toString();
+	}
+	
+	public String[] InputText2Keywords(){
+		String s=stf.getText().trim();
+		String[] keywords=null;
+		if(!s.isEmpty()){		//判断输入框是否为空
+			UpdateString us=new UpdateString();
+			String fk=us.FilterDoubleString(s," ");
+			keywords=fk.split(" ");
+		}
+		return keywords;
 	}
 }

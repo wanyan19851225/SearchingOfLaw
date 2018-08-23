@@ -759,6 +759,32 @@ public class  SOLEvents {
 			       showindex.t.InitTable(false);
 				}
 			}
+			else if(p instanceof SOLDownloadIndex){
+				SOLDownloadIndex downindex=(SOLDownloadIndex)this.p;
+				String keywords=downindex.GetKeywordsInputText(false);		//使用模糊搜索
+//				FileIndexs findexs=new FileIndexs();
+				if(!keywords.isEmpty()){		//判断输入框是否为空
+					Map<String,String[]> finfo=downindex.GetRemoteFileInfo(Path.urlpath);
+					Vector<Vector<String>> data = new Vector<Vector<String>>();
+			        if(!finfo.isEmpty()){
+			        	int i=0;
+			        	for(Entry<String,String[]> entry: finfo.entrySet()){
+			        		Vector<String> line=new Vector<String>();
+			        		String[] infos=entry.getValue();
+			        		line.add(String.valueOf(i++));
+			        		line.add("<html>"+infos[3]+"</html>");
+			        		line.add(infos[2]);
+			        		data.add(line);
+			        	}
+			        }
+			       downindex.t.LoadData(data);
+			       downindex.t.InitTable(true);
+				}
+				else{
+					downindex.t.LoadData(downindex.GetData());
+					downindex.t.InitTable(true);
+				}
+			}
 		}	
 	}
 	
