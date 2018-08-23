@@ -139,42 +139,6 @@ public class SOLDownloadIndex extends JFrame{
 		return fre;	
 	}
 	
-	public int[] CommitIndex(String url,String file,String indexpath) throws Exception{
-		int[] res=new int[2];
-		HandleLucene handle=new HandleLucene();  
-		Map<String,List<String[]>> content=handle.GetTermSearch(Path.indexpath,file);
-			if(!content.isEmpty()){
-				JSONObject body=new JSONObject();
-				JSONObject response=new JSONObject();
-				IOHttp http=new IOHttp(url);
-				body.accumulate("token","");
-				body.accumulate("command","103");
-				body.accumulate("user","tmp");
-				body.accumulate("file",file);
-				List<String[]> laws=content.get(file);
-				int count = laws.size();		//传给服务器的法条总数
-				res[0]=count;
-				body.accumulate("count",count);
-		        JSONArray lawslist=new JSONArray();
-				for(int i=0;i<count;i++){
-					String[] law=laws.get(i);
-					JSONObject tem=new JSONObject();
-					tem.accumulate("number",i);
-					tem.accumulate("path",law[0]);
-					tem.accumulate("law",law[1]);
-					lawslist.add(tem);
-				}
-				body.accumulate("lawslist",lawslist);
-				GZipUntils gzip=new GZipUntils();
-				String sends=gzip.S2Gzip(body.toString());
-				response=http.sendPost(sends);
-				
-				int total=response.getInt("result");		//获取服务器写入索引文件成功的法条总数
-				res[1]=total;	
-			}
-			return res;
-	}
-	
 	public boolean DownloadIndex(String url,String file) throws Exception{
 		boolean f;
 				JSONObject body=new JSONObject();
@@ -183,13 +147,8 @@ public class SOLDownloadIndex extends JFrame{
 				body.accumulate("token","");
 				body.accumulate("command","105");
 				body.accumulate("user","wangyan");
-				//JSONArray fileslist=new JSONArray();
-				//for(int i=0;i<file.size();i++){
-					//JSONObject tem=new JSONObject();
 				body.accumulate("file",file);
-					//fileslist.add(tem);
-				//}
-				//body.accumulate("fileslist",fileslist);
+				
 				GZipUntils gzip=new GZipUntils();
 				String sends=gzip.S2Gzip(body.toString());
 				response=http.sendPost(sends);
@@ -210,7 +169,7 @@ public class SOLDownloadIndex extends JFrame{
 			        Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
 			        content.put(response.getString("file"),laws);
 			        HandleLucene handle=new HandleLucene();
-			        int tatol=handle.AddIndex(content,Path.indexpath);
+			        handle.AddIndexs(content,Path.indexpath,Path.filepath);
 					f=true;
 				}
 				else

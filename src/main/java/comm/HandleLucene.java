@@ -919,22 +919,22 @@ public class HandleLucene {
 	 * @author: wanyan 
 	 * date: 2018-1-23 
 	 * 
-	 * AddIndex方法在根据传递的Map，将Map中的索引追加到已存在的索引文件中，如果没有索引文件，则创建索引文件
+	 * AddIndex方法在根据传递的Map，将Map中的索引追加到已存在的索引文件中，如果没有索引文件，则创建索引文件，该方法用于从服务器索引导入到本地时使用
 	 *
 	 * @params content 
-	 * 				文档索引，以Map<文档名称，List<法条路径，法条内容>>形式传参
-	 * 				
+	 * 				文档索引，以Map<文档名称，List<法条路径，法条内容>>形式传参				
 	 * 		   indexpath
 	 * 				索引文件路径
-	 * 
 	 * @return Integer
 	 * 				返回添加到索引文件中的法条数
 	 * @Modified 2018-8-13
 	 * 				修改为调用CreateAddIndexWriter方法，实现IndexWriter单例化
+	 * @Modified 2018-8-23
+	 * 				为文档段落创建索引成功后，创建文档信息索引
 	 * 	   				
 	 */
 	
-	public Integer AddIndex(Map<String,List<String[]>> content,String indexpath) throws IOException{
+	public Integer AddIndexs(Map<String,List<String[]>> content,String indexpath,String filepath) throws IOException{
 		int totalofindex=0;
 		this.CreateAddIndexWriter(indexpath);
 		
@@ -942,56 +942,39 @@ public class HandleLucene {
 		
 		for(Entry<String, List<String[]>> entry:content.entrySet()){ 
 				
-				//FieldType filetype=new FieldType();
-				//filetype.setIndexOptions(IndexOptions.DOCS);
-				//filetype.setStored(true);		
-				//filetype.setTokenized(false);
-				//FieldType lawtype=new FieldType();
-				//lawtype.setIndexOptions(IndexOptions.NONE);
-				//lawtype.setStored(true);		
-				//lawtype.setTokenized(false);
+			FieldType filetype=new FieldType();
+			filetype.setIndexOptions(IndexOptions.DOCS);
+			filetype.setStored(true);		
+			filetype.setTokenized(false);
 				
-				FieldType filetype=new FieldType();
-				filetype.setIndexOptions(IndexOptions.DOCS);
-				filetype.setStored(true);		
-				filetype.setTokenized(false);
-				
-				laws=entry.getValue();
-				int count=laws.size();
-				totalofindex=count;
-				for(int i=0;i<count;i++){
-					Document doc=new Document();		//鍒涘缓Document,姣忎竴涓彂鏉℃柊寤轰竴涓?
-					doc.add(new Field("file",entry.getKey(),filetype));		//鏂囨。鍚嶇О瀛樺偍锛屼笉鍒嗚瘝
-					//doc.add(new IntPoint("path",Integer.valueOf(laws.get(i)[0])));		//娉曟潯绱㈠紩浠nt绫诲瀷瀛樺偍
-					//doc.add(new StoredField("path",Integer.valueOf(laws.get(i)[0])));
-					doc.add(new NumericDocValuesField("path",Integer.valueOf(laws.get(i)[0])));
-					doc.add(new IntPoint("path",Integer.valueOf(laws.get(i)[0])));		//法条索引以Int类型存储
-					doc.add(new StoredField("path",Integer.valueOf(laws.get(i)[0])));
-					doc.add(new Field("law",laws.get(i)[1],TextField.TYPE_STORED));		//鍙戞潯鍐呭绱㈠紩銆佸垎璇嶏紝涓嶅瓨鍌?
-			    	ramwriter.addDocument(doc);		//灏嗘硶鏉＄储寮曟坊鍔犲埌鍐呭瓨绱㈠紩涓?	
-				}	    		  
+			laws=entry.getValue();
+			int count=laws.size();
+			totalofindex=count;
+			for(int i=0;i<count;i++){
+				Document doc=new Document();		
+				doc.add(new Field("file",entry.getKey(),filetype));		
+				doc.add(new NumericDocValuesField("path",Integer.valueOf(laws.get(i)[0])));
+				doc.add(new IntPoint("path",Integer.valueOf(laws.get(i)[0])));		//法条索引以Int类型存储
+				doc.add(new StoredField("path",Integer.valueOf(laws.get(i)[0])));
+				doc.add(new Field("law",laws.get(i)[1],TextField.TYPE_STORED));	
+			    ramwriter.addDocument(doc);	
 			}
-	
-		ramwriter.close();
-//	
-//		TieredMergePolicy ti=new TieredMergePolicy();
-//		ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
-//        IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
-//    	fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-//    	fsconfig.setMergePolicy(ti);
-////        IndexWriter fsiwriter=new IndexWriter(fsdir,fsconfig);   
-////       fsiwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-//    	
-//    	if(indexwriter!=null){
-//    		if(indexwriter.isOpen())
-//    			indexwriter.close();
-//    	}
-//        
-//    	indexwriter=new IndexWriter(fsdir,fsconfig);  
+			if(totalofindex>0){		//当段落数大于0时，创建文档信息索引
+				Date d=new Date(System.currentTimeMillis());
+				DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
+				FileIndexs findexs=new FileIndexs();
+				Map<String,String[]> finfo=new HashMap<String,String[]>();
+				String[] infos=new String[3];
+				infos[0]="";
+				infos[1]=df.format(d);
+				infos[2]=String.valueOf(totalofindex);
+				finfo.put(entry.getKey(),infos);
+				findexs.AddFiles(finfo,filepath);
+			}
+		}
+		ramwriter.close();  
         indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
- 
-        indexwriter.commit();
-//        indexwriter.close();
+        indexwriter.commit(); 
         
         return totalofindex;
 	}
