@@ -209,6 +209,7 @@ public class SOLDownloadIndex extends JFrame{
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,e.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
 		}
 		return fre;	
 	}
@@ -227,8 +228,8 @@ public class SOLDownloadIndex extends JFrame{
 				String sends=gzip.S2Gzip(body.toString());
 				response=http.sendPost(sends);
 				
-				int res=response.getInt("result");		//获取服务器写入索引文件成功的法条总数
-				if(res==1){
+				int res=response.getInt("count");		
+				if(res>0){		//判断段落总数
 			        JSONArray objarry=response.getJSONArray("lawslist");
 			        JSONObject tem=new JSONObject();
 

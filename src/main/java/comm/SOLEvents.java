@@ -693,15 +693,18 @@ public class  SOLEvents {
 					p.SetSearchButtonEnable(false);
 					//Map<String,int[]> m=new HashMap<String,int[]>();
 					for(int i=0;i<file.size();i++){
-						boolean f=p.DownloadIndex(Path.urlpath, file.get(i));
+						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+						boolean f=p.DownloadIndex(Path.urlpath, s);
 						if(f){
-							Vector<String> obj=p.t.GetDataID(file.get(i));
+							Vector<String> obj=p.t.GetDataID(s);
 							p.RemoveData(obj);
-							p.t.RemoveDataID(file.get(i));
-						}	
+							p.t.RemoveDataID(s);
+						}
+						else
+							JOptionPane.showMessageDialog(null,s+" 导入本地仓库失败！", "警告", JOptionPane.ERROR_MESSAGE);
 					}
 					p.t.LoadData(p.GetData());
-			        p.t.InitTable(false);
+			        p.t.InitTable(true);
 			        p.SetSearchButtonEnable(true);
 				}
 			} catch (Exception e1) {
