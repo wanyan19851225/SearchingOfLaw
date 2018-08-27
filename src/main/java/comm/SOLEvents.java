@@ -725,7 +725,7 @@ public class  SOLEvents {
 			// TODO Auto-generated method stub
 			if(p instanceof SOLShowIndex){
 				SOLShowIndex showindex=(SOLShowIndex)this.p;
-				String keywords=showindex.GetKeywordsInputText(false);		//使用模糊搜索
+				String keywords=showindex.GetKeywordsInputText(true);		//使用模糊搜索
 				FileIndexs findexs=new FileIndexs();
 				if(!keywords.isEmpty()){		//判断输入框是否为空
 					Map<String,String[]> finfo=findexs.QueryFiles(Path.filepath, keywords);
@@ -764,7 +764,7 @@ public class  SOLEvents {
 			}
 			else if(p instanceof SOLDownloadIndex){
 				SOLDownloadIndex downindex=(SOLDownloadIndex)this.p;
-				String keywords=downindex.GetKeywordsInputText(false);		//使用模糊搜索
+				String keywords=downindex.GetKeywordsInputText(true);		//使用模糊搜索
 //				FileIndexs findexs=new FileIndexs();
 				if(!keywords.isEmpty()){		//判断输入框是否为空
 					Map<String,String[]> finfo=downindex.GetRemoteFileInfo(Path.urlpath,keywords);
@@ -789,6 +789,34 @@ public class  SOLEvents {
 					downindex.t.LoadData(downindex.GetData());
 					downindex.t.InitTable(true);
 				}
+			}
+			else if(p instanceof SOLRemoteIndex){
+				SOLRemoteIndex remoteindex=(SOLRemoteIndex)this.p;
+				String keywords=remoteindex.GetKeywordsInputText(true);		//使用模糊搜索
+				if(!keywords.isEmpty()){		
+					Map<String,String[]> finfo=remoteindex.GetRemoteFileInfo(Path.urlpath,keywords);
+					Vector<Vector<String>> data = new Vector<Vector<String>>();
+			        if(!finfo.isEmpty()){
+			        	int i=0;
+			        	for(Entry<String,String[]> entry: finfo.entrySet()){
+			        		Vector<String> line=new Vector<String>();
+			        		String[] infos=entry.getValue();
+			        		line.add(String.valueOf(i++));
+			        		line.add("<html>"+infos[3]+"</html>");
+			        		line.add(infos[2]);
+			        		line.add(infos[0]);
+			        		line.add(infos[1]);
+			        		data.add(line);
+			        	}
+			        }
+			        remoteindex.t.LoadData(data);
+			        remoteindex.t.InitTable(false);
+				}
+				else{
+					remoteindex.t.LoadData(remoteindex.GetData());
+					remoteindex.t.InitTable(false);
+				}
+				
 			}
 		}	
 	}

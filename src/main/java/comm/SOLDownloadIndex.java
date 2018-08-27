@@ -156,7 +156,7 @@ public class SOLDownloadIndex extends JFrame{
 	 * @author: wanyan 
 	 * date: 2018-8-23 
 	 * 
-	 * 使用关键词，检索服务器端的文档信息
+	 * 使用关键词，在指定范围内，检索服务器端的文档信息
 	 *
 	 * @params urlpath
 	 * 				服务器地址
