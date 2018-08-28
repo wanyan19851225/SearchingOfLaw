@@ -44,16 +44,15 @@ public class SOLSearchIndexsProgress extends SwingWorker<Map<String,Long>,String
 			Boolean f=p.GetIsRemote();
 			long start=System.currentTimeMillis();
 			if(DisplayGui.range.isEmpty()){
-				if(f){
-					JOptionPane.showMessageDialog(null,"keywords:"+this.keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
-				}
+				if(f)
+					content=p.QueryRemoteSegments(Path.urlpath,this.keywords);
 				else
 					content=handle.GetSearch(Path.indexpath,this.keywords);
 			}
 			else{					
 //				多条件查询，指定在某个法条文档中查询	
 				if(f){
-					JOptionPane.showMessageDialog(null,"keywords:"+this.keywords+","+"address:"+p.GetRemoteAddress(), "警告", JOptionPane.ERROR_MESSAGE);
+					System.out.println("keywords:"+this.keywords+","+"address:");
 				}
 				else{
 					String[] fields=new String[]{"file","law"};

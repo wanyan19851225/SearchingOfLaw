@@ -197,7 +197,7 @@ public class SOLRemoteIndex extends JFrame{
 			send.accumulate("token","");		
 			send.accumulate("user","");
 			send.accumulate("keywords",keywords);
-			System.out.println(send.toString());
+//			System.out.println(send.toString());
 			GZipUntils gzip=new GZipUntils();
 			String body = gzip.S2Gzip(send.toString());
 			response=http.sendPost(body);

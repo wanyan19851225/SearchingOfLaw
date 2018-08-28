@@ -2,6 +2,8 @@ package comm;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -16,65 +18,42 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
 
 
 public class  SOLEvents {
 	
-	public static class LocalEvent extends MouseAdapter{
-		JPanel jp;
+	public static class RemoteEvent implements ItemListener{
+
+		private DisplayGui p;
 		
-		public LocalEvent(JPanel jp){
-			this.jp=jp;
+		public RemoteEvent(DisplayGui p){
+			this.p=p;
 		}
 		
-		public void mouseClicked(MouseEvent e){	
-			int count = jp.getComponentCount();
-			jp.setEnabled(false);
-			for (int i = 0; i < count; i++) {
-			    Object obj = jp.getComponent(i);
-			    if (obj instanceof JTextField) {
-			    	JTextField jt=(JTextField)obj;
-			        jt.setEnabled(false);
-			    }
-			    if(obj instanceof JLabel){
-			    	JLabel jl=(JLabel)obj;
-			        jl.setEnabled(false);
-			    }
-			}	
+		public void itemStateChanged(ItemEvent e) {
+			// TODO Auto-generated method stub
+			this.p.SetRangeButtonEnable(false);
+			DisplayGui.star.SetRemoteStatus(true);
+			DisplayGui.star.SetRemoteMarkVisable(true);
 		}
-		
 	}
 	
-	public static class HostEvent extends MouseAdapter{
-		JPanel jp;
+	public static class LocalEvent implements ItemListener{
+
+		private DisplayGui p;
 		
-		public HostEvent(JPanel jp){
-			this.jp=jp;
+		public LocalEvent(DisplayGui p){
+			this.p=p;
 		}
 		
-		public void mouseClicked(MouseEvent e){	
-			int count = jp.getComponentCount();
-			jp.setEnabled(true);
-			for (int i = 0; i < count; i++) {
-			    Object obj = jp.getComponent(i);
-			    if (obj instanceof JTextField) {
-			    	JTextField jt=(JTextField)obj;
-			        jt.setEnabled(true);
-			    }
-			    if(obj instanceof JLabel){
-			    	JLabel jl=(JLabel)obj;
-			        jl.setEnabled(true);
-			    }
-			}	
-		}
-		
+		public void itemStateChanged(ItemEvent e) {
+			// TODO Auto-generated method stub
+			this.p.SetRangeButtonEnable(true);
+			DisplayGui.star.SetRemoteStatus(false);
+			DisplayGui.star.SetRemoteMarkVisable(false);
+		}	
 	}
 
 	public static class ExeEvent extends MouseAdapter{
@@ -194,23 +173,23 @@ public class  SOLEvents {
 		}		
 	}
 	
-	public static class RemoteEvent extends MouseAdapter{
+//	public static class RemoteEvent extends MouseAdapter{
+//	
+//		public void mouseClicked(MouseEvent e){
+//			DisplayGui.star.SetRemoteStatus(true);
+//			DisplayGui.star.SetRemoteMarkVisable(true);
+//		}
+//		
+//	}
 	
-		public void mouseClicked(MouseEvent e){
-			DisplayGui.star.SetRemoteStatus(true);
-			DisplayGui.star.SetRemoteMarkVisable(true);
-		}
-		
-	}
-	
-	public static class UnRemoteEvent extends MouseAdapter{
-		
-		public void mouseClicked(MouseEvent e){
-			DisplayGui.star.SetRemoteStatus(false);
-			DisplayGui.star.SetRemoteMarkVisable(false);
-		}
-		
-	}
+//	public static class UnRemoteEvent extends MouseAdapter{
+//		
+//		public void mouseClicked(MouseEvent e){
+//			DisplayGui.star.SetRemoteStatus(false);
+//			DisplayGui.star.SetRemoteMarkVisable(false);
+//		}
+//		
+//	}
 	
 	/** 
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 

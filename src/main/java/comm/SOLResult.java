@@ -114,9 +114,8 @@ public class SOLResult extends JPanel{
 		long total=0;
 		ste.setText("");
 		
-		if(content==null){
+		if(content.isEmpty())
 			ste.setText("<i><b>未搜索到关键词</b></i>");
-		}
 		else{
 			StringBuffer text=new StringBuffer();
 			for(Entry<String,List<String[]>> entry: content.entrySet()){

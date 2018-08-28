@@ -113,94 +113,63 @@ public class HandleLucene {
 	public Map<String,List<String[]>> GetSearch(String indexpath,String keywords) throws ParseException, IOException, InvalidTokenOffsetsException{
 		
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
-		
 		try{
-		
 			this.CreateIndexReader(indexpath);
-			
-				if(indexreader!=null){	
-					Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
-					IndexSearcher indexsearcher=new IndexSearcher(indexreader);
-				//		Term term=new Term("law",keywords);
-				//		TermQuery termquery=new TermQuery(term);
-				//		模糊查询		
-				//		FuzzyQuery fuzzquery=new FuzzyQuery(term);
-				// 		短语查询		
-				//		 PhraseQuery.Builder builder = new PhraseQuery.Builder();
-				//		 builder.add(term);
-				//		 PhraseQuery phrasequery=builder.build();
-				//		查询分析器	
-			
-					QueryParser parser=new QueryParser("law", analyzer);
-           
-					Query query=parser.parse(keywords.toString());
-        
-					int top=indexreader.numDocs();		//获取索引文件中有效文档总数
-       
-					if(top==0)	//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回null
-						files=null;
-					else{
-						TopDocs topdocs=indexsearcher.search(query,top); 
-        
-						ScoreDoc[] hits=topdocs.scoreDocs;
-        
-						int num=hits.length;
-        
-						if(num==0){
-							return null;
-						}
-        
-					//此处加入的是搜索结果的高亮部分
-						SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
-						QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
-					//			Fragmenter fragmenter = new SimpleSpanFragmenter(scorer); //根据这个得分计算出一个片段
-						Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
-					//      	 highlighter.setTextFragmenter(fragmenter); //设置一下要显示的片段		
-						for(int i=0;i<num;i++){	
-							Document hitdoc=indexsearcher.doc(hits[i].doc);
-							String temp=hitdoc.get("file");
-							String indexlaws[]=new String[2];
-							Integer index=Integer.valueOf(hitdoc.get("path"));		
-				    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，表明没有章段落，索引号设置为0
-				    			indexlaws[0]="第"+0+"章"+"&emsp";
-				    		else
-				    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
-							index=index%100000;
-							indexlaws[0]+="第"+index/1000+"节";
-							String laws=hitdoc.get("law");
-							if(laws!=null){
-								TokenStream tokenStream = analyzer.tokenStream("laws",new StringReader(laws));
-								Fragmenter displaysize= new SimpleFragmenter(laws.length());
-								highlighter.setTextFragmenter(displaysize);
-								String highlaws=highlighter.getBestFragment(tokenStream,laws);
-								indexlaws[1]=highlaws;
-								if(i==0){
-									List<String[]> path=new ArrayList<String[]>();
-									path.add(indexlaws);
-									files.put(temp,path);
-								}else{
-									if(files.containsKey(temp)){
-										files.get(temp).add(indexlaws);
-									}else{
-										List<String[]> path=new ArrayList<String[]>();
-										path.add(indexlaws);
-										files.put(temp,path);
-									}     		           	 			
-								}
-							}
+			if(indexreader!=null){	
+				Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+				IndexSearcher indexsearcher=new IndexSearcher(indexreader);
+				QueryParser parser=new QueryParser("law", analyzer);         
+				Query query=parser.parse(keywords.toString());        
+				int top=indexreader.numDocs();		//获取索引文件中有效文档总数      
+				if(top==0)	//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回null
+					return files;					
+				TopDocs topdocs=indexsearcher.search(query,top);         
+				ScoreDoc[] hits=topdocs.scoreDocs;       
+				int num=hits.length;        
+				if(num==0)
+					return files;											
+				SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
+				QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分		
+				Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);						
+				for(int i=0;i<num;i++){	
+					Document hitdoc=indexsearcher.doc(hits[i].doc);
+					String temp=hitdoc.get("file");
+					String indexlaws[]=new String[2];
+					Integer index=Integer.valueOf(hitdoc.get("path"));		
+				    if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，表明没有章段落，索引号设置为0
+				    	indexlaws[0]="第"+0+"章"+"&emsp";
+				    else
+				    	indexlaws[0]="第"+index/100000+"章"+"&emsp";
+				    index=index%100000;
+					indexlaws[0]+="第"+index/1000+"节";
+					String laws=hitdoc.get("law");
+					if(laws!=null){
+						TokenStream tokenStream = analyzer.tokenStream("laws",new StringReader(laws));
+						Fragmenter displaysize= new SimpleFragmenter(laws.length());
+						highlighter.setTextFragmenter(displaysize);
+						String highlaws=highlighter.getBestFragment(tokenStream,laws);
+						indexlaws[1]=highlaws;
+						if(i==0){
+							List<String[]> path=new ArrayList<String[]>();
+							path.add(indexlaws);
+							files.put(temp,path);
+						}else{
+							if(files.containsKey(temp)){
+								files.get(temp).add(indexlaws);
+							}else{
+								List<String[]> path=new ArrayList<String[]>();
+								path.add(indexlaws);
+								files.put(temp,path);
+							}     		           	 			
 						}
 					}
-
-				//      ramdir.close();
-				//      indexreader.close();
-				//      fsdir.close();
-				}	
+				}			
+			}	
 		}catch (IOException e) {
 			// TODO Auto-generated catch block
 				e.printStackTrace();
 		}
-        return files;
-		
+        return files;	
 	}
 
 	/*
