@@ -1,6 +1,7 @@
 package comm;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -157,7 +159,8 @@ public class IOHistory {
 		int n=0;		//用来循环读取sb容器里的数据
 //		long num=this.GetNumHistory(filename);		
 		if(cnum+snum>20){
-			FileWriter fw = new FileWriter(file,false);
+//			FileWriter fw = new FileWriter(file,false);
+			BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename,false),"UTF-8"));
 			int offset=cnum+snum-20;	//需要现有容量腾出多个位置
 			int move=cnum-offset;		//需要移动多少次，才能腾出offset个位置
 			for(int i=0,j=0;i<cnum;i++,j++){		//操作现有容器里的数据，腾出offset位置，同事将腾出来的位置用sb容器里的数据替换
@@ -181,7 +184,8 @@ public class IOHistory {
 			fw.close();
 		}
 		else{
-			FileWriter fw = new FileWriter(file,true);	
+//			FileWriter fw = new FileWriter(file,true);	
+			BufferedWriter fw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename,true),"UTF-8"));
 			for(int i=0;i<sb.size();i++)	
 				fw.write(sb.get(i).toString()+"\r\n");
 			fw.flush();
