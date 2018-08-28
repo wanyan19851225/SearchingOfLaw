@@ -110,7 +110,7 @@ public class HandleLucene {
 	 * 
 	 */
 	
-	public Map<String,List<String[]>> GetSearch(String indexpath,String keywords) throws ParseException, IOException, InvalidTokenOffsetsException{
+	public Map<String,List<String[]>> QuerySegments(String indexpath,String keywords) throws ParseException, IOException, InvalidTokenOffsetsException{
 		
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
 		try{
@@ -203,127 +203,127 @@ public class HandleLucene {
 	 * 
 	 */
 	
-	public Map<String,List<String[]>> GetMultipleSearch(String indexpath,List<String[]> keywordset,int top) throws IOException, ParseException, InvalidTokenOffsetsException{
-		
-		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
-		
-		Path inpath=Paths.get(indexpath);
-		
-		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		
-		IOContext iocontext=new IOContext();
-
-		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
-		
-		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
-
-		IndexReader indexreader=DirectoryReader.open(ramdir);
-
-		IndexSearcher indexsearcher=new IndexSearcher(indexreader);
-		
-		int total=keywordset.size();
-		
-//		if(total==0)
-//			return null;
-		
-		String[] keywords=new String[total];
-		String[] fields=new String[total];
-		BooleanClause.Occur[] flags=new BooleanClause.Occur[total];
-	
-		for(int i=0;i<total;i++){
-			keywords[i]=keywordset.get(i)[2];
-			fields[i]=keywordset.get(i)[1];
-			if(keywordset.get(i)[0].equals("AND")){
-				flags[i]=BooleanClause.Occur.MUST;	
-			}else if(keywordset.get(i)[0].equals("OR")){
-				flags[i]=BooleanClause.Occur.SHOULD;
-			}else if(keywordset.get(i)[0].equals("NOT")){
-				flags[i]=BooleanClause.Occur.MUST_NOT;
-			}
-		}
-		
-		Query query=MultiFieldQueryParser.parse(keywords,fields,flags,analyzer);
-
-/*
-		BooleanClause.Occur[] flags=new BooleanClause.Occur[total];
-		Term[] term=null;
-		TermQuery[] termquery=null;
-		BooleanClause[] flags;
-		BooleanQuery.Builder builder=new BooleanQuery.Builder();
-		
-*/  
-        
-       
-/*		
-		for(int i=0;i<total;i++){
-			term[i]=new Term("law",keywordset.get(i)[0]);
-			termquery[i]=new TermQuery(term[i]);
-			if(keywordset.get(i)[1].equals("AND")||keywordset.get(i)[1].equals("")){
-				builder.add(termquery[i],BooleanClause.Occur.MUST);
-			}else if(keywordset.get(i)[i].equals("OR")){
-				builder.add(termquery[i],BooleanClause.Occur.SHOULD);
-			}else if(keywordset.get(i)[i].equals("NOT")){
-				builder.add(termquery[i],BooleanClause.Occur.MUST_NOT);
-			}	
-		}
-
-		BooleanQuery  booleanquery=builder.build();
-*/        
-        TopDocs topdocs=indexsearcher.search(query,top); 
-        
-        ScoreDoc[] hits=topdocs.scoreDocs;
-        
-        int num=hits.length;
-        
-        if(num==0){
-        	return null;
-        }
-        
-        //此处加入的是搜索结果的高亮部分
-        SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
-        QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
-        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer); //根据这个得分计算出一个片段
-        Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
-        highlighter.setTextFragmenter(fragmenter); //设置一下要显示的片段
-  
-        for(int i=0;i<num;i++){
-        	
-        	Document hitdoc=indexsearcher.doc(hits[i].doc);
-        	
-    		String temp=hitdoc.get("file");
-    		String indexlaws[]=new String[2];
-    		Integer index=Integer.valueOf(hitdoc.get("path"));
-    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
-    			indexlaws[0]="第"+0+"章"+"&emsp";
-    		else
-    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
-    		index=index%100000;
-    		indexlaws[0]+="第"+index/1000+"节";
-    		String laws=hitdoc.get("law");
-    		if(laws!=null){
-    			TokenStream tokenStream=analyzer.tokenStream("laws",new StringReader(laws));
-    			String highlaws=highlighter.getBestFragment(tokenStream,laws);
-        		indexlaws[1]=highlaws;
-               	if(i==0){
-            		List<String[]> path=new ArrayList<String[]>();
-            		path.add(indexlaws);
-            		files.put(temp,path);
-            	}else{
-            		if(files.containsKey(temp)){
-            			files.get(temp).add(indexlaws);
-            		}else{
-            			List<String[]> path=new ArrayList<String[]>();
-                		path.add(indexlaws);
-                		files.put(temp,path);
-            		}     		
-            	}
-    		}
-        }
-        indexreader.close();
-        fsdir.close();
-        return files;
-		
-	}
+//	public Map<String,List<String[]>> GetMultipleSearch(String indexpath,List<String[]> keywordset,int top) throws IOException, ParseException, InvalidTokenOffsetsException{
+//		
+//		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
+//		
+//		Path inpath=Paths.get(indexpath);
+//		
+//		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+//		
+//		IOContext iocontext=new IOContext();
+//
+//		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
+//		
+//		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+//
+//		IndexReader indexreader=DirectoryReader.open(ramdir);
+//
+//		IndexSearcher indexsearcher=new IndexSearcher(indexreader);
+//		
+//		int total=keywordset.size();
+//		
+////		if(total==0)
+////			return null;
+//		
+//		String[] keywords=new String[total];
+//		String[] fields=new String[total];
+//		BooleanClause.Occur[] flags=new BooleanClause.Occur[total];
+//	
+//		for(int i=0;i<total;i++){
+//			keywords[i]=keywordset.get(i)[2];
+//			fields[i]=keywordset.get(i)[1];
+//			if(keywordset.get(i)[0].equals("AND")){
+//				flags[i]=BooleanClause.Occur.MUST;	
+//			}else if(keywordset.get(i)[0].equals("OR")){
+//				flags[i]=BooleanClause.Occur.SHOULD;
+//			}else if(keywordset.get(i)[0].equals("NOT")){
+//				flags[i]=BooleanClause.Occur.MUST_NOT;
+//			}
+//		}
+//		
+//		Query query=MultiFieldQueryParser.parse(keywords,fields,flags,analyzer);
+//
+///*
+//		BooleanClause.Occur[] flags=new BooleanClause.Occur[total];
+//		Term[] term=null;
+//		TermQuery[] termquery=null;
+//		BooleanClause[] flags;
+//		BooleanQuery.Builder builder=new BooleanQuery.Builder();
+//		
+//*/  
+//        
+//       
+///*		
+//		for(int i=0;i<total;i++){
+//			term[i]=new Term("law",keywordset.get(i)[0]);
+//			termquery[i]=new TermQuery(term[i]);
+//			if(keywordset.get(i)[1].equals("AND")||keywordset.get(i)[1].equals("")){
+//				builder.add(termquery[i],BooleanClause.Occur.MUST);
+//			}else if(keywordset.get(i)[i].equals("OR")){
+//				builder.add(termquery[i],BooleanClause.Occur.SHOULD);
+//			}else if(keywordset.get(i)[i].equals("NOT")){
+//				builder.add(termquery[i],BooleanClause.Occur.MUST_NOT);
+//			}	
+//		}
+//
+//		BooleanQuery  booleanquery=builder.build();
+//*/        
+//        TopDocs topdocs=indexsearcher.search(query,top); 
+//        
+//        ScoreDoc[] hits=topdocs.scoreDocs;
+//        
+//        int num=hits.length;
+//        
+//        if(num==0){
+//        	return null;
+//        }
+//        
+//        //此处加入的是搜索结果的高亮部分
+//        SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
+//        QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
+//        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer); //根据这个得分计算出一个片段
+//        Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
+//        highlighter.setTextFragmenter(fragmenter); //设置一下要显示的片段
+//  
+//        for(int i=0;i<num;i++){
+//        	
+//        	Document hitdoc=indexsearcher.doc(hits[i].doc);
+//        	
+//    		String temp=hitdoc.get("file");
+//    		String indexlaws[]=new String[2];
+//    		Integer index=Integer.valueOf(hitdoc.get("path"));
+//    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
+//    			indexlaws[0]="第"+0+"章"+"&emsp";
+//    		else
+//    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
+//    		index=index%100000;
+//    		indexlaws[0]+="第"+index/1000+"节";
+//    		String laws=hitdoc.get("law");
+//    		if(laws!=null){
+//    			TokenStream tokenStream=analyzer.tokenStream("laws",new StringReader(laws));
+//    			String highlaws=highlighter.getBestFragment(tokenStream,laws);
+//        		indexlaws[1]=highlaws;
+//               	if(i==0){
+//            		List<String[]> path=new ArrayList<String[]>();
+//            		path.add(indexlaws);
+//            		files.put(temp,path);
+//            	}else{
+//            		if(files.containsKey(temp)){
+//            			files.get(temp).add(indexlaws);
+//            		}else{
+//            			List<String[]> path=new ArrayList<String[]>();
+//                		path.add(indexlaws);
+//                		files.put(temp,path);
+//            		}     		
+//            	}
+//    		}
+//        }
+//        indexreader.close();
+//        fsdir.close();
+//        return files;
+//		
+//	}
 
 	/*
 	 *
@@ -357,7 +357,7 @@ public class HandleLucene {
 	 * 			判断章段落索引号是否为999，如果是，则标明没有章段落
 	 */
 
-	public Map<String,List<String[]>> GetMultipleSearch(String indexpath,String[] fields,List<String> range,String keywords) throws IOException, ParseException, InvalidTokenOffsetsException{
+	public Map<String,List<String[]>> QuerySegments(String indexpath,String[] fields,List<String> range,String keywords) throws IOException, ParseException, InvalidTokenOffsetsException{
 		
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
 /*		
@@ -513,7 +513,7 @@ public class HandleLucene {
 	 * 
 	 */
 	
-	public Map<String,List<String[]>> GetTermSearch(String indexpath,String keywords,int top) throws IOException{
+	public Map<String,List<String[]>> GetAllSegments(String indexpath,String keywords,int top) throws IOException{
 		
 		String s=keywords.replaceAll("<[^>]+>","");
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
@@ -588,7 +588,7 @@ public class HandleLucene {
 	 * 
 	 */
 	
-	public Map<String,List<String[]>> GetTermSearch(String indexpath,String keywords) throws IOException{
+	public Map<String,List<String[]>> GetAllSegments(String indexpath,String keywords) throws IOException{
 		
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
     	List<String[]> path=new ArrayList<String[]>();
@@ -679,53 +679,53 @@ public class HandleLucene {
 	
 	}
 
-	/*
-	 *
-	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
-	 * All right reserved. 
-	 * @author: wanyan 
-	 * date: 2017-11-10 
-	 * 
-	 * GetTermFreq方法在根据file字段中，文档名称出现的次数，获取该文档中索引的法条总数
-	 *
-	 * @params indexpath 
-	 * 				索引文件存放目录
-	 * 				
-	 * @return Map<String,Integer>
-	 * 				返回文档中法条总数，<文档名称，法条总数>
-	 * 
-	 * @2017-11-15
-	 * 			修改为使用TermsEnum类获取词频
-	 * 			修复当没有索引文件时，catch报错异常，并进行弹框提示			   				
-	 * 
-	 */
-	
-	public Map<String,Integer> GetTermFreq(String indexpath){
-		Map<String,Integer> res=new HashMap<String,Integer>();
-		try{
-			this.CreateIndexReader(indexpath);
-			if(indexreader!=null){
-				Terms terms = MultiFields.getTerms(indexreader,"file");
-				if(terms!=null){
-					TermsEnum termsEnums = terms.iterator();
-					while(termsEnums.next()!=null){
-						int num=termsEnums.docFreq();
-						BytesRef byteRef=termsEnums.term();
-						String term = new String(byteRef.bytes, byteRef.offset, byteRef.length,"UTF-8");
-						res.put(term,num);			 
-					}
-				}
-			}
-		}catch (IOException e) {
-			// TODO Auto-generated catch block
-			if(e.getClass().getSimpleName().equals("IndexNotFoundException"))		//当没有找到索引文件时，catch异常，并弹框提示
-				JOptionPane.showMessageDialog(null, "未找到索引文件，请先创建索引文件", "警告", JOptionPane.ERROR_MESSAGE);
-			else
-				e.printStackTrace();
-		}
-
-		return res;
-	}
+//	/*
+//	 *
+//	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
+//	 * All right reserved. 
+//	 * @author: wanyan 
+//	 * date: 2017-11-10 
+//	 * 
+//	 * GetTermFreq方法在根据file字段中，文档名称出现的次数，获取该文档中索引的法条总数
+//	 *
+//	 * @params indexpath 
+//	 * 				索引文件存放目录
+//	 * 				
+//	 * @return Map<String,Integer>
+//	 * 				返回文档中法条总数，<文档名称，法条总数>
+//	 * 
+//	 * @2017-11-15
+//	 * 			修改为使用TermsEnum类获取词频
+//	 * 			修复当没有索引文件时，catch报错异常，并进行弹框提示			   				
+//	 * 
+//	 */
+//	
+//	public Map<String,Integer> GetTermFreq(String indexpath){
+//		Map<String,Integer> res=new HashMap<String,Integer>();
+//		try{
+//			this.CreateIndexReader(indexpath);
+//			if(indexreader!=null){
+//				Terms terms = MultiFields.getTerms(indexreader,"file");
+//				if(terms!=null){
+//					TermsEnum termsEnums = terms.iterator();
+//					while(termsEnums.next()!=null){
+//						int num=termsEnums.docFreq();
+//						BytesRef byteRef=termsEnums.term();
+//						String term = new String(byteRef.bytes, byteRef.offset, byteRef.length,"UTF-8");
+//						res.put(term,num);			 
+//					}
+//				}
+//			}
+//		}catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			if(e.getClass().getSimpleName().equals("IndexNotFoundException"))		//当没有找到索引文件时，catch异常，并弹框提示
+//				JOptionPane.showMessageDialog(null, "未找到索引文件，请先创建索引文件", "警告", JOptionPane.ERROR_MESSAGE);
+//			else
+//				e.printStackTrace();
+//		}
+//
+//		return res;
+//	}
 	
 
 	/*
@@ -1147,7 +1147,7 @@ public class HandleLucene {
 		keywordset.add(new String[]{"AND","file","劳动人事争议仲裁办案规则（新）法.doc"});
 //		contentoffiles=handle.GetSearch("D:\\Lucene\\index\\","file:劳动人事争议仲裁办案规则（新）法.doc",1000);
 //		contentoffiles=handle.GetMultipleSearch("D:\\Lucene\\index\\",keywordset,1000);
-		contentoffiles=handle.GetTermSearch("D:\\Lucene\\index\\","劳动人事争议仲裁办案规则（新）法.doc",1000);
+//		contentoffiles=handle.GetTermSearch("D:\\Lucene\\index\\","劳动人事争议仲裁办案规则（新）法.doc",1000);
 		StringBuffer text=new StringBuffer();
 		for(String key:contentoffiles.keySet()){
 			for(int i=0;i<contentoffiles.get(key).size();i++){

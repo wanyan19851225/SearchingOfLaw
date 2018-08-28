@@ -35,7 +35,7 @@ public class SOLShowLaws extends JFrame{
         Map<String,List<String[]>> contentoflaw=new HashMap<String,List<String[]>>();
 		HandleLucene handle=new HandleLucene();
         
-        contentoflaw=handle.GetTermSearch(Path.indexpath,file,top);
+        contentoflaw=handle.GetAllSegments(Path.indexpath,file,top);
         String s=file.replaceAll("<[^>]+>","");		//删除html标签
         List<String[]> laws=contentoflaw.get(s);
         

@@ -31,8 +31,10 @@ public class SOLSelectIndex extends JFrame{
 
 		Container contentpane=this.getContentPane();
 		contentpane.setLayout(new BorderLayout(3,3));
-		HandleLucene handle=new HandleLucene();
-		Map<String,Integer> fre=new HashMap<String,Integer>();
+//		HandleLucene handle=new HandleLucene();
+//		Map<String,Integer> fre=new HashMap<String,Integer>();
+		FileIndexs findexs=new FileIndexs();
+		Map<String,String[]> finfo=findexs.GetFileInfo(Path.filepath);
 		
 		Vector<String> cname = new Vector<String>();
 		cname.add("序号");
@@ -42,15 +44,15 @@ public class SOLSelectIndex extends JFrame{
         
 		Vector<Vector<String>> data = new Vector<Vector<String>>();
         
-        fre=handle.GetTermFreq(Path.indexpath);
+//        fre=handle.GetTermFreq(Path.indexpath);
         
-        if(!fre.isEmpty()){
+        if(!finfo.isEmpty()){
         	int i=0;
-        	for(Entry<String,Integer> entry: fre.entrySet()){
+        	for(Entry<String,String[]> entry: finfo.entrySet()){
         		Vector<String> line=new Vector<String>();
         		line.add(String.valueOf(i++));
         		line.add(entry.getKey());
-        		line.add(String.valueOf(entry.getValue()));
+        		line.add(entry.getValue()[2]);
         		data.add(line);
         	}
         }

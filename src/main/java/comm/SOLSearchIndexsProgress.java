@@ -47,7 +47,7 @@ public class SOLSearchIndexsProgress extends SwingWorker<Map<String,Long>,String
 				if(f)
 					content=p.QueryRemoteSegments(Path.urlpath,this.keywords);
 				else
-					content=handle.GetSearch(Path.indexpath,this.keywords);
+					content=handle.QuerySegments(Path.indexpath,this.keywords);
 			}
 			else{					
 //				多条件查询，指定在某个法条文档中查询	
@@ -56,7 +56,7 @@ public class SOLSearchIndexsProgress extends SwingWorker<Map<String,Long>,String
 				}
 				else{
 					String[] fields=new String[]{"file","law"};
-					content=handle.GetMultipleSearch(Path.indexpath,fields,DisplayGui.range,this.keywords);
+					content=handle.QuerySegments(Path.indexpath,fields,DisplayGui.range,this.keywords);
 				}
 			}
 					

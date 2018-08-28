@@ -137,43 +137,43 @@ public class SOLResult extends JPanel{
 		return total;
 	}
 
-	public static void main(String[] args) throws IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException, InvalidTokenOffsetsException{
-		
-		JFrame jf=new JFrame();
-		Container contentpane=jf.getContentPane();
-		contentpane.setLayout(new BorderLayout(0,0));
-		
-		HandleLucene handle=new HandleLucene();
-		
-		SOLResult res=new SOLResult(true);
-		
-		Map<String,List<String[]>> content=handle.GetSearch("D:\\Lucene\\index\\","当事人");
-		
-//		res.UpdateText(content);
-		res.UpdateTable(content);
-		
-		IOHistory iohis=new IOHistory();
-		
-		List<String> input=iohis.HistoryReaderByList("D:\\Lucene\\conf\\history.cf");
-
-		SOLHistory his=new SOLHistory(null);
-	
-	
-//		Date date=new Date(System.currentTimeMillis());
-//		DateFormat dformat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//		String fdate=dformat.format(file.lastModified());
-//		String ndate=dformat.format(date);
-		
-		
-		contentpane.add(his,BorderLayout.WEST);
-		contentpane.add(res,BorderLayout.EAST);
-		
-	    jf.setTitle("Searching Of Laws");//窗体标签  
-	    jf.setSize(963,588);//窗体大小  
-	    jf.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
-	    jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//退出关闭JFrame  
-	    jf.setVisible(true);//显示窗体
-	    jf.setResizable(false); //锁定窗体	
-	}
+//	public static void main(String[] args) throws IOException, ParseException, org.apache.lucene.queryparser.classic.ParseException, InvalidTokenOffsetsException{
+//		
+//		JFrame jf=new JFrame();
+//		Container contentpane=jf.getContentPane();
+//		contentpane.setLayout(new BorderLayout(0,0));
+//		
+//		HandleLucene handle=new HandleLucene();
+//		
+//		SOLResult res=new SOLResult(true);
+//		
+//		Map<String,List<String[]>> content=handle.GetSearch("D:\\Lucene\\index\\","当事人");
+//		
+////		res.UpdateText(content);
+//		res.UpdateTable(content);
+//		
+//		IOHistory iohis=new IOHistory();
+//		
+//		List<String> input=iohis.HistoryReaderByList("D:\\Lucene\\conf\\history.cf");
+//
+//		SOLHistory his=new SOLHistory(null);
+//	
+//	
+////		Date date=new Date(System.currentTimeMillis());
+////		DateFormat dformat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+////		String fdate=dformat.format(file.lastModified());
+////		String ndate=dformat.format(date);
+//		
+//		
+//		contentpane.add(his,BorderLayout.WEST);
+//		contentpane.add(res,BorderLayout.EAST);
+//		
+//	    jf.setTitle("Searching Of Laws");//窗体标签  
+//	    jf.setSize(963,588);//窗体大小  
+//	    jf.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
+//	    jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//退出关闭JFrame  
+//	    jf.setVisible(true);//显示窗体
+//	    jf.setResizable(false); //锁定窗体	
+//	}
 
 }

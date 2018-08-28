@@ -41,8 +41,9 @@ public class SOLCommitIndex extends JFrame{
         data = new Vector<Vector<String>>();
 		try {
 			Map<String, Integer> rfre = this.GetRemoteIndex(Path.urlpath);
-			HandleLucene handle=new HandleLucene();
-			Map<String,Integer> lfre=handle.GetTermFreq(Path.indexpath);
+//			HandleLucene handle=new HandleLucene();
+			FileIndexs findexs=new FileIndexs();
+			Map<String,String[]> lfre=findexs.GetFileInfo(Path.filepath);
 		    if(!lfre.isEmpty()&&!rfre.isEmpty()){	
 		    	for(String key:rfre.keySet()){
 		        	if(lfre.containsKey(key))	
@@ -51,11 +52,11 @@ public class SOLCommitIndex extends JFrame{
 		    }
 	        if(!lfre.isEmpty()){
 	        	int i=0;
-	        	for(Entry<String,Integer> entry: lfre.entrySet()){
+	        	for(Entry<String,String[]> entry: lfre.entrySet()){
 	        		Vector<String> line=new Vector<String>();
 	        		line.add(String.valueOf(i++));
 	        		line.add(entry.getKey());
-	        		line.add(String.valueOf(entry.getValue()));
+	        		line.add(entry.getValue()[2]);
 	        		data.add(line);
 	        	}
 	        }
@@ -153,7 +154,7 @@ public class SOLCommitIndex extends JFrame{
 		int[] res={-1,-1};
 		String user=DisplayGui.star.GetUserName();	//获取登录用户名
 		HandleLucene handle=new HandleLucene();  
-		Map<String,List<String[]>> content=handle.GetTermSearch(Path.indexpath,file);
+		Map<String,List<String[]>> content=handle.GetAllSegments(Path.indexpath,file);
 			if(!content.isEmpty()){
 				JSONObject body=new JSONObject();
 				JSONObject response=new JSONObject();

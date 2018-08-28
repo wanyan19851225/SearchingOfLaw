@@ -62,37 +62,7 @@ public class SOLAddIndex extends JFrame{
 			}
 		}
 		lbt.addActionListener(new ChooseEvent());
-/*		
-		class AddIndexEvent implements ActionListener{	
-			public void actionPerformed(ActionEvent e) {
-							
-				HandleLucene handle=new HandleLucene();
-				
-				String t=stf.getText();
 
-				sbt.setEnabled(false);
-				
-				if(!t.isEmpty()){
-				
-					try {
-						long start=System.currentTimeMillis();
-						int totalofindex=handle.AddIndex(t,ipath);
-						long end=System.currentTimeMillis();
-				
-						stbar.setStatusText("创建检索完毕!"+"耗时："+String.valueOf(end-start)+"ms "+"创建索引条数："+totalofindex);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					
-				}
-				else
-					JOptionPane.showMessageDialog(null, "请选择要添加索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
-			sbt.setEnabled(true);	
-			
-			}
-		}
-	*/
 		sbt.addActionListener(new SOLEvents.AddIndexEvent(this));
 		
 		JPanel cpane=new JPanel();

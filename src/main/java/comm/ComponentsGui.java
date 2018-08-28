@@ -78,7 +78,7 @@ public class ComponentsGui {
 	        columnName.add("法条总数");   
 	        Vector rowData = new Vector();  
 	        
-	        fre=handle.GetTermFreq("D:\\Lucene\\index\\");
+//	        fre=handle.GetTermFreq("D:\\Lucene\\index\\");
 	        
 	        for(String key:fre.keySet()){
 	        	Vector line=new Vector();
