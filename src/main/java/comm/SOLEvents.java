@@ -423,10 +423,11 @@ public class  SOLEvents {
 			if(!file.isEmpty()){
 				HandleLucene handle=new HandleLucene();
 				for(int i=0;i<file.size();i++){
-					Vector<String> obj=p.t.GetDataID(file.get(i));
+					String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+					Vector<String> obj=p.t.GetDataID(s);
 					p.RemoveData(obj);
-					p.t.RemoveDataID(file.get(i));
-					handle.DeleteIndex(file.get(i),Path.indexpath,Path.filepath);	
+					p.t.RemoveDataID(s);
+					handle.DeleteIndex(s,Path.indexpath,Path.filepath);	
 				}
 
 				p.t.LoadData(p.GetData());
@@ -461,14 +462,14 @@ public class  SOLEvents {
 					Boolean f=p.DeleteRemoteIndex(Path.urlpath,file);
 					if(f){
 						for(int i=0;i<file.size();i++){
-							Vector<String> obj=p.t.GetDataID(file.get(i));
+							String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+							Vector<String> obj=p.t.GetDataID(s);
 							p.RemoveData(obj);
-							p.t.RemoveDataID(file.get(i));
+							p.t.RemoveDataID(s);
 						}
 					}
 					p.t.LoadData(p.GetData());
 			        p.t.InitTable(false);
-			       // JOptionPane.showMessageDialog(null,"删除成功！", "信息", JOptionPane.INFORMATION_MESSAGE);
 			        p.SetSearchButtonEnable(true);
 				}
 
@@ -641,20 +642,27 @@ public class  SOLEvents {
 					p.SetSearchButtonEnable(false);
 					Map<String,int[]> m=new HashMap<String,int[]>();
 					for(int i=0;i<file.size();i++){
-						Vector<String> obj=p.t.GetDataID(file.get(i));
-						int[] res=p.CommitIndex(Path.urlpath,file.get(i),Path.indexpath);
-						m.put(file.get(i),res);
-						if(res[0]==res[1]){
+						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+						Vector<String> obj=p.t.GetDataID(s);
+						int[] res=p.CommitIndex(Path.urlpath,s,Path.indexpath);
+						m.put(s,res);
+						if(res[0]==res[1]&&res[0]!=-1&&res[1]!=-1){
 							p.RemoveData(obj);
-							p.t.RemoveDataID(file.get(i));
+							p.t.RemoveDataID(s);
 						}
 					}
 					p.t.LoadData(p.GetData());
-			        p.t.InitTable(false);
+			        p.t.InitTable(true);
 			        StringBuffer sb=new StringBuffer();
 			        for(Entry<String,int[]> entry:m.entrySet()){
-			        	sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
-			        	sb.append("\n");
+			        	if(entry.getValue()[0]==entry.getValue()[1]&&entry.getValue()[0]!=-1&&entry.getValue()[1]!=-1){
+			        		sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
+			        		sb.append("\n");
+			        	}
+			        	else{
+			        		sb.append(entry.getKey()+" "+"提交失败");
+			        		sb.append("\n");
+			        	}
 			        }
 			        JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
 
@@ -815,6 +823,32 @@ public class  SOLEvents {
 				else{
 					remoteindex.t.LoadData(remoteindex.GetData());
 					remoteindex.t.InitTable(false);
+				}
+				
+			}
+			else if(p instanceof SOLCommitIndex){
+				SOLCommitIndex commitindex=(SOLCommitIndex)this.p;
+				String keywords=commitindex.GetKeywordsInputText(true);		//使用模糊搜索
+				if(!keywords.isEmpty()){
+					Map<String,String[]> finfo=commitindex.GetFileInfo(Path.filepath, keywords);
+					Vector<Vector<String>> data = new Vector<Vector<String>>();
+			        if(!finfo.isEmpty()){
+			        	int i=0;
+			        	for(Entry<String,String[]> entry: finfo.entrySet()){
+			        		Vector<String> line=new Vector<String>();
+			        		String[] infos=entry.getValue();
+			        		line.add(String.valueOf(i++));
+			        		line.add("<html>"+infos[3]+"</html>");
+			        		line.add(infos[2]);
+			        		data.add(line);
+			        	}
+			        }
+			        commitindex.t.LoadData(data);
+			        commitindex.t.InitTable(true);
+				}
+				else{
+					commitindex.t.LoadData(commitindex.GetData());
+					commitindex.t.InitTable(true);
 				}
 				
 			}

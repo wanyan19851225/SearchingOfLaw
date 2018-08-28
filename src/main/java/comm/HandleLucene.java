@@ -632,48 +632,33 @@ public class HandleLucene {
     		
 			int top=indexreader.numDocs();		//获取索引文件中有效文档总数
 		       
-			if(top==0)		//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回null
-				files=null;
-			else{
-		
-				Term term=new Term("file",keywords);
-				
-				TermQuery termquery=new TermQuery(term);
-		
-				SortField sortfield=new SortField("path",SortField.Type.INT,false);		//false为升序
-       
-				Sort sort=new Sort(sortfield);
-	
-				TopDocs topdocs=indexsearcher.search(termquery,top,sort); 
-        
-				ScoreDoc[] hits=topdocs.scoreDocs;
- 
-				int num=hits.length;
-        
-				if(num==0)		//查询结果为空
-					files=null;
-				else{
-					String temp=null;
-					String laws;
-					for(int i=0;i<num;i++){
-						String indexlaws[]=new String[2];
-						Document hitdoc=indexsearcher.doc(hits[i].doc);
-						temp=hitdoc.get("file");	
-						indexlaws[0]=hitdoc.get("path");
-						laws=hitdoc.get("law");
-						if(laws!=null){
-							indexlaws[1]=laws;
-							path.add(indexlaws);						
-						}    
-					}  	
-					files.put(temp,path);			
-				}
-			
-			}
-    	
+			if(top==0)		//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回files
+				return files;
+			Term term=new Term("file",keywords);
+			TermQuery termquery=new TermQuery(term);
+			SortField sortfield=new SortField("path",SortField.Type.INT,false);		//false为升序
+			Sort sort=new Sort(sortfield);
+			TopDocs topdocs=indexsearcher.search(termquery,top,sort); 
+			ScoreDoc[] hits=topdocs.scoreDocs;
+			int num=hits.length;
+			if(num==0)		//查询结果为空
+				return files;
+			String temp=null;
+			String laws;
+			for(int i=0;i<num;i++){
+				String indexlaws[]=new String[2];
+				Document hitdoc=indexsearcher.doc(hits[i].doc);
+				temp=hitdoc.get("file");	
+				indexlaws[0]=hitdoc.get("path");
+				laws=hitdoc.get("law");
+				if(laws!=null){
+					indexlaws[1]=laws;
+					path.add(indexlaws);						
+				}    
+			}  	
+			files.put(temp,path);			
     	}
-        return files;
-		
+        return files;	
 	}
 	
 	/*

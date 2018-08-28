@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -24,6 +27,7 @@ public class SOLCommitIndex extends JFrame{
 	public IOTable t;
 	private Vector<Vector<String>> data;
 	private JButton lbt;
+	private JTextField stf;
 	
 	public SOLCommitIndex(){
 		Container contentpane=this.getContentPane();
@@ -64,8 +68,12 @@ public class SOLCommitIndex extends JFrame{
         t=new IOTable(cname,data);
         t.InitTable(true);
 		
-		lbt=new JButton("提交");
-		lbt.setPreferredSize(new Dimension(60,35));
+        stf=new JTextField(50);
+		stf.setPreferredSize(new Dimension(300,30));
+		JButton sbt2=new JButton("搜索");
+		sbt2.setPreferredSize(new Dimension(60,30));
+        lbt=new JButton("提交");
+		lbt.setPreferredSize(new Dimension(60,30));
 		
 		if(DisplayGui.star.GetLoginStatus())	//判断是否处于登录状态，如果登录状态，则提交按钮启用，否则，提交按钮禁止，修改时间2018-1-31
 			lbt.setEnabled(true);
@@ -73,10 +81,10 @@ public class SOLCommitIndex extends JFrame{
 			lbt.setEnabled(false);
 		
 		JButton sbt=new JButton("全选");
-		sbt.setPreferredSize(new Dimension(60,35));
+		sbt.setPreferredSize(new Dimension(60,30));
 		
 		JButton sbt1=new JButton("反选");
-		sbt1.setPreferredSize(new Dimension(60,35));
+		sbt1.setPreferredSize(new Dimension(60,30));
 		
 		JScrollPane jsp=new JScrollPane();
 		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));
@@ -86,18 +94,24 @@ public class SOLCommitIndex extends JFrame{
 		lbt.addActionListener(new SOLEvents.CommitIndexEvent(this));
 		sbt.addActionListener(new SOLEvents.SelEvent(this));
 		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
+		sbt2.addActionListener(new SOLEvents.FilterEvent(this));
 //		t.addMouseListener(new SOLEvents.ShowSOLShowLawsEvent(this));
 		
-		JPanel cpane=new JPanel();
-	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
-	    JPanel spane=new JPanel();
+		JPanel npane=new JPanel();		//搜索框、搜索按钮面板
+	    npane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
+		JPanel cpane=new JPanel();		//列表面板
+	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
+	    JPanel spane=new JPanel();		//全选，反选，删除按钮面板
+	    spane.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
 		
-		
-		cpane.add(jsp);
+		npane.add(stf);
+		npane.add(sbt2);
+	    cpane.add(jsp);
 		spane.add(sbt);
 		spane.add(sbt1);
 		spane.add(lbt);
 		
+		contentpane.add(npane,BorderLayout.NORTH);
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
 		
@@ -136,7 +150,7 @@ public class SOLCommitIndex extends JFrame{
 	}
 	
 	public int[] CommitIndex(String url,String file,String indexpath) throws Exception{
-		int[] res=new int[2];
+		int[] res={-1,-1};
 		String user=DisplayGui.star.GetUserName();	//获取登录用户名
 		HandleLucene handle=new HandleLucene();  
 		Map<String,List<String[]>> content=handle.GetTermSearch(Path.indexpath,file);
@@ -162,10 +176,8 @@ public class SOLCommitIndex extends JFrame{
 					lawslist.add(tem);
 				}
 				body.accumulate("lawslist",lawslist);
-//				System.out.println(body.toString());
 				GZipUntils gzip=new GZipUntils();
 				String sends=gzip.S2Gzip(body.toString());
-//				System.out.println(sends);
 				response=http.sendPost(sends);
 				
 				int total=response.getInt("result");		//获取服务器写入索引文件成功的法条总数
@@ -174,12 +186,41 @@ public class SOLCommitIndex extends JFrame{
 			return res;
 	}
 	
+	public Map<String,String[]> GetFileInfo(String url,String keywords){
+		Map<String,String[]> fre=new HashMap<String,String[]>();
+		try {
+			List<String> file=this.GetFiles();
+			if(file.isEmpty())
+				return fre;
+			else{
+				FileIndexs findexs=new FileIndexs();
+				String[] fields={"file","fname"};
+				fre=findexs.QueryFiles(url, fields, file, keywords);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,e.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
+		}
+		return fre;	
+	}
+	
 	public void RemoveData(Vector<String> obj){
 		data.remove(obj);
 	}
 	
 	public Vector<Vector<String>> GetData(){
 		return data;
+	}
+	
+	public List<String> GetFiles(){
+		List<String> file=new ArrayList<String>();
+		int n=data.size();
+		for(int i=0;i<n;i++){
+			String fname=data.elementAt(i).elementAt(1);
+			file.add(fname);
+		}
+		return file;
 	}
 
 	public void SetSearchButtonEnable(Boolean f){
@@ -204,5 +245,42 @@ public class SOLCommitIndex extends JFrame{
 			else
 				t.setValueAt(true,i,cnum-1);
 		}	
+	}
+	
+	public String GetKeywordsInputText(Boolean f){		//参数f判断是否使用模糊搜索方式
+
+		StringBuffer s=new StringBuffer();
+		String[] k=this.InputText2Keywords();
+		if(k!=null){		//判断输入框是否为空
+			if(k.length!=0){
+				if(f)		//使用模糊搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append(k[i]);
+						else
+							s.append(k[i]+" AND ");
+					}
+				else		//使用精确搜索
+					for(int i=0;i<k.length;i++){
+						if(i==k.length-1)
+							s.append("\""+k[i]+"\"");
+						else
+							s.append("\""+k[i]+"\""+" AND ");
+						
+					}
+			}
+		}
+		return s.toString();
+	}
+	
+	public String[] InputText2Keywords(){
+		String s=stf.getText().trim();
+		String[] keywords=null;
+		if(!s.isEmpty()){		//判断输入框是否为空
+			UpdateString us=new UpdateString();
+			String fk=us.FilterDoubleString(s," ");
+			keywords=fk.split(" ");
+		}
+		return keywords;
 	}
 }
