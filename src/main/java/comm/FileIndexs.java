@@ -156,7 +156,6 @@ public class FileIndexs {
 				indexreader=DirectoryReader.open(ramdir);
 			}
 			else{
-			
 				if(indexwriter!=null){		//判断indexwriter是否实例化
 					IndexReader tr=DirectoryReader.openIfChanged((DirectoryReader)indexreader,indexwriter);	
 					if(tr!=null){	
@@ -164,7 +163,6 @@ public class FileIndexs {
 						indexreader=tr;	
 					}
 				}
-		
 			}
 			f=true;
 		}catch (IOException e) {
@@ -316,11 +314,9 @@ public class FileIndexs {
 			//	e.printStackTrace();
 				return finfo;
 			}
-			
 			else
 				e.printStackTrace();
 		}
-		
 		return finfo;
 	}
 	

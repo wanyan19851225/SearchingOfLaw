@@ -110,7 +110,6 @@ public class DisplayGui extends JFrame{
 	   star.SetLoginLabelVisabel(true); //初始化时，显示登录用户标签
 	   star.AddShowSOLLLoginEvent(new SOLEvents.ShowSOLLoginEvent());		//初始化时，对登录用户名标签装载ShowSOLLogin鼠标事件
 		
-
 	    solresult=new SOLResult();		//创建搜索结果面板
 		
 		stf=new JTextField(78);
@@ -121,7 +120,6 @@ public class DisplayGui extends JFrame{
 		sbt.setPreferredSize(new Dimension(100,34));
 				
 		ButtonGroup modebg=new ButtonGroup();
-		
 		accmode=new JRadioButton("精确",true);
 		accmode.setLocation(20, 20);
 		accmode.setSize(50, 20);
@@ -134,7 +132,6 @@ public class DisplayGui extends JFrame{
 		modebg.add(fuzzymode);
 		
 		ButtonGroup rangebg=new ButtonGroup();
-		
 		all=new JRadioButton("所有文档",true);
 		all.setLocation(20, 20);
 		all.setSize(50, 20);
@@ -149,12 +146,10 @@ public class DisplayGui extends JFrame{
 		rangebg.add(other);
 		
 		ButtonGroup sourcebg=new ButtonGroup();
-		
 		final JRadioButton local=new JRadioButton("本地",true);
 		local.setLocation(20, 20);
 		local.setSize(50, 20);
 //		local.setName("local");
-		
 		
 		remote=new JRadioButton("远程"); 
 		remote.setLocation(20, 20);
@@ -178,7 +173,6 @@ public class DisplayGui extends JFrame{
 //		port.setEnabled(false);
 //		port.setName("port");
 
-		
 		solhis=new SOLHistory(this);	//创建搜索历史面板
 		history.clear();
 
@@ -194,7 +188,6 @@ public class DisplayGui extends JFrame{
 	    npaneofcenterleft.add(accmode);
 	    npaneofcenterleft.add(fuzzymode);
 		
-	    
 		JPanel npaneofcenterright=new JPanel();		/*搜索范围面板*/
 		npaneofcenterright.setBorder(BorderFactory.createTitledBorder("请选择查询范围"));
 	    npaneofcenterright.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
@@ -218,7 +211,6 @@ public class DisplayGui extends JFrame{
 //		local.addMouseListener(new SOLEvents.LocalEvent(npaneofcenter2));
 //		remote.addMouseListener(new SOLEvents.HostEvent(npaneofcenter2));
 
-	    
 		JPanel npaneofcenter=new JPanel();			/*搜索条数、搜索范围、搜索源*/
 		npaneofcenter.setPreferredSize(new Dimension(400,50));
 	    npaneofcenter.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
@@ -226,7 +218,6 @@ public class DisplayGui extends JFrame{
 	    npaneofcenter.add(npaneofcenterright);		//添加搜索范围面板
 	    npaneofcenter.add(npaneofcenter1);		//添加搜索源面板
 //	    npaneofcenter.add(npaneofcenter2);		//添加远程地址面板
-	    
 	    
 		JPanel npane=new JPanel();		/*搜索输入框、搜索按钮、搜索条数、搜索范围面板*/
 	    npane.setLayout(new BorderLayout(0,0));
@@ -265,13 +256,10 @@ public class DisplayGui extends JFrame{
 	    this.setResizable(false); //锁定窗体	
 	    
 		sollogin=new SOLLogin(this);	//创建登录窗口
- 	
 	}	
 	public void StoreHistory() throws IOException{
-		
 		IOHistory iohis=new IOHistory();
-        iohis.HistoryWriter(history,Path.historypath);
-			
+        iohis.HistoryWriter(history,Path.historypath);		
 	}
 
 	public List<String> LoadHistory(String filename) throws IOException{
@@ -299,7 +287,6 @@ public class DisplayGui extends JFrame{
 							s.append("\""+k[i]+"\"");
 						else
 							s.append("\""+k[i]+"\""+" AND ");
-						
 					}
 			}
 		}
