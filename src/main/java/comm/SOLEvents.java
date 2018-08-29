@@ -632,19 +632,19 @@ public class  SOLEvents {
 					}
 					p.t.LoadData(p.GetData());
 			        p.t.InitTable(true);
-			        StringBuffer sb=new StringBuffer();
-			        for(Entry<String,int[]> entry:m.entrySet()){
-			        	if(entry.getValue()[0]==entry.getValue()[1]&&entry.getValue()[0]!=-1&&entry.getValue()[1]!=-1){
-			        		sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
-			        		sb.append("\n");
-			        	}
-			        	else{
-			        		sb.append(entry.getKey()+" "+"提交失败");
-			        		sb.append("\n");
-			        	}
-			        }
-			        JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
-
+			        new SOLShowCommitIndexsResults(m);
+//			        StringBuffer sb=new StringBuffer();
+//			        for(Entry<String,int[]> entry:m.entrySet()){
+//			        	if(entry.getValue()[0]==entry.getValue()[1]&&entry.getValue()[0]!=-1&&entry.getValue()[1]!=-1){
+//			        		sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
+//			        		sb.append("\n");
+//			        	}
+//			        	else{
+//			        		sb.append(entry.getKey()+" "+"提交失败");
+//			        		sb.append("\n");
+//			        	}
+//			        }
+//			        JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
 				}
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
