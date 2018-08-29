@@ -763,6 +763,9 @@ public class HandleLucene {
 	 * Modified Date:2018-8-21
 	 * 			新增当写入段落索引成功后，创建文档信息索引文件
 	 * 			新增filepath参数，传入文档信息索引文件路径
+	 * Modified Date:2018-8-29
+	 * 			新增当为html文档创建段落索引前，先判断该文档在文档信息索引中是否已经存在
+	 * 			新增创建word文档段落索引时，捕捉IOWord.GetIndexOfgeneraldocment方法异常，捕获异常后，totalofindex赋值-3
 	 */
 	
 	public Integer AddIndexs(String url,String indexpath,String filepath) throws IOException{
@@ -772,28 +775,33 @@ public class HandleLucene {
 		if(url.matches("(http|https)://.*")){
 			try{
 				IOHtml html=new IOHtml(url);		//使用构造函数抓取html文档，捕捉异常，如果报异常，totalofindex赋值-1，不在建立索引文件
-				Map<Integer,String> law=html.GetIndexOflaw();
 				filename=html.GetHtmlH();		//解析html文档标题
-				totalofindex=law.size();		//获取读到的法条总数
-				if(!law.isEmpty()){		//判断是否读取到了法条，如果有读到法条，则为每条法条创建索引
-					for (Map.Entry<Integer,String> e:law.entrySet()){ 
-						Document doc=new Document();		//创建Document,每一个发条新建一个		
-						FieldType fieldtype=new FieldType();
-						fieldtype.setIndexOptions(IndexOptions.DOCS);
-						fieldtype.setStored(true);		
-						fieldtype.setTokenized(false);
-						doc.add(new Field("file",filename,fieldtype));		//文档名称存储，不分词
-						doc.add(new NumericDocValuesField("path",e.getKey()));
-						doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
-						doc.add(new StoredField("path",e.getKey()));
-						doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//法条内容索引、分词，存储
-						ramwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+				List<String> files=new FileIndexs().GetAllFiles(filepath);
+				if(!files.contains(filename)){
+					Map<Integer,String> law=html.GetIndexOflaw();
+					totalofindex=law.size();		//获取读到的法条总数
+					if(!law.isEmpty()){		//判断是否读取到了法条，如果有读到法条，则为每条法条创建索引
+						for (Map.Entry<Integer,String> e:law.entrySet()){ 
+							Document doc=new Document();		//创建Document,每一个发条新建一个		
+							FieldType fieldtype=new FieldType();
+							fieldtype.setIndexOptions(IndexOptions.DOCS);
+							fieldtype.setStored(true);		
+							fieldtype.setTokenized(false);
+							doc.add(new Field("file",filename,fieldtype));		//文档名称存储，不分词
+							doc.add(new NumericDocValuesField("path",e.getKey()));
+							doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
+							doc.add(new StoredField("path",e.getKey()));
+							doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//法条内容索引、分词，存储
+							ramwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+						}
 					}
+					else		//如果没有读到段落，则totalofindex赋值-1
+						totalofindex=ResultsType.Index_NONE;
 				}
-				else		//如果没有读到段落，则totalofindex赋值-1
-					totalofindex=-1;
+				else
+					totalofindex=ResultsType.Index_NONE;
 			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
-				totalofindex=-2;
+				totalofindex=ResultsType.Index_Exception;
 			}
 			if(totalofindex>0){		//当段落数大于0时，创建文档信息索引
 				Date d=new Date(System.currentTimeMillis());
@@ -809,38 +817,37 @@ public class HandleLucene {
 			}
 		}else if(url.matches("[a-zA-Z]:\\\\.*")){
 			File file=new File(url);
-			IOWord ioword=new IOWord();
-			String fname=file.getName().split("\\.")[0];
-			//String check=fname.substring(fname.length()-2,fname.length());
-			Map<Integer,String> law=new HashMap<Integer,String>();
-			if(fname.matches("[\u4e00-\u9fa5《》]*(法|条例|草案|规则|通则)$")){		//规范的法条内容
-				
-				law=ioword.GetIndexOflaw(file);
-			}
-			else if(fname.matches("[\u4e00-\u9fa5《》]*M$")){		//带$的法条内容
-				law=ioword.GetIndexOfmarkdocment(file);
-			}
-			else{		//按段落的法条内容
-				law=ioword.GetIndexOfgeneraldocment(file);
-			}
-			totalofindex+=law.size();
-			if(!law.isEmpty()){
-				for (Map.Entry<Integer,String> e:law.entrySet()){ 
-					Document doc=new Document();		//创建Document,每一个法条新建一个		
-					FieldType fieldtype=new FieldType();
-					fieldtype.setIndexOptions(IndexOptions.DOCS);
-					fieldtype.setStored(true);		
-					fieldtype.setTokenized(false);
-					doc.add(new Field("file",file.getName(),fieldtype));		//文档名称存储，不分词
-					doc.add(new NumericDocValuesField("path",e.getKey()));
-					doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
-					doc.add(new StoredField("path",e.getKey()));
-					doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//发条内容索引、分词，存储
-					ramwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+			try{
+				IOWord ioword=new IOWord();
+				String fname=file.getName().split("\\.")[0];
+				Map<Integer,String> law=new HashMap<Integer,String>();
+				if(fname.matches("[\u4e00-\u9fa5《》]*(法|条例|草案|规则|通则)$"))		//规范的法条内容
+					law=ioword.GetIndexOflaw(file);
+				else if(fname.matches("[\u4e00-\u9fa5《》]*M$"))		//带$的法条内容
+					law=ioword.GetIndexOfmarkdocment(file);
+				else		//按段落的法条内容
+					law=ioword.GetIndexOfgeneraldocment(file);
+				totalofindex+=law.size();
+				if(!law.isEmpty()){
+					for (Map.Entry<Integer,String> e:law.entrySet()){ 
+						Document doc=new Document();		//创建Document,每一个法条新建一个		
+						FieldType fieldtype=new FieldType();
+						fieldtype.setIndexOptions(IndexOptions.DOCS);
+						fieldtype.setStored(true);		
+						fieldtype.setTokenized(false);
+						doc.add(new Field("file",file.getName(),fieldtype));		//文档名称存储，不分词
+						doc.add(new NumericDocValuesField("path",e.getKey()));
+						doc.add(new IntPoint("path",e.getKey()));		//法条索引以Int类型存储
+						doc.add(new StoredField("path",e.getKey()));
+						doc.add(new Field("law",e.getValue(),TextField.TYPE_STORED));		//发条内容索引、分词，存储
+						ramwriter.addDocument(doc);		//将法条索引添加到内存索引中			  
+					}
 				}
+				else
+					totalofindex=ResultsType.Index_NONE;
+			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
+				totalofindex=ResultsType.Index_Exception;
 			}
-			else
-				totalofindex=-1;
 			if(totalofindex>0){		//当段落数大于0时，创建文档信息索引
 				Date d=new Date(System.currentTimeMillis());
 				DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
@@ -853,18 +860,16 @@ public class HandleLucene {
 				finfo.put(file.getName(),infos);
 				findexs.AddFiles(finfo,filepath);
 			}
-		}else{
-			totalofindex=-3;
 		}
-		
+		else
+			totalofindex=ResultsType.Index_Format_Error;
+	
 		ramwriter.close();	
 		indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
         indexwriter.commit();
         
         return totalofindex;
 	}
-	
-
 	
 	/*
 	 *

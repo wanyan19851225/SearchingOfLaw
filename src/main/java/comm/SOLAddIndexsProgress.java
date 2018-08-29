@@ -62,20 +62,31 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 		if(f!=null){		//判断是否是文件夹，如果是，则走此分支
 			int size=f.length;		//获取文件夹下文件总数
 			if(size==0)			//判断文件夹下是否有文件，如果没有文件，则走此分支，返回-1
-				r.put(url,-1);
+				r.put(url,ResultsType.Index_NONE);
 			else{
+				FileIndexs findexs=new FileIndexs();
+				List<String> files=findexs.GetAllFiles(Path.filepath);
 				for(int i=0; i<size; i++){		//为文件夹下的文件添加索引
-					Integer t=handle.AddIndexs(f[i].getPath(), Path.indexpath,Path.filepath);
-					r.put(f[i].getPath(),t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落。由于在GetFile方法中已经对传入的url进行了判断，只要走到此分支，必然不会出现返回-2和-3的情况
-					String dd="("+(i+1)+"/"+size+")";
-					publish(dd);   
+					if(!files.contains(f[i].getName())){
+						Integer t=handle.AddIndexs(f[i].getPath(), Path.indexpath,Path.filepath);
+						r.put(f[i].getPath(),t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落。由于在GetFile方法中已经对传入的url进行了判断，只要走到此分支，必然不会出现返回-2和-3的情况
+					}
+					else
+						r.put(f[i].getPath(),ResultsType.Index_NONE);
+					publish("("+(i+1)+"/"+size+")");   
 				}
 			}
 		}
 		else{		//如果url不是文件夹,即或者是html的网址，或者是单个文件，或者url格式有误，则走此分支
-			Integer t=handle.AddIndexs(url, Path.indexpath,Path.filepath);
-			r.put(url,t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落；-2：网站地址无效或者无法访问；-3：输入路径url格式有误
-//			publish("("+"1"+"/"+"1"+")");		//html网址，或者单个文件，或者url地址有误时，传给pross的参数为空，不在显示动态进度
+			FileIndexs findexs=new FileIndexs();
+			List<String> files=findexs.GetAllFiles(Path.filepath);
+			File file=new File(url);
+			if(!files.contains(file.getName())){
+				Integer t=handle.AddIndexs(url, Path.indexpath,Path.filepath);
+				r.put(url,t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落；-2：网站地址无效或者无法访问；-3：输入路径url格式有误
+			}
+			else
+				r.put(url,ResultsType.Index_NONE);
 		}
 		Long end=System.currentTimeMillis();
 		Long t=end-start;
@@ -107,17 +118,16 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 		List<String> UnArrveHtmlFiles=new ArrayList<String>();		//存储返回值-2的html名称，即html的url地址无效，或无法访问
 		List<String> UnFormatFiles=new ArrayList<String>();		//存储url格式错误的路径名称
 		List<String> SuccesIndexFiles=new ArrayList<String>();		//存储成功建立索引的文件名称
-		try {
-				
+		try {	
 			Map<String,Integer> r= get();	
 			int n=0;
 			for(Map.Entry<String,Integer> e:r.entrySet()){
 				if(e.getKey()!="__time__"){
-					if(e.getValue()==-1)
+					if(e.getValue()==ResultsType.Index_NONE)
 						BlankIndexFiles.add(e.getKey());
-					else if(e.getValue()==-2)		//返回-2和-3时，必然会只有一个元素
+					else if(e.getValue()==ResultsType.Index_Exception)
 						UnArrveHtmlFiles.add(e.getKey());							
-					else if(e.getValue()==-3)		//返回-2和-3时，必然会只有一个元素
+					else if(e.getValue()==ResultsType.Index_Format_Error)		//返回-3时，必然会只有一个元素
 						UnFormatFiles.add(e.getKey());
 					else{
 							n+=e.getValue();
@@ -130,16 +140,20 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 				int nf=BlankIndexFiles.size();
 				for(int i=0;i<nf;i++)
 					s.append(BlankIndexFiles.get(i)+"\r\n");
-				JOptionPane.showMessageDialog(null, s.toString()+"文档或网站中没有检索到内容，或文件夹下未找到文档", "警告", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, s.toString()+"文档或网站中没有检索到内容，或文件夹下未找到文档，或该文档已经存在", "警告", JOptionPane.ERROR_MESSAGE);
 			}
-			if(!UnArrveHtmlFiles.isEmpty())
-				JOptionPane.showMessageDialog(null, "请输入有效网址，或确认网站是否可以正常访问", "警告", JOptionPane.ERROR_MESSAGE);
+			if(!UnArrveHtmlFiles.isEmpty()){
+				StringBuffer s=new StringBuffer();
+				int nf=UnArrveHtmlFiles.size();
+				for(int i=0;i<nf;i++)
+					s.append(UnArrveHtmlFiles.get(i)+"\r\n");
+				JOptionPane.showMessageDialog(null,  s.toString()+"请输入有效网址，或确认网站是否可以正常访问，或文档已经损坏", "警告", JOptionPane.ERROR_MESSAGE);
+			}
 			if(!UnFormatFiles.isEmpty())
 				JOptionPane.showMessageDialog(null, "请输入有效格式的路径", "警告", JOptionPane.ERROR_MESSAGE);
-			if(!SuccesIndexFiles.isEmpty()){
+			if(!SuccesIndexFiles.isEmpty())
 				DisplayGui.defselect.clear();
-				jf.solstar.setStatusText("添加检索完毕!"+"耗时："+r.get("__time__")+"ms "+"创建索引条数："+n);
-			}
+			jf.solstar.setStatusText("添加检索完毕!"+"耗时："+r.get("__time__")+"ms "+"创建索引条数："+n);
 		} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -147,8 +161,6 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-
 	}
 
 }

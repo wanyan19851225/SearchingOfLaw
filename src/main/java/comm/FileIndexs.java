@@ -60,7 +60,7 @@ public class FileIndexs {
 	private static RAMDirectory ramdir;
 	private static IndexWriter indexwriter;
 	private static IndexWriter ramwriter;
-	
+
 	/*
  	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
 	 * All right reserved. 
