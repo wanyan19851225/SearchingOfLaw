@@ -712,7 +712,7 @@ public class  SOLEvents {
 			// TODO Auto-generated method stub
 			if(p instanceof SOLShowIndex){
 				SOLShowIndex showindex=(SOLShowIndex)this.p;
-				String keywords=showindex.GetKeywordsInputText(true);		//使用模糊搜索
+				String keywords=showindex.GetKeywordsInputText(false);		//使用精确搜索
 				FileIndexs findexs=new FileIndexs();
 				if(!keywords.isEmpty()){		//判断输入框是否为空
 					Map<String,String[]> finfo=findexs.QueryFiles(Path.filepath, keywords);
@@ -751,7 +751,7 @@ public class  SOLEvents {
 			}
 			else if(p instanceof SOLDownloadIndex){
 				SOLDownloadIndex downindex=(SOLDownloadIndex)this.p;
-				String keywords=downindex.GetKeywordsInputText(true);		//使用模糊搜索
+				String keywords=downindex.GetKeywordsInputText(false);		//使用精确搜索
 //				FileIndexs findexs=new FileIndexs();
 				if(!keywords.isEmpty()){		//判断输入框是否为空
 					Map<String,String[]> finfo=downindex.GetRemoteFileInfo(Path.urlpath,keywords);
@@ -779,7 +779,7 @@ public class  SOLEvents {
 			}
 			else if(p instanceof SOLRemoteIndex){
 				SOLRemoteIndex remoteindex=(SOLRemoteIndex)this.p;
-				String keywords=remoteindex.GetKeywordsInputText(true);		//使用模糊搜索
+				String keywords=remoteindex.GetKeywordsInputText(false);		//使用精确搜索
 				if(!keywords.isEmpty()){		
 					Map<String,String[]> finfo=remoteindex.GetRemoteFileInfo(Path.urlpath,keywords);
 					Vector<Vector<String>> data = new Vector<Vector<String>>();
@@ -807,7 +807,7 @@ public class  SOLEvents {
 			}
 			else if(p instanceof SOLCommitIndex){
 				SOLCommitIndex commitindex=(SOLCommitIndex)this.p;
-				String keywords=commitindex.GetKeywordsInputText(true);		//使用模糊搜索
+				String keywords=commitindex.GetKeywordsInputText(false);		//使用精确搜索
 				if(!keywords.isEmpty()){
 					Map<String,String[]> finfo=commitindex.GetFileInfo(Path.filepath, keywords);
 					Vector<Vector<String>> data = new Vector<Vector<String>>();

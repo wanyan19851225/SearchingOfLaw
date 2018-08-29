@@ -54,11 +54,10 @@ public class SOLSearchIndexsProgress extends SwingWorker<Map<String,Long>,String
 					content=handle.QuerySegments(Path.indexpath,this.keywords);
 				}
 			}
-			else{					
-//				多条件查询，指定在某个法条文档中查询	
+			else{		//多条件查询，指定在某个法条文档中查询				
 				if(f){
 					type=Store.Type.R;
-					System.out.println("keywords:"+this.keywords+","+"address:");
+					content=p.QueryRemoteSegments(Path.urlpath,this.keywords);
 				}
 				else{
 					type=Store.Type.L;

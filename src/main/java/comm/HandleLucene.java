@@ -177,159 +177,6 @@ public class HandleLucene {
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
 	 * All right reserved. 
 	 * @author: wanyan 
-	 * date: 2017-10-31 
-	 * 
-	 * 该方法与GetSearch功能一致，直接返回法条内容，只是可以使用多条件、多域进行查询
-	 *
-	 * @params indexpath
-	 * 				索引文件所在目录
-	 * 			keywords 
-	 * 				从JTextField获取用户输入的多个关键字,使用String[]方式传递，[关键字，查询条件]
-	 * 			top
-	 * 				从JRadio获取用户选择的搜索条数，在索引文件中根据相关度排序，返回前top条
-	 * 			
-	 * @return Map<Stirng,List<String[]>>
-	 * 				将搜索结果以Map<文件名，[章节，法条]>的映射关系，返回查询结果		   
-	 * 						  
-	 * @2017-10-31
-	 * 			修改使用BooleanQuery方式实现多条件查询
-	 * @2017-11-1
-	 * 			修改同时支持单条件查询和多条件查询
-	 * 			修改使用查询分析器QueryParser实现多域、多字段、多条件查询
-	 * @2017-11-16
-	 * 			修改使用MultiFieldQueryParser类实现多字段、多条件查询
-	 * @2018-8-9
-	 * 			修改判断章段落索引号，如果章段落索引号为999时，标明没有章段落
-	 * 
-	 */
-	
-//	public Map<String,List<String[]>> GetMultipleSearch(String indexpath,List<String[]> keywordset,int top) throws IOException, ParseException, InvalidTokenOffsetsException{
-//		
-//		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
-//		
-//		Path inpath=Paths.get(indexpath);
-//		
-//		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-//		
-//		IOContext iocontext=new IOContext();
-//
-//		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
-//		
-//		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
-//
-//		IndexReader indexreader=DirectoryReader.open(ramdir);
-//
-//		IndexSearcher indexsearcher=new IndexSearcher(indexreader);
-//		
-//		int total=keywordset.size();
-//		
-////		if(total==0)
-////			return null;
-//		
-//		String[] keywords=new String[total];
-//		String[] fields=new String[total];
-//		BooleanClause.Occur[] flags=new BooleanClause.Occur[total];
-//	
-//		for(int i=0;i<total;i++){
-//			keywords[i]=keywordset.get(i)[2];
-//			fields[i]=keywordset.get(i)[1];
-//			if(keywordset.get(i)[0].equals("AND")){
-//				flags[i]=BooleanClause.Occur.MUST;	
-//			}else if(keywordset.get(i)[0].equals("OR")){
-//				flags[i]=BooleanClause.Occur.SHOULD;
-//			}else if(keywordset.get(i)[0].equals("NOT")){
-//				flags[i]=BooleanClause.Occur.MUST_NOT;
-//			}
-//		}
-//		
-//		Query query=MultiFieldQueryParser.parse(keywords,fields,flags,analyzer);
-//
-///*
-//		BooleanClause.Occur[] flags=new BooleanClause.Occur[total];
-//		Term[] term=null;
-//		TermQuery[] termquery=null;
-//		BooleanClause[] flags;
-//		BooleanQuery.Builder builder=new BooleanQuery.Builder();
-//		
-//*/  
-//        
-//       
-///*		
-//		for(int i=0;i<total;i++){
-//			term[i]=new Term("law",keywordset.get(i)[0]);
-//			termquery[i]=new TermQuery(term[i]);
-//			if(keywordset.get(i)[1].equals("AND")||keywordset.get(i)[1].equals("")){
-//				builder.add(termquery[i],BooleanClause.Occur.MUST);
-//			}else if(keywordset.get(i)[i].equals("OR")){
-//				builder.add(termquery[i],BooleanClause.Occur.SHOULD);
-//			}else if(keywordset.get(i)[i].equals("NOT")){
-//				builder.add(termquery[i],BooleanClause.Occur.MUST_NOT);
-//			}	
-//		}
-//
-//		BooleanQuery  booleanquery=builder.build();
-//*/        
-//        TopDocs topdocs=indexsearcher.search(query,top); 
-//        
-//        ScoreDoc[] hits=topdocs.scoreDocs;
-//        
-//        int num=hits.length;
-//        
-//        if(num==0){
-//        	return null;
-//        }
-//        
-//        //此处加入的是搜索结果的高亮部分
-//        SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
-//        QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
-//        Fragmenter fragmenter = new SimpleSpanFragmenter(scorer); //根据这个得分计算出一个片段
-//        Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
-//        highlighter.setTextFragmenter(fragmenter); //设置一下要显示的片段
-//  
-//        for(int i=0;i<num;i++){
-//        	
-//        	Document hitdoc=indexsearcher.doc(hits[i].doc);
-//        	
-//    		String temp=hitdoc.get("file");
-//    		String indexlaws[]=new String[2];
-//    		Integer index=Integer.valueOf(hitdoc.get("path"));
-//    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
-//    			indexlaws[0]="第"+0+"章"+"&emsp";
-//    		else
-//    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
-//    		index=index%100000;
-//    		indexlaws[0]+="第"+index/1000+"节";
-//    		String laws=hitdoc.get("law");
-//    		if(laws!=null){
-//    			TokenStream tokenStream=analyzer.tokenStream("laws",new StringReader(laws));
-//    			String highlaws=highlighter.getBestFragment(tokenStream,laws);
-//        		indexlaws[1]=highlaws;
-//               	if(i==0){
-//            		List<String[]> path=new ArrayList<String[]>();
-//            		path.add(indexlaws);
-//            		files.put(temp,path);
-//            	}else{
-//            		if(files.containsKey(temp)){
-//            			files.get(temp).add(indexlaws);
-//            		}else{
-//            			List<String[]> path=new ArrayList<String[]>();
-//                		path.add(indexlaws);
-//                		files.put(temp,path);
-//            		}     		
-//            	}
-//    		}
-//        }
-//        indexreader.close();
-//        fsdir.close();
-//        return files;
-//		
-//	}
-
-	/*
-	 *
-	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
-	 * All right reserved. 
-	 * @author: wanyan 
 	 * date: 2017-11-18 
 	 * 
 	 * 该方法与GetSearch功能一致，直接返回法条内容，只是可以使用多条件、多域进行查询
@@ -359,131 +206,77 @@ public class HandleLucene {
 
 	public Map<String,List<String[]>> QuerySegments(String indexpath,String[] fields,List<String> range,String keywords) throws IOException, ParseException, InvalidTokenOffsetsException{
 		
-		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
-/*		
-		Path inpath=Paths.get(indexpath);
-		
-		FSDirectory fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		
-		IOContext iocontext=new IOContext();
-
-		RAMDirectory ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
-*/		
+		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();	
 		Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
-
-//		IndexReader indexreader=DirectoryReader.open(ramdir);
 		
 		this.CreateIndexReader(indexpath);
 		
 		if(indexreader!=null){
-
 			IndexSearcher indexsearcher=new IndexSearcher(indexreader);
-		
-			BooleanQuery.Builder fbuilder=new BooleanQuery.Builder();
-		
-			int rnum=range.size();
-		
-			for(int i=0;i<rnum;i++){
-		
-				Term term=new Term(fields[0],range.get(i));
-		
-				TermQuery termquery=new TermQuery(term);
-		
-				fbuilder.add(termquery,BooleanClause.Occur.SHOULD);
-		
+			BooleanQuery.Builder fbuilder=new BooleanQuery.Builder();		
+			int rnum=range.size();		
+			for(int i=0;i<rnum;i++){	
+				Term term=new Term(fields[0],range.get(i));	
+				TermQuery termquery=new TermQuery(term);		
+				fbuilder.add(termquery,BooleanClause.Occur.SHOULD);	
 			}
-		
+			
 			BooleanQuery  fbooleanquery=fbuilder.build();
-	    
-			BooleanQuery.Builder lbuilder=new BooleanQuery.Builder();
-		
-			QueryParser parser=new QueryParser(fields[1], analyzer);
-	           
-			Query query=parser.parse(keywords);
-	        
-			lbuilder.add(query,BooleanClause.Occur.MUST);
-			
-			BooleanQuery  lbooleanquery=lbuilder.build();
-	    
-			BooleanQuery.Builder builder=new BooleanQuery.Builder();
-		
-			builder.add(fbooleanquery,BooleanClause.Occur.MUST);
-		
-			builder.add(lbooleanquery,BooleanClause.Occur.MUST);
-		
-			BooleanQuery  booleanquery=builder.build();
-		
-			int top=indexreader.numDocs();		//获取有效索引文档总数
-		
-			if(top==0){		//判断有效索引文档数是否为0，如果为零则退出该方法，返回null
-				files=null;
-			}
-			else{
-			
-				TopDocs topdocs=indexsearcher.search(booleanquery,top); 
-			
-				ScoreDoc[] hits=topdocs.scoreDocs;
-		        
-				int num=hits.length;
-		        
-				if(num==0){
-		        	
-					return null;
-		        }
-		        
-		    	//此处加入的是搜索结果的高亮部分
-				SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>
-		    
-				QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分
-		    
-				//			Fragmenter fragmenter = new SimpleSpanFragmenter(scorer); //根据这个得分计算出一个片段
-		    
-				Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);
-
-				//       	highlighter.setTextFragmenter(fragmenter); //设置一下要显示的片段
-		  
-				for(int i=0;i<num;i++){	
-					Document hitdoc=indexsearcher.doc(hits[i].doc);
-					String temp=hitdoc.get("file");
-					String indexlaws[]=new String[2];
-					Integer index=Integer.valueOf(hitdoc.get("path"));
-		    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
-		    			indexlaws[0]="第"+0+"章"+"&emsp";
-		    		else
-		    			indexlaws[0]="第"+index/100000+"章"+"&emsp";
-					index=index%100000;
-					indexlaws[0]+="第"+index/1000+"节";
-					String laws=hitdoc.get("law");
-					if(laws!=null){
-						TokenStream tokenStream = analyzer.tokenStream("laws",new StringReader(laws));
-						Fragmenter displaysize= new SimpleFragmenter(laws.length());
-						highlighter.setTextFragmenter(displaysize);
-						String highlaws=highlighter.getBestFragment(tokenStream,laws);
-						indexlaws[1]=highlaws;
-						if(i==0){	
+			BooleanQuery.Builder lbuilder=new BooleanQuery.Builder();		
+			QueryParser parser=new QueryParser(fields[1], analyzer);	           
+			Query query=parser.parse(keywords);	        
+			lbuilder.add(query,BooleanClause.Occur.MUST);			
+			BooleanQuery  lbooleanquery=lbuilder.build();	    
+			BooleanQuery.Builder builder=new BooleanQuery.Builder();		
+			builder.add(fbooleanquery,BooleanClause.Occur.MUST);		
+			builder.add(lbooleanquery,BooleanClause.Occur.MUST);		
+			BooleanQuery  booleanquery=builder.build();		
+			int top=indexreader.numDocs();		//获取有效索引文档总数		
+			if(top==0)		//判断有效索引文档数是否为0，如果为零则退出该方法，返回null
+				return files;
+			TopDocs topdocs=indexsearcher.search(booleanquery,top); 			
+			ScoreDoc[] hits=topdocs.scoreDocs;		        
+			int num=hits.length;		       
+			if(num==0)		   	
+				return files;
+			SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<b><font color=red>","</font></b>"); //如果不指定参数的话，默认是加粗，即<b><b/>		    
+			QueryScorer scorer = new QueryScorer(query);//计算得分，会初始化一个查询结果最高的得分		    
+			Highlighter highlighter = new Highlighter(simpleHTMLFormatter, scorer);		  
+			for(int i=0;i<num;i++){	
+				Document hitdoc=indexsearcher.doc(hits[i].doc);
+				String temp=hitdoc.get("file");
+				String indexlaws[]=new String[2];
+				Integer index=Integer.valueOf(hitdoc.get("path"));
+		    	if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
+		    		indexlaws[0]="第"+0+"章"+"&emsp";
+		    	else
+		    		indexlaws[0]="第"+index/100000+"章"+"&emsp";
+				index=index%100000;
+				indexlaws[0]+="第"+index/1000+"节";
+				String laws=hitdoc.get("law");
+				if(laws!=null){
+					TokenStream tokenStream = analyzer.tokenStream("laws",new StringReader(laws));
+					Fragmenter displaysize= new SimpleFragmenter(laws.length());
+					highlighter.setTextFragmenter(displaysize);
+					String highlaws=highlighter.getBestFragment(tokenStream,laws);
+					indexlaws[1]=highlaws;
+					if(i==0){	
+						List<String[]> path=new ArrayList<String[]>();
+						path.add(indexlaws);
+						files.put(temp,path);	
+					}else{	
+						if(files.containsKey(temp)){
+							files.get(temp).add(indexlaws);
+						}else{	
 							List<String[]> path=new ArrayList<String[]>();
 							path.add(indexlaws);
-							files.put(temp,path);	
-						}else{	
-							if(files.containsKey(temp)){
-								files.get(temp).add(indexlaws);
-							}else{	
-								List<String[]> path=new ArrayList<String[]>();
-								path.add(indexlaws);
-								files.put(temp,path);		
-							}     		    	
-						}    
-				
-					}        
-				}
-			}
-//	        ramdir.close();
-//	        indexreader.close();
-//	        fsdir.close();
-	
+							files.put(temp,path);		
+						}     		    	
+					}    				
+				}        
+			}			
 		}
-		return files;
-		
+		return files;	
 	}
 		
 	/*
@@ -521,48 +314,37 @@ public class HandleLucene {
     	
     	this.CreateIndexReader(indexpath);
     	
-		IndexSearcher indexsearcher=new IndexSearcher(indexreader);
-		
-		Term term=new Term("file",s);
-		
-		TermQuery termquery=new TermQuery(term);
-		
-		SortField sortfield=new SortField("path",SortField.Type.INT,false);		//false为升序
-       
-		Sort sort=new Sort(sortfield);
-	
-        TopDocs topdocs=indexsearcher.search(termquery,top,sort); 
-        
-        ScoreDoc[] hits=topdocs.scoreDocs;
-        
-        String temp=null;
-        
-        int num=hits.length;
-        
-        if(num==0)
-        	return files;
-        
-        for(int i=0;i<num;i++){
-        	
-        	Document hitdoc=indexsearcher.doc(hits[i].doc);
-        	
-    		temp=hitdoc.get("file");
-    		String indexlaws[]=new String[2];
-    		Integer index=Integer.valueOf(hitdoc.get("path"));
-    		if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
-    			indexlaws[0]="第"+0+"章"+" ";
-    		else
-    			indexlaws[0]="第"+index/100000+"章"+" ";
-    		index=index%100000;
-    		indexlaws[0]+="第"+index/1000+"节";
-    		String laws=hitdoc.get("law");
-    		if(laws!=null){
-        		indexlaws[1]=laws;
-            	path.add(indexlaws);
+    	if(indexreader!=null){
+    		IndexSearcher indexsearcher=new IndexSearcher(indexreader);		
+    		Term term=new Term("file",s);		
+    		TermQuery termquery=new TermQuery(term);		
+    		SortField sortfield=new SortField("path",SortField.Type.INT,false);		//false为升序      
+    		Sort sort=new Sort(sortfield);	
+    		TopDocs topdocs=indexsearcher.search(termquery,top,sort);         
+    		ScoreDoc[] hits=topdocs.scoreDocs;        
+    		String temp=null;        
+    		int num=hits.length;        
+    		if(num==0)
+    			return files;        
+    		for(int i=0;i<num;i++){        	
+    			Document hitdoc=indexsearcher.doc(hits[i].doc);       	
+    			temp=hitdoc.get("file");
+    			String indexlaws[]=new String[2];
+    			Integer index=Integer.valueOf(hitdoc.get("path"));
+    			if(index/100000==999)		//判断章段落的索引号是否为999,当索引号为999时，标明没有章段落
+    				indexlaws[0]="第"+0+"章"+" ";
+    			else
+    				indexlaws[0]="第"+index/100000+"章"+" ";
+    			index=index%100000;
+    			indexlaws[0]+="第"+index/1000+"节";
+    			String laws=hitdoc.get("law");
+    			if(laws!=null){
+    				indexlaws[1]=laws;
+    				path.add(indexlaws);
+    			}
     		}
-        }
-    	files.put(temp,path);
-		
+    		files.put(temp,path);
+    	}
         return files;	
 	}
 	
@@ -593,14 +375,10 @@ public class HandleLucene {
 		Map<String,List<String[]>> files=new LinkedMap<String,List<String[]>>();
     	List<String[]> path=new ArrayList<String[]>();
     	
-    	this.CreateIndexReader(indexpath);
-    	
-    	if(indexreader!=null){
-    	
-    		IndexSearcher indexsearcher=new IndexSearcher(indexreader);
-    		
-			int top=indexreader.numDocs();		//获取索引文件中有效文档总数
-		       
+    	this.CreateIndexReader(indexpath);    	
+    	if(indexreader!=null){   	
+    		IndexSearcher indexsearcher=new IndexSearcher(indexreader);   		
+			int top=indexreader.numDocs();		//获取索引文件中有效文档总数		       
 			if(top==0)		//判断索引文件中的有效文档总数是否为0，如果为零则退出该方法，返回files
 				return files;
 			Term term=new Term("file",keywords);
@@ -678,55 +456,6 @@ public class HandleLucene {
 		}
 	
 	}
-
-//	/*
-//	 *
-//	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
-//	 * All right reserved. 
-//	 * @author: wanyan 
-//	 * date: 2017-11-10 
-//	 * 
-//	 * GetTermFreq方法在根据file字段中，文档名称出现的次数，获取该文档中索引的法条总数
-//	 *
-//	 * @params indexpath 
-//	 * 				索引文件存放目录
-//	 * 				
-//	 * @return Map<String,Integer>
-//	 * 				返回文档中法条总数，<文档名称，法条总数>
-//	 * 
-//	 * @2017-11-15
-//	 * 			修改为使用TermsEnum类获取词频
-//	 * 			修复当没有索引文件时，catch报错异常，并进行弹框提示			   				
-//	 * 
-//	 */
-//	
-//	public Map<String,Integer> GetTermFreq(String indexpath){
-//		Map<String,Integer> res=new HashMap<String,Integer>();
-//		try{
-//			this.CreateIndexReader(indexpath);
-//			if(indexreader!=null){
-//				Terms terms = MultiFields.getTerms(indexreader,"file");
-//				if(terms!=null){
-//					TermsEnum termsEnums = terms.iterator();
-//					while(termsEnums.next()!=null){
-//						int num=termsEnums.docFreq();
-//						BytesRef byteRef=termsEnums.term();
-//						String term = new String(byteRef.bytes, byteRef.offset, byteRef.length,"UTF-8");
-//						res.put(term,num);			 
-//					}
-//				}
-//			}
-//		}catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			if(e.getClass().getSimpleName().equals("IndexNotFoundException"))		//当没有找到索引文件时，catch异常，并弹框提示
-//				JOptionPane.showMessageDialog(null, "未找到索引文件，请先创建索引文件", "警告", JOptionPane.ERROR_MESSAGE);
-//			else
-//				e.printStackTrace();
-//		}
-//
-//		return res;
-//	}
-	
 
 	/*
 	 *
@@ -1127,9 +856,9 @@ public class HandleLucene {
 	
 
 	public static void main(String[] args) throws Exception{
-		HandleLucene handle=new HandleLucene();
+//		HandleLucene handle=new HandleLucene();
 //		Map<String,List<Integer>> files=new HashMap<String,List<Integer>>();
-		Map<String,List<String[]>> contentoffiles=new HashMap<String,List<String[]>>();
+//		Map<String,List<String[]>> contentoffiles=new HashMap<String,List<String[]>>();
 //		Map<String,Integer> fre=new HashMap<String,Integer>();
 //		List<String[]> contentoflaw=new ArrayList<String[]>();
 //		int num=handle.CreateIndex("D:\\Lucene\\src\\","D:\\Lucene\\index\\");
@@ -1139,49 +868,48 @@ public class HandleLucene {
 //		for(String key:fre.keySet()){
 //			System.out.println(key+":"+fre.get(key));
 //		}
-/*
-		files=handle.ExecuteSearch("D:\\Lucene\\index\\","当事人",4);
-		
-		if(files==null){
-			System.out.println("未搜索到关键词");
-		}else{
-			for(String key:files.keySet()){
-				System.out.println("文件名："+key);
-				List<Integer> path=files.get(key);
-				System.out.println(path.size());	
-			}
-		}
-
-
-		contentoflaw=handle.GetContentOfLawByIndex(files,"D:\\Lucene\\src\\");
-		
-		if(contentoflaw==null){
-			System.out.println("未搜索到关键词");
-		}else{	
-			for(int i=0;i<contentoflaw.size();i++)
-				System.out.println(contentoflaw.get(i)[0]+" "+contentoflaw.get(i)[1]+" "+contentoflaw.get(i)[2]+" "+contentoflaw.get(i)[3]);
-			}
-*/	
-		
-		List<String[]> keywordset=new ArrayList<String[]>();
-		keywordset.add(new String[]{"AND","file","劳动人事争议仲裁办案规则（新）法.doc"});
+//
+//		files=handle.ExecuteSearch("D:\\Lucene\\index\\","当事人",4);
+//		
+//		if(files==null){
+//			System.out.println("未搜索到关键词");
+//		}else{
+//			for(String key:files.keySet()){
+//				System.out.println("文件名："+key);
+//				List<Integer> path=files.get(key);
+//				System.out.println(path.size());	
+//			}
+//		}
+//
+//
+//		contentoflaw=handle.GetContentOfLawByIndex(files,"D:\\Lucene\\src\\");
+//		
+//		if(contentoflaw==null){
+//			System.out.println("未搜索到关键词");
+//		}else{	
+//			for(int i=0;i<contentoflaw.size();i++)
+//				System.out.println(contentoflaw.get(i)[0]+" "+contentoflaw.get(i)[1]+" "+contentoflaw.get(i)[2]+" "+contentoflaw.get(i)[3]);
+//			}
+//	
+//		
+//		List<String[]> keywordset=new ArrayList<String[]>();
+//		keywordset.add(new String[]{"AND","file","劳动人事争议仲裁办案规则（新）法.doc"});
 //		contentoffiles=handle.GetSearch("D:\\Lucene\\index\\","file:劳动人事争议仲裁办案规则（新）法.doc",1000);
 //		contentoffiles=handle.GetMultipleSearch("D:\\Lucene\\index\\",keywordset,1000);
 //		contentoffiles=handle.GetTermSearch("D:\\Lucene\\index\\","劳动人事争议仲裁办案规则（新）法.doc",1000);
-		StringBuffer text=new StringBuffer();
-		for(String key:contentoffiles.keySet()){
-			for(int i=0;i<contentoffiles.get(key).size();i++){
-				text.append("&emsp&emsp");
-				text.append(contentoffiles.get(key).get(i)[1]);
-				text.append("&emsp"+"<i>"+"--摘录自");
-				text.append(key);;
-				text.append("&emsp"+contentoffiles.get(key).get(i)[0]+"</i>");
-				text.append("<br/>");
-				text.append("<br/>");
-				}
-			}
-	System.out.println(text.toString());
-	
+//		StringBuffer text=new StringBuffer();
+//		for(String key:contentoffiles.keySet()){
+//			for(int i=0;i<contentoffiles.get(key).size();i++){
+//				text.append("&emsp&emsp");
+//				text.append(contentoffiles.get(key).get(i)[1]);
+//				text.append("&emsp"+"<i>"+"--摘录自");
+//				text.append(key);;
+//				text.append("&emsp"+contentoffiles.get(key).get(i)[0]+"</i>");
+//				text.append("<br/>");
+//				text.append("<br/>");
+//				}
+//			}
+//	System.out.println(text.toString());
 	}
 	
 	
