@@ -372,9 +372,11 @@ public class DisplayGui extends JFrame{
 				JSONObject tem1=new JSONObject();
 				for(int j=0;j<sg.size();j++){
 					tem1=sg.getJSONObject(j);
-					String[] segment=new String[2];
+					String[] segment=new String[4];
 					segment[0]=tem1.getString("path");
 					segment[1]=tem1.getString("segment");
+					segment[2]=tem.getString("fpath");
+					segment[3]=tem.getString("type");
 					segments.add(segment);
 				}
 				res.put(tem.getString("file"),segments);

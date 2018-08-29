@@ -243,8 +243,11 @@ public class SOLDownloadIndex extends JFrame{
 			        }
 			        Map<String,List<String[]>> content=new HashMap<String,List<String[]>>();
 			        content.put(response.getString("file"),laws);
+			        String[] finfos=new String[2];
+			        finfos[0]=response.getString("fpath");
+			        finfos[1]=response.getString("type");
 			        HandleLucene handle=new HandleLucene();
-			        handle.AddIndexs(content,Path.indexpath,Path.filepath);
+			        handle.AddIndexs(content,finfos,Path.indexpath,Path.filepath);
 					f=true;
 				}
 				else

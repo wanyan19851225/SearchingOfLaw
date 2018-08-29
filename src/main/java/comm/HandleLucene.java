@@ -766,6 +766,7 @@ public class HandleLucene {
 	 * Modified Date:2018-8-29
 	 * 			新增当为html文档创建段落索引前，先判断该文档在文档信息索引中是否已经存在
 	 * 			新增创建word文档段落索引时，捕捉IOWord.GetIndexOfgeneraldocment方法异常，捕获异常后，totalofindex赋值-3
+	 * 			新增当创建文档信息索引时，新增文档路径，文档类型，文档来源三个字段
 	 */
 	
 	public Integer AddIndexs(String url,String indexpath,String filepath) throws IOException{
@@ -808,10 +809,13 @@ public class HandleLucene {
 				DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
 				FileIndexs findexs=new FileIndexs();
 				Map<String,String[]> finfo=new HashMap<String,String[]>();
-				String[] infos=new String[3];
-				infos[0]="";
-				infos[1]=df.format(d);
-				infos[2]=String.valueOf(totalofindex);
+				String[] infos=new String[6];
+				infos[0]="";		//文档作者
+				infos[1]=df.format(d);		//创建日期
+				infos[2]=String.valueOf(totalofindex);		//段落总数
+				infos[3]=url;		//文档路径
+				infos[4]=Store.Docment.HTML;		//文档类型
+				infos[5]=Store.Type.L;		//文档来源
 				finfo.put(filename,infos);
 				findexs.AddFiles(finfo,filepath);
 			}
@@ -853,10 +857,13 @@ public class HandleLucene {
 				DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
 				FileIndexs findexs=new FileIndexs();
 				Map<String,String[]> finfo=new HashMap<String,String[]>();
-				String[] infos=new String[3];
-				infos[0]="";
-				infos[1]=df.format(d);
-				infos[2]=String.valueOf(totalofindex);
+				String[] infos=new String[6];
+				infos[0]="";		//文档作者
+				infos[1]=df.format(d);		//创建日期
+				infos[2]=String.valueOf(totalofindex);		//段落总数
+				infos[3]=url;		//文档路径
+				infos[4]=Store.Docment.WORD;		//文档类型
+				infos[5]=Store.Type.L;		//文档来源
 				finfo.put(file.getName(),infos);
 				findexs.AddFiles(finfo,filepath);
 			}
@@ -884,23 +891,28 @@ public class HandleLucene {
 	 * 				文档索引，以Map<文档名称，List<法条路径，法条内容>>形式传参				
 	 * 		   indexpath
 	 * 				索引文件路径
+	 * 		   filepath
+	 * 				文档信息索引路径
+	 * 		   finfos
+	 * 				以[文档路径，文档类型]形式传入参数
 	 * @return Integer
 	 * 				返回添加到索引文件中的法条数
 	 * @Modified 2018-8-13
 	 * 				修改为调用CreateAddIndexWriter方法，实现IndexWriter单例化
 	 * @Modified 2018-8-23
 	 * 				为文档段落创建索引成功后，创建文档信息索引
-	 * 	   				
+	 *  @Modified 2018-8-29
+	 *  			新增finfos参数，用来传入[文档路径，文档类型]
+	 *  	   				
 	 */
 	
-	public Integer AddIndexs(Map<String,List<String[]>> content,String indexpath,String filepath) throws IOException{
+	public Integer AddIndexs(Map<String,List<String[]>> content,String[] finfos,String indexpath,String filepath) throws IOException{
 		int totalofindex=0;
 		this.CreateAddIndexWriter(indexpath);
 		
 		List<String[]> laws=new ArrayList<String[]>();
 		
 		for(Entry<String, List<String[]>> entry:content.entrySet()){ 
-				
 			FieldType filetype=new FieldType();
 			filetype.setIndexOptions(IndexOptions.DOCS);
 			filetype.setStored(true);		
@@ -923,10 +935,13 @@ public class HandleLucene {
 				DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
 				FileIndexs findexs=new FileIndexs();
 				Map<String,String[]> finfo=new HashMap<String,String[]>();
-				String[] infos=new String[3];
+				String[] infos=new String[6];
 				infos[0]="";
 				infos[1]=df.format(d);
 				infos[2]=String.valueOf(totalofindex);
+				infos[3]=finfos[0];		//文档路径
+				infos[4]=finfos[1];		//文档类型
+				infos[5]=Store.Type.R;		//文档来源
 				finfo.put(entry.getKey(),infos);
 				findexs.AddFiles(finfo,filepath);
 			}

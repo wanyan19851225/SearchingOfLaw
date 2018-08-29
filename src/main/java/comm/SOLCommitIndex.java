@@ -156,13 +156,20 @@ public class SOLCommitIndex extends JFrame{
 		HandleLucene handle=new HandleLucene();  
 		Map<String,List<String[]>> content=handle.GetAllSegments(Path.indexpath,file);
 			if(!content.isEmpty()){
+				FileIndexs findexs=new FileIndexs();
+				Map<String,String[]> finfo=new HashMap<String,String[]>();
+				for(String keywords : content.keySet()){
+					finfo=findexs.QueryFiles(Path.filepath,"\""+keywords+"\"");
+				}
 				JSONObject body=new JSONObject();
-				JSONObject response=new JSONObject();
-				IOHttp http=new IOHttp(url);
 				body.accumulate("token","");
 				body.accumulate("command","103");
 				body.accumulate("user",user);
 				body.accumulate("file",file);
+				for(String[] v : finfo.values()){
+					body.accumulate("fpath",v[4]);
+					body.accumulate("type",v[5]);
+				}
 				List<String[]> laws=content.get(file);
 				int count = laws.size();		//传给服务器的法条总数
 				res[0]=count;
@@ -179,6 +186,8 @@ public class SOLCommitIndex extends JFrame{
 				body.accumulate("lawslist",lawslist);
 				GZipUntils gzip=new GZipUntils();
 				String sends=gzip.S2Gzip(body.toString());
+				JSONObject response=new JSONObject();
+				IOHttp http=new IOHttp(url);
 				response=http.sendPost(sends);
 				
 				int total=response.getInt("result");		//获取服务器写入索引文件成功的法条总数

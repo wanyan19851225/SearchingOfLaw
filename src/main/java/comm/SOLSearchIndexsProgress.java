@@ -43,25 +43,32 @@ public class SOLSearchIndexsProgress extends SwingWorker<Map<String,Long>,String
 		if(!this.keywords.isEmpty()){
 			Boolean f=p.GetIsRemote();
 			long start=System.currentTimeMillis();
+			String type="";
 			if(DisplayGui.range.isEmpty()){
-				if(f)
+				if(f){
+					type=Store.Type.R;
 					content=p.QueryRemoteSegments(Path.urlpath,this.keywords);
-				else
+				}
+				else{
+					type=Store.Type.L;
 					content=handle.QuerySegments(Path.indexpath,this.keywords);
+				}
 			}
 			else{					
 //				多条件查询，指定在某个法条文档中查询	
 				if(f){
+					type=Store.Type.R;
 					System.out.println("keywords:"+this.keywords+","+"address:");
 				}
 				else{
+					type=Store.Type.L;
 					String[] fields=new String[]{"file","law"};
 					content=handle.QuerySegments(Path.indexpath,fields,DisplayGui.range,this.keywords);
 				}
 			}
 					
 			long end=System.currentTimeMillis();
-			long total=p.solresult.UpdateText(content);
+			long total=p.solresult.UpdateText(content,type);
 			r.put(String.valueOf(end-start),total);
 		}
 		return r;

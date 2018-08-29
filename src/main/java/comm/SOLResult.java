@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -109,7 +110,7 @@ public class SOLResult extends JPanel{
 		
 	}
 	
-	public long UpdateText(Map<String,List<String[]>> content){
+	public long UpdateText(Map<String,List<String[]>> content,String type){
 		
 		long total=0;
 		ste.setText("");
@@ -119,12 +120,30 @@ public class SOLResult extends JPanel{
 		else{
 			StringBuffer text=new StringBuffer();
 			for(Entry<String,List<String[]>> entry: content.entrySet()){
+				FileIndexs findexs=new FileIndexs();
+				Map<String,String[]> finfo=new HashMap<String,String[]>();
+				finfo=findexs.QueryFiles(Path.filepath,"\""+entry.getKey()+"\"");
+				String url="";
+				if(type.equals(Store.Type.L)){
+					for(String[] v : finfo.values()){
+						if(v[5].equals(Store.Docment.WORD))
+							url="<a href=\"file:///"+v[4]+"\">"+entry.getKey()+"</a>";
+						else
+							url="<a href="+v[4]+">"+entry.getKey()+"</a>";
+					}
+				}	
 				for(int i=0;i<entry.getValue().size();i++){
 					text.append("&emsp&emsp ");
 					String[] item=entry.getValue().get(i);
 					text.append(item[1]);
+					if(type.equals(Store.Type.R)){
+						if(item[3].equals(Store.Docment.WORD))
+							url="<a href=\"file:///"+item[2]+"\">"+entry.getKey()+"</a>";
+						else
+							url="<a href="+item[2]+">"+entry.getKey()+"</a>";
+					}
 					text.append("&emsp"+"<i>"+"--摘录自");
-					text.append("<a href=\"file:///D:/Lucene/src/"+entry.getKey()+"\">"+entry.getKey()+"</a>");
+					text.append(url);
 					text.append("&emsp"+item[0]+"</i>");
 					text.append("<br/>");
 					text.append("<br/>");
