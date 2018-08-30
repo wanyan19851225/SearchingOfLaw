@@ -1,28 +1,26 @@
 package comm;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
-public class SOLShowConfirmDeleteIndexs extends JFrame{
+public class SOLShowConfirmCommitIndexs extends JFrame{
 	
-	private SOLShowIndex p;
+	private SOLCommitIndex p;
 	private JProgressBar jpb;
 	private JLabel bl,ll;
 	private JButton lbt,sbt;
 	
-	public SOLShowConfirmDeleteIndexs(SOLShowIndex p){
+	public SOLShowConfirmCommitIndexs(SOLCommitIndex p) {
 		this.p=p;
 		
 		Container contentpane=this.getContentPane();
@@ -30,7 +28,7 @@ public class SOLShowConfirmDeleteIndexs extends JFrame{
 		
 		ll=new JLabel();
 		ll.setHorizontalAlignment(JLabel.CENTER);
-		ll.setText("<html><font size=4>删除后你将的本地仓库中移除，且以后不会再检索到该文档<br><center>确认是否删除？</center></font></html>");
+		ll.setText("<html><font size=4>提交后本地文档将上传到远程服务器，其他人将能够检索到该文档<br><center>确认是否提交？</center></font></html>");
 		ll.setPreferredSize(new Dimension(FrameSize.X-60,(FrameSize.Y/4-100)));
 //		ll.setBorder(BorderFactory.createLineBorder(Color.red));
 		
@@ -47,12 +45,12 @@ public class SOLShowConfirmDeleteIndexs extends JFrame{
 		sbt=new JButton("取消");
 		sbt.setPreferredSize(new Dimension(60,30));
 
-		lbt.addActionListener(new SOLEvents.DeleteIndexEvent(this));
+		lbt.addActionListener(new SOLEvents.CommitIndexEvent(this));
 		sbt.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				SOLShowConfirmDeleteIndexs.this.dispose();
+				SOLShowConfirmCommitIndexs.this.dispose();
 			}
 		});
 //		this.addWindowListener(new WindowAdapter()
@@ -82,7 +80,7 @@ public class SOLShowConfirmDeleteIndexs extends JFrame{
 		this.SetProgressBarLabelVisabel(false);
 		this.SetConfirmInfomationVisabel(true);
 		
-	    this.setTitle("确认删除");//窗体标签  
+	    this.setTitle("确认提交");//窗体标签  
 	    this.setSize(FrameSize.X-36,FrameSize.Y/4);//窗体大小  
 	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
 	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
@@ -90,7 +88,7 @@ public class SOLShowConfirmDeleteIndexs extends JFrame{
 	    this.setResizable(false); //锁定窗体
 //	    this.setAlwaysOnTop(true);
 	}
-	
+
 	public void SetProgressBarVisabel(Boolean f){
 		jpb.setVisible(f);
 	}
@@ -103,7 +101,7 @@ public class SOLShowConfirmDeleteIndexs extends JFrame{
 		ll.setVisible(f);
 	}
 	
-	public SOLShowIndex GetSOLShowIndexFrame(){
+	public SOLCommitIndex GetSOLShowCommitIndexFrame(){
 		return this.p;
 	}
 	

@@ -92,7 +92,7 @@ public class SOLCommitIndex extends JFrame{
 		jsp.setViewportView(t);
 
 		
-		lbt.addActionListener(new SOLEvents.CommitIndexEvent(this));
+		lbt.addActionListener(new SOLEvents.ConfirmCommitIndexEvent(this));
 		sbt.addActionListener(new SOLEvents.SelEvent(this));
 		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
 		sbt2.addActionListener(new SOLEvents.FilterEvent(this));

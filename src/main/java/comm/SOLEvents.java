@@ -401,8 +401,11 @@ public class  SOLEvents {
 	
 		public void actionPerformed(ActionEvent e) {
 			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
-			if(!file.isEmpty())
+			if(!file.isEmpty()) {
+//				p.setEnabled(false);
+//				p.setAlwaysOnTop(false);
 				new SOLShowConfirmDeleteIndexs(this.p);	
+			}
 		}
 	}
 	
@@ -642,11 +645,11 @@ public class  SOLEvents {
 	 * 
 	 */
 	
-	public static class CommitIndexEvent implements ActionListener{
+	public static class ConfirmCommitIndexEvent implements ActionListener{
 		
 		private SOLCommitIndex p;
 		
-		public CommitIndexEvent(SOLCommitIndex p){
+		public ConfirmCommitIndexEvent(SOLCommitIndex p){
 			this.p=p;
 		}
 
@@ -655,21 +658,22 @@ public class  SOLEvents {
 			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
 			try {
 				if(!file.isEmpty()){
+					new SOLShowConfirmCommitIndexs(this.p);
 					p.SetSearchButtonEnable(false);
-					Map<String,int[]> m=new HashMap<String,int[]>();
-					for(int i=0;i<file.size();i++){
-						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
-						Vector<String> obj=p.t.GetDataID(s);
-						int[] res=p.CommitIndex(Path.urlpath,s,Path.indexpath);
-						m.put(s,res);
-						if(res[0]==res[1]&&res[0]!=-1&&res[1]!=-1){
-							p.RemoveData(obj);
-							p.t.RemoveDataID(s);
-						}
-					}
-					p.t.LoadData(p.GetData());
-			        p.t.InitTable(true);
-			        new SOLShowCommitIndexsResults(m);
+//					Map<String,int[]> m=new HashMap<String,int[]>();
+//					for(int i=0;i<file.size();i++){
+//						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+//						Vector<String> obj=p.t.GetDataID(s);
+//						int[] res=p.CommitIndex(Path.urlpath,s,Path.indexpath);
+//						m.put(s,res);
+//						if(res[0]==res[1]&&res[0]!=-1&&res[1]!=-1){
+//							p.RemoveData(obj);
+//							p.t.RemoveDataID(s);
+//						}
+//					}
+//					p.t.LoadData(p.GetData());
+//			        p.t.InitTable(true);
+//			        new SOLShowCommitIndexsResults(m);
 //			        StringBuffer sb=new StringBuffer();
 //			        for(Entry<String,int[]> entry:m.entrySet()){
 //			        	if(entry.getValue()[0]==entry.getValue()[1]&&entry.getValue()[0]!=-1&&entry.getValue()[1]!=-1){
@@ -689,8 +693,68 @@ public class  SOLEvents {
 				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
 			}
 	        p.SetSearchButtonEnable(true);
+		}		
+	}
+	
+	/** 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-30
+	 * desc:向远处服务器上传索引文件，SOLCommitIndex窗体_lbt事件
+	 * 
+	 */
+	
+	public static class CommitIndexEvent implements ActionListener{
+		
+		private SOLShowConfirmCommitIndexs p;
+		
+		public CommitIndexEvent(SOLShowConfirmCommitIndexs p){
+			this.p=p;
 		}
-			
+
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			SOLCommitIndex commitindex=this.p.GetSOLShowCommitIndexFrame();
+			List<String> file=commitindex.t.GetAllRowsDatasAtColumn(1);
+//			try {
+				if(!file.isEmpty()){
+//					new SOLShowConfirmCommitIndexs(this.p);
+//					p.SetSearchButtonEnable(false);
+//					Map<String,int[]> m=new HashMap<String,int[]>();
+//					for(int i=0;i<file.size();i++){
+//						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+//						Vector<String> obj=p.t.GetDataID(s);
+//						int[] res=p.CommitIndex(Path.urlpath,s,Path.indexpath);
+//						m.put(s,res);
+//						if(res[0]==res[1]&&res[0]!=-1&&res[1]!=-1){
+//							p.RemoveData(obj);
+//							p.t.RemoveDataID(s);
+//						}
+//					}
+//					p.t.LoadData(p.GetData());
+//			        p.t.InitTable(true);
+//			        new SOLShowCommitIndexsResults(m);
+//			        StringBuffer sb=new StringBuffer();
+//			        for(Entry<String,int[]> entry:m.entrySet()){
+//			        	if(entry.getValue()[0]==entry.getValue()[1]&&entry.getValue()[0]!=-1&&entry.getValue()[1]!=-1){
+//			        		sb.append(entry.getKey()+" "+"法条总数："+entry.getValue()[0]+" "+"上传成功数:"+entry.getValue()[1]);
+//			        		sb.append("\n");
+//			        	}
+//			        	else{
+//			        		sb.append(entry.getKey()+" "+"提交失败");
+//			        		sb.append("\n");
+//			        	}
+//			        }
+//			        JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
+				}
+//			} catch (Exception e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
+//			}
+//	        p.SetSearchButtonEnable(true);
+		}		
 	}
 	
 	/** 
