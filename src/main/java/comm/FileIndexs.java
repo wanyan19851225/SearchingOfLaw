@@ -60,6 +60,7 @@ public class FileIndexs {
 	private static RAMDirectory ramdir;
 	private static IndexWriter indexwriter;
 	private static IndexWriter ramwriter;
+	private static Boolean ramdiriscolse=false;
 
 	/*
  	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
@@ -81,12 +82,13 @@ public class FileIndexs {
 		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
 		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
 			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		if(ramwriter==null||!ramwriter.isOpen()) {
+		if(ramwriter==null||!ramwriter.isOpen()||ramdiriscolse) {
 			if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
 				ramdir.close();
 			ramdir=new RAMDirectory();		//创建内存索引文件
 			IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
 			ramwriter = new IndexWriter(ramdir,ramconfig);
+			ramdiriscolse=false;
 		}
 		
 		if(indexwriter==null||!indexwriter.isOpen()){
@@ -156,6 +158,7 @@ public class FileIndexs {
 					ramdir.close();
 				ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
 				indexreader=DirectoryReader.open(ramdir);
+				ramdiriscolse=true;
 			}
 			else{
 				if(indexwriter!=null){		//判断indexwriter是否实例化
