@@ -1,4 +1,4 @@
-package comm;
+﻿package comm;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +78,7 @@ public class HandleLucene {
 	private static RAMDirectory ramdir;
 	private static IndexWriter indexwriter;
 	private static IndexWriter ramwriter;
-	private static Boolean ramdirisopen=false;
+	private static Boolean ramdiriscolse=false;
 	
 	/*
 	 *
@@ -729,6 +729,7 @@ public class HandleLucene {
 					ramdir.close();
 				ramdir=new RAMDirectory(fsdir,iocontext);		//创建内存索引文件，并将磁盘索引文件放到内存中
 				indexreader=DirectoryReader.open(ramdir);
+				ramdiriscolse=true;
 			}
 			else{
 				if(indexwriter!=null){		//判断indexwriter是否实例化
@@ -806,12 +807,13 @@ public class HandleLucene {
 		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
 		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
 			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		if(ramwriter==null||!ramwriter.isOpen()) {		//判断ramwriter是否为空或者关闭，如果为空或已关闭，则创建内存索引，重新创建ramwriter
+		if(ramwriter==null||!ramwriter.isOpen()||ramdiriscolse) {		//判断ramwriter是否为空或者关闭，如果为空或已关闭，则创建内存索引，重新创建ramwriter
 			if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
 				ramdir.close();
 			ramdir=new RAMDirectory();		//创建内存索引文件
 			IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
 			ramwriter = new IndexWriter(ramdir,ramconfig);
+			ramdiriscolse=false;
 		}
 		
 		if(indexwriter==null||!indexwriter.isOpen()){
