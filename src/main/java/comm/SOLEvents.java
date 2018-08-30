@@ -318,7 +318,7 @@ public class  SOLEvents {
 		
 		public void actionPerformed(ActionEvent e) {
 			String s=jf.GetFilePath();
-			jf.sbt.setEnabled(false);
+//			jf.sbt.setEnabled(false);
 
 			if(!s.isEmpty()){
 				SOLAddIndexsProgress pb=new SOLAddIndexsProgress(jf);
@@ -328,7 +328,7 @@ public class  SOLEvents {
 			}
 			else
 				JOptionPane.showMessageDialog(null, "请选择要添加索引的文档", "警告", JOptionPane.ERROR_MESSAGE);
-			jf.sbt.setEnabled(true);	
+//			jf.sbt.setEnabled(true);	
 		}
 	}
 	
@@ -386,36 +386,87 @@ public class  SOLEvents {
 	 * date: 2017-12-22
 	 * desc:SOLShowIndex窗口中，删除按钮_lbt的删除事件
 	 * 
+	 * Modified 2018-8-30
+	 * 		修改方法名称为ConfirmDeleteEvent
+	 * 		修改为调用SOLShowConfirmDeleteIndexs窗口
 	 */
 	
-	public static class DeleteIndexEvent implements ActionListener{
+	public static class ConfirmDeleteEvent implements ActionListener{
 		
 		SOLShowIndex p;
 		
-		public DeleteIndexEvent(SOLShowIndex p){
+		public ConfirmDeleteEvent(SOLShowIndex p){
 			this.p=p;
 		}
 	
 		public void actionPerformed(ActionEvent e) {
 			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
-			Boolean f;
-			Map<String,Boolean> m=new HashMap<String,Boolean>();
+//			Boolean f;
+//			Map<String,Boolean> m=new HashMap<String,Boolean>();
 			if(!file.isEmpty()){
-				HandleLucene handle=new HandleLucene();
-				for(int i=0;i<file.size();i++){
-					String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
-					f=handle.DeleteIndex(s,Path.indexpath,Path.filepath);	
-					if(f){
-						Vector<String> obj=p.t.GetDataID(s);
-						p.RemoveData(obj);
-						p.t.RemoveDataID(s);
-					}
-					m.put(s, f);					
-				}
-				p.t.LoadData(p.GetData());
-		        p.t.InitTable(false);
-		        
-		        new SOLShowDeleteIndexsResults(m);
+//				HandleLucene handle=new HandleLucene();
+//				for(int i=0;i<file.size();i++){
+//					String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+//					f=handle.DeleteIndex(s,Path.indexpath,Path.filepath);	
+//					if(f){
+//						Vector<String> obj=p.t.GetDataID(s);
+//						p.RemoveData(obj);
+//						p.t.RemoveDataID(s);
+//					}
+//					m.put(s, f);					
+//				}
+//				p.t.LoadData(p.GetData());
+//		        p.t.InitTable(false);
+//		        
+//		        new SOLShowDeleteIndexsResults(m);
+				
+				new SOLShowConfirmDeleteIndexs(this.p);
+			}
+		}
+	}
+	
+	/** 
+	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
+	 * All right reserved. 
+	 * @author: wanyan 
+	 * date: 2018-8-30
+	 * desc:SOLShowConfirmDeleteIndexs窗口中，确认按钮_lbt的删除事件
+	 * 
+	 */
+	
+	public static class DeleteIndexEvent implements ActionListener{
+		
+		private SOLShowConfirmDeleteIndexs p;
+		
+		public DeleteIndexEvent(SOLShowConfirmDeleteIndexs p){
+			this.p=p;
+		}
+	
+		public void actionPerformed(ActionEvent e) {
+			SOLShowIndex showindex=this.p.GetSOLShowIndexFrame();
+			List<String> file=showindex.t.GetAllRowsDatasAtColumn(1);
+//			Boolean f;
+//			Map<String,Boolean> m=new HashMap<String,Boolean>();
+			if(!file.isEmpty()){
+				int size=file.size();
+				SOLDeleteIndexsProgress pb=new SOLDeleteIndexsProgress(this.p,file);
+				p.setProgressBarMaximum(size);
+				pb.execute();
+//				HandleLucene handle=new HandleLucene();
+//				for(int i=0;i<file.size();i++){
+//					String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+//					f=handle.DeleteIndex(s,Path.indexpath,Path.filepath);	
+//					if(f){
+//						Vector<String> obj=p.t.GetDataID(s);
+//						p.RemoveData(obj);
+//						p.t.RemoveDataID(s);
+//					}
+//					m.put(s, f);					
+//				}
+//				p.t.LoadData(p.GetData());
+//		        p.t.InitTable(false);
+//		        
+//		        new SOLShowDeleteIndexsResults(m);
 			}
 		}
 	}

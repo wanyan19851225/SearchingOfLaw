@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JOptionPane;
@@ -49,7 +50,6 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 		return size;
 	}
 	
-	
 	@Override
 	protected Map<String,Integer> doInBackground() throws Exception {
 		// TODO Auto-generated method stub
@@ -58,11 +58,14 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 		jf.solstar.SetDoneLabelVisabel(false);
 		jf.solstar.SetProgressBarVisabel(true);
 		jf.solstar.SetProgressBarLabelVisabel(true);
+		jf.setFrameEnable(false);
+		jf.setTableVisabel(false);
+		
 		Long start=System.currentTimeMillis();
 		if(f!=null){		//判断是否是文件夹，如果是，则走此分支
 			int size=f.length;		//获取文件夹下文件总数
 			if(size==0)			//判断文件夹下是否有文件，如果没有文件，则走此分支，返回-1
-				r.put(url,ResultsType.Index_NONE);
+				r.put(url,ResultsType.Directory_NONE);
 			else{
 				FileIndexs findexs=new FileIndexs();
 				List<String> files=findexs.GetAllFiles(Path.filepath);
@@ -72,8 +75,8 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 						r.put(f[i].getPath(),t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落。由于在GetFile方法中已经对传入的url进行了判断，只要走到此分支，必然不会出现返回-2和-3的情况
 					}
 					else
-						r.put(f[i].getPath(),ResultsType.Index_NONE);
-					publish("("+(i+1)+"/"+size+")");   
+						r.put(f[i].getPath(),ResultsType.DOC_Already_Exist);
+					publish("("+(i+1)+"/"+size+")"+" "+f[i].getName());   
 				}
 			}
 		}
@@ -86,7 +89,7 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 				r.put(url,t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落；-2：网站地址无效或者无法访问；-3：输入路径url格式有误
 			}
 			else
-				r.put(url,ResultsType.Index_NONE);
+				r.put(url,ResultsType.DOC_Already_Exist);
 		}
 		Long end=System.currentTimeMillis();
 		Long t=end-start;
@@ -96,8 +99,13 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 	
 	@Override  
 	protected void process(List<String> chunks) {
-		if(!chunks.isEmpty()){		
-	        jf.solstar.setProgeressBarLabelText(chunks.get(chunks.size()-1)); 
+		if(!chunks.isEmpty()){
+			String s=chunks.get(chunks.size()-1);
+			if(s.length()>40){
+				StringBuffer sb=new StringBuffer(s.substring(0,40)+"...");
+				s=sb.toString();
+			}	
+	        jf.solstar.setProgeressBarLabelText(s); 
 	        int x=Integer.parseInt(chunks.get(chunks.size()-1).substring(chunks.get(chunks.size()-1).indexOf("(")+1,chunks.get(chunks.size()-1).indexOf("/")).trim()); 
 	        jf.solstar.setProgressBarValue(x);  
 		}
@@ -113,47 +121,76 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 		jf.solstar.SetDoneLabelVisabel(true);
 		jf.solstar.SetProgressBarVisabel(false);
 		jf.solstar.SetProgressBarLabelVisabel(false);
+		jf.setFrameEnable(true);
+
+		
+		jf.ClearData();
 			
-		List<String> BlankIndexFiles=new ArrayList<String>();		//存储返回值-1的文件，即空文件夹或者内容为空的文件名称
-		List<String> UnArrveHtmlFiles=new ArrayList<String>();		//存储返回值-2的html名称，即html的url地址无效，或无法访问
-		List<String> UnFormatFiles=new ArrayList<String>();		//存储url格式错误的路径名称
-		List<String> SuccesIndexFiles=new ArrayList<String>();		//存储成功建立索引的文件名称
+//		List<String> BlankIndexFiles=new ArrayList<String>();		//存储返回值-1的文件，即空文件夹或者内容为空的文件名称
+//		List<String> UnArrveHtmlFiles=new ArrayList<String>();		//存储返回值-2的html名称，即html的url地址无效，或无法访问
+//		List<String> UnFormatFiles=new ArrayList<String>();		//存储url格式错误的路径名称
+//		List<String> SuccesIndexFiles=new ArrayList<String>();		//存储成功建立索引的文件名称
+		Boolean formaterror=false;
+		Boolean	success=false;
 		try {	
 			Map<String,Integer> r= get();	
-			int n=0;
+			int n=0,j=0;
+			Vector<Vector<String>> data = new Vector<Vector<String>>();
 			for(Map.Entry<String,Integer> e:r.entrySet()){
 				if(e.getKey()!="__time__"){
-					if(e.getValue()==ResultsType.Index_NONE)
-						BlankIndexFiles.add(e.getKey());
-					else if(e.getValue()==ResultsType.Index_Exception)
-						UnArrveHtmlFiles.add(e.getKey());							
-					else if(e.getValue()==ResultsType.Index_Format_Error)		//返回-3时，必然会只有一个元素
-						UnFormatFiles.add(e.getKey());
+					Vector<String> line=new Vector<String>();
+					if(e.getValue()==ResultsType.Index_NONE){
+						line.add(String.valueOf(j++));
+						line.add(e.getKey());
+						line.add(String.valueOf(0));
+						line.add("<html><font color=red>未检索到内容</font></html>");
+					}
+					else if(e.getValue()==ResultsType.Directory_NONE){
+						line.add(String.valueOf(j++));
+						line.add(e.getKey());
+						line.add(String.valueOf(0));
+						line.add("<html><font color=red>未找到文档</font></html>");
+					}
+					else if(e.getValue()==ResultsType.DOC_Already_Exist){
+						line.add(String.valueOf(j++));
+						line.add(e.getKey());
+						line.add(String.valueOf(0));
+						line.add("<html><font color=red>文档已存在</font></html>");
+					}
+					else if(e.getValue()==ResultsType.URL_UNArrive){
+						line.add(String.valueOf(j++));
+						line.add(e.getKey());
+						line.add(String.valueOf(0));
+						line.add("<html><font color=red>网站无法访问</font></html>");
+					}
+					else if(e.getValue()==ResultsType.DOC_Bad){
+						line.add(String.valueOf(j++));
+						line.add(e.getKey());
+						line.add(String.valueOf(0));
+						line.add("<html><font color=red>文档已经损坏</font></html>");
+					}
+					else if(e.getValue()==ResultsType.URL_Format_Error)		//返回-3时，必然会只有一个元素
+						formaterror=true;
 					else{
 							n+=e.getValue();
-							SuccesIndexFiles.add(e.getKey());
-						}			
-					}
+							success=true;
+							line.add(String.valueOf(j++));
+							line.add(e.getKey());
+							line.add(String.valueOf(e.getValue()));
+							line.add("成功");
+						}
+					data.add(line);					
+				}
 			}
-			if(!BlankIndexFiles.isEmpty()){
-				StringBuffer s=new StringBuffer();
-				int nf=BlankIndexFiles.size();
-				for(int i=0;i<nf;i++)
-					s.append(BlankIndexFiles.get(i)+"\r\n");
-				JOptionPane.showMessageDialog(null, s.toString()+"文档或网站中没有检索到内容，或文件夹下未找到文档，或该文档已经存在", "警告", JOptionPane.ERROR_MESSAGE);
-			}
-			if(!UnArrveHtmlFiles.isEmpty()){
-				StringBuffer s=new StringBuffer();
-				int nf=UnArrveHtmlFiles.size();
-				for(int i=0;i<nf;i++)
-					s.append(UnArrveHtmlFiles.get(i)+"\r\n");
-				JOptionPane.showMessageDialog(null,  s.toString()+"请输入有效网址，或确认网站是否可以正常访问，或文档已经损坏", "警告", JOptionPane.ERROR_MESSAGE);
-			}
-			if(!UnFormatFiles.isEmpty())
+			if(formaterror)
 				JOptionPane.showMessageDialog(null, "请输入有效格式的路径", "警告", JOptionPane.ERROR_MESSAGE);
-			if(!SuccesIndexFiles.isEmpty())
+			if(success)
 				DisplayGui.defselect.clear();
 			jf.solstar.setStatusText("添加检索完毕!"+"耗时："+r.get("__time__")+"ms "+"创建索引条数："+n);
+			if(data.size()>0){
+				jf.t.LoadData(data);
+				jf.setTableVisabel(true);
+			}
 		} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

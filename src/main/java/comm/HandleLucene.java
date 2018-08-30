@@ -57,6 +57,7 @@ import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.SimpleFragmenter;
 import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.search.highlight.SimpleSpanFragmenter;
+import org.apache.lucene.store.AlreadyClosedException;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.RAMDirectory;
@@ -453,11 +454,13 @@ public class HandleLucene {
 			indexwriter.commit();  
 			
 			FileIndexs findexs=new FileIndexs();
-			findexs.DeleteIndex(s, filepath);	
-		} catch (IOException e) {
+			Boolean ff=false;
+			while(!ff)
+				ff=findexs.DeleteIndex(s, filepath);	
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			f=false;
-//			e.printStackTrace();
+			e.printStackTrace();
 		}
 		return f;
 	}
@@ -534,9 +537,9 @@ public class HandleLucene {
 						totalofindex=ResultsType.Index_NONE;
 				}
 				else
-					totalofindex=ResultsType.Index_NONE;
+					totalofindex=ResultsType.DOC_Already_Exist;
 			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
-				totalofindex=ResultsType.Index_Exception;
+				totalofindex=ResultsType.URL_UNArrive;
 			}
 			if(totalofindex>0){		//当段落数大于0时，创建文档信息索引
 				Date d=new Date(System.currentTimeMillis());
@@ -584,7 +587,7 @@ public class HandleLucene {
 				else
 					totalofindex=ResultsType.Index_NONE;
 			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
-				totalofindex=ResultsType.Index_Exception;
+				totalofindex=ResultsType.DOC_Bad;
 			}
 			if(totalofindex>0){		//当段落数大于0时，创建文档信息索引
 				Date d=new Date(System.currentTimeMillis());
@@ -603,12 +606,12 @@ public class HandleLucene {
 			}
 		}
 		else
-			totalofindex=ResultsType.Index_Format_Error;
-	
-		ramwriter.close();	
-		indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-        indexwriter.commit();
-        
+			totalofindex=ResultsType.URL_Format_Error;
+		if(totalofindex>0){
+			ramwriter.close();	
+			indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+			indexwriter.commit();
+		}
         return totalofindex;
 	}
 	
@@ -807,7 +810,7 @@ public class HandleLucene {
 		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
 		ramwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
 		
-		if(indexwriter==null){
+		if(indexwriter==null||!indexwriter.isOpen()){
 			TieredMergePolicy ti=new TieredMergePolicy();
 			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
 			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
@@ -839,6 +842,9 @@ public class HandleLucene {
 	 * 		   indexpath
 	 * 				索引文件存储位置
 	 * @return void	
+	 * 
+	 * Modified 2018-8-30
+	 * 			修改增加对indexwriter是否关闭的判断，如果已经处于关闭状态，则重新创建indexwriter
 	 * 				
 	 */
 	
@@ -848,7 +854,7 @@ public class HandleLucene {
 		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
 			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
 		
-		if(indexwriter==null){
+		if(indexwriter==null||!indexwriter.isOpen()){
 			Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
 			TieredMergePolicy ti=new TieredMergePolicy();
 			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0

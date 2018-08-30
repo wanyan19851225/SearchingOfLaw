@@ -117,7 +117,7 @@ public class FileIndexs {
 		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
 			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
 		
-		if(indexwriter==null){
+		if(indexwriter==null||!indexwriter.isOpen()){
 			Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
 			TieredMergePolicy ti=new TieredMergePolicy();
 			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
@@ -339,10 +339,13 @@ public class FileIndexs {
 	 * 				文档名称
 	 * 			indexpath 
 	 * 				文档信息索引文件存放目录	
-	 * @return void	   				
-	 * 
+	 * @return Boolean
+	 * 			删除文档信息成功，返回true	   				
+	 * Modified 2018-8-30
+	 * 			修改返回值，返回Boolean
 	 */
-	public void DeleteIndex(String filename,String indexpath){
+	public Boolean DeleteIndex(String filename,String indexpath){
+		Boolean f=true;
 		try {
 			this.CreateDeleteIndexWriter(indexpath);
 			Term t=new Term("file",filename);
@@ -350,10 +353,12 @@ public class FileIndexs {
 			indexwriter.deleteDocuments(t);
 			indexwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
 			indexwriter.commit();  	
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			f=false;
 			e.printStackTrace();
 		}
+		return f;
 	}
 	
 	/*

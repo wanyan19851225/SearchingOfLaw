@@ -57,7 +57,8 @@ public class SOLStar extends JPanel{
 		jpb.setPreferredSize(new Dimension(size.width*1/6,size.height-6));
         
         bl=new JLabel();		//进度条提示标签
-//        bl.setPreferredSize(new Dimension(size.width*2/3,size.height));
+        bl.setPreferredSize(new Dimension(size.width*1/3,size.height-6));
+//		bl.setBorder(BorderFactory.createLineBorder(Color.BLUE));
 //        bl.setText("正在创建索引...");
 		
 		JPanel status=new JPanel();			//远程标识、登录状态、登录按钮标签面板

@@ -51,9 +51,7 @@ public class IOWord{
 			FileInputStream is = new FileInputStream(file);
 		
 			if(filetype!=null&&!filetype.equals("")){
-	    	
 				if(filetype.equals("docx")){
-
 					XWPFDocument docx=new XWPFDocument(is); 	  	      
 					List<XWPFParagraph> lip=docx.getParagraphs();
 
@@ -97,24 +95,11 @@ public class IOWord{
 					}
 					doc.close();
 	    		
-				}else
-					paragraphs=null;		
+				}		
 			}
 			is.close();
 		}
-	    return paragraphs;
-		      
-//	      WordExtractor wordextractor = new WordExtractor(myFileSystem);
-	      
-//	      String[] text=wordextractor.getParagraphText();
-	      
-//	      System.out.println(text[0]);
-	     
-//	      for(String rawText : wordextractor.getParagraphText()) {
-//	    	  String text = wordextractor.stripFields(rawText);
-//	    	  System.out.println(text);
-//	    	  }
-	      
+	    return paragraphs;    
 	}
 	
 	public Map<Integer,String> CreateIndexOfLaw(File file) throws IOException{
@@ -253,7 +238,6 @@ public class IOWord{
 
 	public Map<Integer,String> GetIndexOflaw(File file) throws IOException{
 		
-
 		List<String> content=this.GetParagraphText(file);
 		Map<Integer,String> chapter=new HashMap<Integer,String>();
 		Map<Integer,String> section=new HashMap<Integer,String>();
@@ -264,7 +248,7 @@ public class IOWord{
 		UpdateString updatestring=new UpdateString();
 		int chapterindex=0,sectionindex=0,itemindex=0,inputitemindex=0,inputchapterindex=0,inputsectionindex=0;
 		
-		if(content!=null){		
+		if(!content.isEmpty()){		
 			for(int i=0;i<content.size();i++){
 				
 				String temp1=content.get(i);
@@ -363,8 +347,7 @@ public class IOWord{
 			return item;
 		}
 		else
-			return null;
-
+			return item;
 	}
 	
 	
@@ -394,7 +377,7 @@ public class IOWord{
 		UpdateString updatestring=new UpdateString();
 		int itemindex=0;
 		
-		if(content!=null){		
+		if(!content.isEmpty()){		
 			for(int i=0;i<content.size();i++){
 				
 				itemindex++;
@@ -405,7 +388,6 @@ public class IOWord{
 					item.put(index,temp1);
 			}
 		}
-		
 		return item;	
 	}
 
@@ -415,17 +397,15 @@ public class IOWord{
 		Map<Integer,String> item=new HashMap<Integer,String>();
 		int itemindex=0;
 	
-		if(content!=null){		
+		if(!content.isEmpty()){		
 			for(int i=0;i<content.size();i++){				
 				itemindex++;
 				String temp1=content.get(i);
 				int index=0*100000+0*1000+itemindex;
 				item.put(index,temp1);
 			}
-		}
-		
-		return item;
-		
+		}	
+		return item;	
 	}
 
 	public static void main(String[] args) throws Exception{
