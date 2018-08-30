@@ -608,7 +608,7 @@ public class HandleLucene {
 		else
 			totalofindex=ResultsType.URL_Format_Error;
 		if(totalofindex>0){
-			ramwriter.close();	
+			ramwriter.close();
 			indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
 			indexwriter.commit();
 		}
@@ -727,7 +727,6 @@ public class HandleLucene {
 				indexreader=DirectoryReader.open(ramdir);
 			}
 			else{
-			
 				if(indexwriter!=null){		//判断indexwriter是否实例化
 					IndexReader tr=DirectoryReader.openIfChanged((DirectoryReader)indexreader,indexwriter);	
 					if(tr!=null){	
@@ -735,7 +734,6 @@ public class HandleLucene {
 						indexreader=tr;	
 					}
 				}
-		
 			}
 			f=true;
 		}catch (IOException e) {
@@ -804,11 +802,13 @@ public class HandleLucene {
 		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
 		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
 			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
-			ramdir.close();
-		ramdir=new RAMDirectory();		//创建内存索引文件
-		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
-		ramwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+		if(ramwriter==null||!ramwriter.isOpen()) {		//判断ramwriter是否为空或者关闭，如果为空或已关闭，则创建内存索引，重新创建ramwriter
+			if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
+				ramdir.close();
+			ramdir=new RAMDirectory();		//创建内存索引文件
+			IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+			ramwriter = new IndexWriter(ramdir,ramconfig);
+		}
 		
 		if(indexwriter==null||!indexwriter.isOpen()){
 			TieredMergePolicy ti=new TieredMergePolicy();
@@ -817,17 +817,7 @@ public class HandleLucene {
 			fsconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 			fsconfig.setMergePolicy(ti);
 			indexwriter=new IndexWriter(fsdir,fsconfig); 
-		}
-    	
-//    	if(indexwriter!=null){
-//    		if(indexwriter.isOpen())
-//    			indexwriter.close();
-//    	}
-        
-    	 
-		
-//		return f;
-		
+		}		
 	}
 	
 	/*
