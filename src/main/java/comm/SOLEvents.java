@@ -398,19 +398,24 @@ public class  SOLEvents {
 	
 		public void actionPerformed(ActionEvent e) {
 			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
-			
+			Boolean f;
+			Map<String,Boolean> m=new HashMap<String,Boolean>();
 			if(!file.isEmpty()){
 				HandleLucene handle=new HandleLucene();
 				for(int i=0;i<file.size();i++){
 					String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
-					Vector<String> obj=p.t.GetDataID(s);
-					p.RemoveData(obj);
-					p.t.RemoveDataID(s);
-					handle.DeleteIndex(s,Path.indexpath,Path.filepath);	
+					f=handle.DeleteIndex(s,Path.indexpath,Path.filepath);	
+					if(f){
+						Vector<String> obj=p.t.GetDataID(s);
+						p.RemoveData(obj);
+						p.t.RemoveDataID(s);
+					}
+					m.put(s, f);					
 				}
-
 				p.t.LoadData(p.GetData());
 		        p.t.InitTable(false);
+		        
+		        new SOLShowDeleteIndexsResults(m);
 			}
 		}
 	}

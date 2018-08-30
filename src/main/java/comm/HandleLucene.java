@@ -423,7 +423,8 @@ public class HandleLucene {
 	 * 				索引文件存放目录	
 	 * 			filepath
 	 * 				文档信息索引路径
-	 * @return void
+	 * @return Boolean
+	 * 			删除成功返回true
 	 * 
 	 * @2017-11-15
 	 * 			使用方法forceMergeDeletes()，实现立即删除
@@ -436,10 +437,13 @@ public class HandleLucene {
 	 * 			修改删除文档内容索引后，调用findexs.DeleteIndex删除文档信息索引
 	 * Modefied Date:2018-8-22
 	 * 			增加当filename有html标签时，删除html标签的功能
+	 * Modified 2018-8-30
+	 * 			新增Boolean类型返回值
 	 */
 
-	public void DeleteIndex(String filename,String indexpath,String filepath){
-		String s=filename.replaceAll("<[^>]+>","");	
+	public Boolean DeleteIndex(String filename,String indexpath,String filepath){
+		Boolean f=true;
+		String s=filename.replaceAll("<[^>]+>","");
 		try {
 			this.CreateDeleteIndexWriter(indexpath);
 			Term t=new Term("file",s);
@@ -452,9 +456,10 @@ public class HandleLucene {
 			findexs.DeleteIndex(s, filepath);	
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			f=false;
+//			e.printStackTrace();
 		}
-	
+		return f;
 	}
 
 	/*
