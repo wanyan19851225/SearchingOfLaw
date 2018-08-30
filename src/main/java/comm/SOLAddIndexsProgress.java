@@ -179,7 +179,8 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 							line.add(String.valueOf(e.getValue()));
 							line.add("成功");
 						}
-					data.add(line);					
+					if(line.size()>0)
+						data.add(line);					
 				}
 			}
 			if(formaterror)

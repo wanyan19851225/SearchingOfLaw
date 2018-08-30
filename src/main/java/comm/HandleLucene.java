@@ -78,6 +78,7 @@ public class HandleLucene {
 	private static RAMDirectory ramdir;
 	private static IndexWriter indexwriter;
 	private static IndexWriter ramwriter;
+	private static Boolean ramdirisopen=false;
 	
 	/*
 	 *
@@ -640,6 +641,8 @@ public class HandleLucene {
 	 * 				为文档段落创建索引成功后，创建文档信息索引
 	 *  @Modified 2018-8-29
 	 *  			新增finfos参数，用来传入[文档路径，文档类型]
+	 * @Modified 2018-8-29
+	 * 				如果content为空，则ramwriter不在关闭，不在执行indexwriter.commit方法 
 	 *  	   				
 	 */
 	
@@ -683,10 +686,11 @@ public class HandleLucene {
 				findexs.AddFiles(finfo,filepath);
 			}
 		}
-		ramwriter.close();  
-        indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-        indexwriter.commit(); 
-        
+		if(totalofindex>0) {
+			ramwriter.close();  
+			indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+			indexwriter.commit(); 
+		}
         return totalofindex;
 	}
 	

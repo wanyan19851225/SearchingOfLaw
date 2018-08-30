@@ -81,13 +81,15 @@ public class FileIndexs {
 		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
 		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
 			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
-			ramdir.close();
-		ramdir=new RAMDirectory();		//创建内存索引文件
-		IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
-		ramwriter = new IndexWriter(ramdir,ramconfig);		//创建内存IndexWriter
+		if(ramwriter==null||!ramwriter.isOpen()) {
+			if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
+				ramdir.close();
+			ramdir=new RAMDirectory();		//创建内存索引文件
+			IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
+			ramwriter = new IndexWriter(ramdir,ramconfig);
+		}
 		
-		if(indexwriter==null){
+		if(indexwriter==null||!indexwriter.isOpen()){
 			TieredMergePolicy ti=new TieredMergePolicy();
 			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引的合并策略为0，有删除segment时，立即进行合并
 			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer); 
