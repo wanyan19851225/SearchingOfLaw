@@ -98,10 +98,13 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 	protected void process(List<String> chunks) {
 		if(!chunks.isEmpty()){	
 			NumberFormat numberFormat = NumberFormat.getInstance();
-			numberFormat.setMaximumFractionDigits(0);
-			String result = numberFormat.format((float)chunks.get(chunks.size()-1).charAt(0)/(float) chunks.get(chunks.size()-1).charAt(chunks.get(chunks.size()-1).length()-1) * 100);
+			numberFormat.setMaximumFractionDigits(2);
+			String s=chunks.get(chunks.size()-1);
+			String s1=s.substring(0, s.indexOf("/")).trim();
+			String s2=s.substring(s.indexOf("/")+1,s.length()).trim();
+			String result = numberFormat.format(Float.parseFloat(s1)/Float.parseFloat(s2) * 100);
 	        this.p.setProgeressBarLabelText("总进度：  "+result); 
-	        int x=Integer.parseInt(chunks.get(chunks.size()-1).substring(0,chunks.get(chunks.size()-1).indexOf("/")).trim()); 
+	        int x=Integer.parseInt(s1); 
 	        this.p.setProgressBarValue(x);  
 		}
 	}
