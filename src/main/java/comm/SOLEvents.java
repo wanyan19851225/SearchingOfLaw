@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 
@@ -130,9 +131,15 @@ public class  SOLEvents {
 	
 	public static class AboutEvent implements ActionListener{
 
+		private DisplayGui p;
+		
+		public AboutEvent(DisplayGui p){
+			this.p=p;
+		}
+		
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			new SOLAbout();
+			new SOLAbout(this.p);
 		}		
 	}
 
@@ -932,6 +939,24 @@ public class  SOLEvents {
 				}
 				
 			}
+		}	
+	}
+	
+	public static class ShowSOLShowUpadteEvent implements ActionListener{
+		
+		private SOLAbout p;
+		private DisplayGui dp;
+		
+		public ShowSOLShowUpadteEvent(SOLAbout p){
+			this.p=p;
+			this.dp=this.p.GetDisplayGui();
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			new SOLShowUpdate();
+			p.dispose();
+			this.dp.setExtendedState(JFrame.ICONIFIED);
 		}	
 	}
 	

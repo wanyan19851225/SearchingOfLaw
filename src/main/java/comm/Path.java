@@ -12,4 +12,5 @@ public interface Path {
 	public static final String userpath = usrdocment+"\\SearchingOfLaw\\DB\\usr.db";
 //	public static final String urlpath = "http://localhost:8080/swd/ServletDemo";
 	public static final String urlpath = "http://47.97.108.15:8080/swd/ServletDemo";
+	public static final String downloadtmpfilepath=usrdocment+"\\SearchingOfLaw\\TEMP";
 }

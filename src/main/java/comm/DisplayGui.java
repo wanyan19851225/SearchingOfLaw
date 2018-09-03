@@ -240,7 +240,7 @@ public class DisplayGui extends JFrame{
 		synchronizeindex.addActionListener(new SOLEvents.ShowSOLSynchronizeIndexEvent());
 		downloadindex.addActionListener(new SOLEvents.ShowSOLDownloadIndexEvent());
 		remoteindex.addActionListener(new SOLEvents.ShowSOLRemoteIndexEvent());
-		aboutitem.addActionListener(new SOLEvents.AboutEvent());
+		aboutitem.addActionListener(new SOLEvents.AboutEvent(this));
 		sbt.addMouseListener(new SOLEvents.SearchEvent(this));
 		other.addMouseListener(new SOLEvents.ShowSOLSelectIndexEvent());
 //		remote.addMouseListener(new SOLEvents.RemoteEvent());
