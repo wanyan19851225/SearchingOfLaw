@@ -111,7 +111,7 @@ public class SOLShowIndex extends JFrame{
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
 		
-	    this.setTitle("查看本地索引");//窗体标签  
+	    this.setTitle("查看本地仓库");//窗体标签  
 	    this.setSize(FrameSize.X,FrameSize.Y);//窗体大小  
 	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
 	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  

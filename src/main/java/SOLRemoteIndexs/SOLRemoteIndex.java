@@ -57,7 +57,7 @@ public class SOLRemoteIndex extends JFrame{
 	
 	public SOLRemoteIndex(){
 		Container contentpane=this.getContentPane();
-		contentpane.setLayout(new BorderLayout(3,3));
+		contentpane.setLayout(new BorderLayout(3,1));
 		
 		Vector<String> cname = new Vector<String>();
 		cname.add("序号");
@@ -69,27 +69,7 @@ public class SOLRemoteIndex extends JFrame{
         data = new Vector<Vector<String>>();
     
         this.BuildIndexs();
-//		try {
-//			Map<String, String[]> rfre = this.GetRemoteIndex(Path.urlpath);
-//	        if(!rfre.isEmpty()){
-//	        	int i=0;
-//	        	for(Entry<String,String[]> entry: rfre.entrySet()){
-//	        		Vector<String> line=new Vector<String>();
-//	        		line.add(String.valueOf(i++));
-//	        		line.add(entry.getKey());
-//	        		String[] info=entry.getValue();
-//	        		line.add(info[2]);
-//	        		line.add(info[0]);
-//	        		line.add(info[1]);
-//	        		data.add(line);
-//	        	}
-//	        }
-//		} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				JOptionPane.showMessageDialog(null,e.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
-//		}
-//        
+       
         t=new IOTable(cname,data);
         t.InitTable(false);
 		
@@ -102,6 +82,12 @@ public class SOLRemoteIndex extends JFrame{
 		lbt=new JButton("删除");
 		lbt.setPreferredSize(new Dimension(60,30));
 		
+		JButton sbt=new JButton("全选");
+		sbt.setPreferredSize(new Dimension(60,30));
+		
+		JButton sbt1=new JButton("反选");
+		sbt1.setPreferredSize(new Dimension(60,30));
+		
 		if(DisplayGui.star.GetLoginStatus()){	//判断是否处于登录状态，如果登录状态，则删除按钮启用，否则，删除按钮禁止，修改时间2018-2-1
 			if(DisplayGui.star.GetUserName().equals("wangyan"))
 				lbt.setEnabled(true);
@@ -112,11 +98,13 @@ public class SOLRemoteIndex extends JFrame{
 			lbt.setEnabled(false);
 		
 		JScrollPane jsp=new JScrollPane();
-		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));
+		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-100));
 		jsp.setViewportView(t);
 
 		
 		lbt.addActionListener(new SOLEvents.ConfirmDeleteRemoteIndexEvent(this));
+		sbt.addActionListener(new SOLEvents.SelEvent(this));
+		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
 		sbt2.addActionListener(new SOLEvents.FilterEvent(this));
 		t.addMouseListener(new SOLEvents.ShowSOLShowRemoteLawsEvent(this));
 		
@@ -130,13 +118,15 @@ public class SOLRemoteIndex extends JFrame{
 		npane.add(stf);
 		npane.add(sbt2);
 		cpane.add(jsp);
+		spane.add(sbt);
+		spane.add(sbt1);
 		spane.add(lbt);
 		
 		contentpane.add(npane,BorderLayout.NORTH);
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
 		
-	    this.setTitle("Searching Of Laws");//窗体标签  
+	    this.setTitle("查看远程仓库");//窗体标签  
 	    this.setSize(FrameSize.X,FrameSize.Y);//窗体大小  
 	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
 	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
@@ -349,5 +339,23 @@ public class SOLRemoteIndex extends JFrame{
 		return keywords;
 	}
 	
+	public void SelectAll(){
+		int cnum=t.getColumnCount();
+		int rnum=t.getRowCount();
+		for(int i=0;i<rnum;i++){
+			t.setValueAt(true,i,cnum-1);
+		}
+	}
 	
+	public void SelectInvert(){
+		int cnum=t.getColumnCount();
+		int rnum=t.getRowCount();
+		for(int i=0;i<rnum;i++){
+			
+			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
+				t.setValueAt(false,i,cnum-1);
+			else
+				t.setValueAt(true,i,cnum-1);
+		}	
+	}
 }
