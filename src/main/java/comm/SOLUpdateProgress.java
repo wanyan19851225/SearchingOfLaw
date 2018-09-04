@@ -60,6 +60,7 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 		try {
 	        byte[] buffer = new byte[1024];
 	        int size=0;
+	        int n=0;
 	        
 	        is = http.getInputStream();
 	        bis =new BufferedInputStream(is);
@@ -68,7 +69,8 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 	        while ((size = bis.read(buffer)) != -1) {
 	            fos.write(buffer,0,size);
 	            fos.flush();
-	            publish(String.valueOf(size)+"/"+String.valueOf(fsize));
+	            n+=size;
+	            publish(String.valueOf(n)+"/"+String.valueOf(fsize));
 	        }
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
@@ -98,12 +100,15 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 	protected void process(List<String> chunks) {
 		if(!chunks.isEmpty()){	
 			NumberFormat numberFormat = NumberFormat.getInstance();
-			numberFormat.setMaximumFractionDigits(2);
+			numberFormat.setMaximumFractionDigits(0);
 			String s=chunks.get(chunks.size()-1);
 			String s1=s.substring(0, s.indexOf("/")).trim();
 			String s2=s.substring(s.indexOf("/")+1,s.length()).trim();
-			String result = numberFormat.format(Float.parseFloat(s1)/Float.parseFloat(s2) * 100);
-	        this.p.setProgeressBarLabelText("总进度：  "+result); 
+			double d1=Double.parseDouble(s1);
+			double d2=Double.parseDouble(s2);
+			double dd=d1/d2*100;
+			String result = numberFormat.format(dd);
+	        this.p.setProgeressBarLabelText("总进度： "+result+"%"); 
 	        int x=Integer.parseInt(s1); 
 	        this.p.setProgressBarValue(x);  
 		}

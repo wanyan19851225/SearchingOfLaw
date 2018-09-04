@@ -382,7 +382,11 @@ public class  SOLEvents {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-          }	
+          }
+		
+		public void windowClosed(WindowEvent e){
+			System.out.println("主界面已经关闭");
+		}
 	}
 	
 	
@@ -663,10 +667,10 @@ public class  SOLEvents {
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
 			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
-			try {
+//			try {
 				if(!file.isEmpty()){
 					new SOLShowConfirmCommitIndexs(this.p);
-					p.SetSearchButtonEnable(false);
+//					p.SetSearchButtonEnable(false);
 //					Map<String,int[]> m=new HashMap<String,int[]>();
 //					for(int i=0;i<file.size();i++){
 //						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
@@ -694,12 +698,12 @@ public class  SOLEvents {
 //			        }
 //			        JOptionPane.showMessageDialog(null,sb.toString(), "信息", JOptionPane.INFORMATION_MESSAGE);
 				}
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
-			}
-	        p.SetSearchButtonEnable(true);
+//			} catch (Exception e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
+//			}
+//	        p.SetSearchButtonEnable(true);
 		}		
 	}
 	
@@ -726,7 +730,10 @@ public class  SOLEvents {
 			List<String> file=commitindex.t.GetAllRowsDatasAtColumn(1);
 //			try {
 				if(!file.isEmpty()){
-//					new SOLShowConfirmCommitIndexs(this.p);
+					int size=file.size();
+					SOLCommitIndexsProgress pb=new SOLCommitIndexsProgress(this.p,file);
+					p.setProgressBarMaximum(size);
+					pb.execute();
 //					p.SetSearchButtonEnable(false);
 //					Map<String,int[]> m=new HashMap<String,int[]>();
 //					for(int i=0;i<file.size();i++){
@@ -954,7 +961,7 @@ public class  SOLEvents {
 
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			new SOLShowUpdate();
+			new SOLShowUpdate(this.p);
 			p.dispose();
 			this.dp.setExtendedState(JFrame.ICONIFIED);
 		}	

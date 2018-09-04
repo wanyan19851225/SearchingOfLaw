@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,11 +17,14 @@ public class SOLShowUpdate extends JFrame{
 	private JProgressBar jpb;
 	private JLabel bl,ll;
 	private JButton sbt,lbt;
+	private SOLAbout p;
 	
-	public SOLShowUpdate(){
+	public SOLShowUpdate(SOLAbout p){
 		
 		Container contentpane=this.getContentPane();
 		contentpane.setLayout(new BorderLayout(3,1));
+		
+		this.p=p;
 		
 		jpb = new JProgressBar();		//进度条
         jpb.setMinimum(0);  
@@ -31,13 +36,23 @@ public class SOLShowUpdate extends JFrame{
 		sbt=new JButton("取消");
 		sbt.setPreferredSize(new Dimension(60,30));
 		
-		lbt=new JButton("立即重启");
-		lbt.setPreferredSize(new Dimension(60,30));
+		lbt=new JButton();
+		lbt.setText("立即重启");
 		
 		ll=new JLabel();
 		ll.setHorizontalAlignment(JLabel.CENTER);
 		ll.setText("<html><font size=4>更新下载完成，下次启动软件后安装生效</font></html>");
 		ll.setPreferredSize(new Dimension(FrameSize.X-60,(FrameSize.Y/4-100)));
+		
+		lbt.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				DisplayGui dp=SOLShowUpdate.this.p.GetDisplayGui();
+				dp.dispose();
+				SOLShowUpdate.this.dispose();
+			}
+		});
 		
 		JPanel cpane=new JPanel();		//创建进度条、进度条提示标签面板
 	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
