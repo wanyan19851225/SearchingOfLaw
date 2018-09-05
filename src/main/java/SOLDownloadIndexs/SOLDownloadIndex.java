@@ -1,4 +1,4 @@
-package Com;
+package SOLDownloadIndexs;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -19,6 +19,19 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import Com.FileIndexs;
+import Com.FrameSize;
+import Com.GZipUntils;
+import Com.HandleLucene;
+import Com.IOHttp;
+import Com.IOTable;
+import Com.Path;
+import Com.SOLEvents;
+import Com.UpdateString;
+import Com.SOLEvents.DownloadIndexEvent;
+import Com.SOLEvents.FilterEvent;
+import Com.SOLEvents.SelEvent;
+import Com.SOLEvents.UnselEvent;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -87,7 +100,7 @@ public class SOLDownloadIndex extends JFrame{
 		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-100));
 		jsp.setViewportView(t);
 
-		lbt.addActionListener(new SOLEvents.DownloadIndexEvent(this));
+		lbt.addActionListener(new SOLEvents.ConfirmDownloadIndexEvent(this));
 		sbt.addActionListener(new SOLEvents.SelEvent(this));
 		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
 		sbt2.addActionListener(new SOLEvents.FilterEvent(this));

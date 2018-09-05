@@ -28,6 +28,9 @@ import SOLAddIndexs.SOLAddIndexsProgress;
 import SOLCommitIndexs.SOLCommitIndex;
 import SOLCommitIndexs.SOLCommitIndexsProgress;
 import SOLCommitIndexs.SOLShowConfirmCommitIndexs;
+import SOLDownloadIndexs.SOLDownloadIndex;
+import SOLDownloadIndexs.SOLDownloadIndexsProgress;
+import SOLDownloadIndexs.SOLShowConfirmDownloadIndexs;
 import SOLRemoteIndexs.SOLRemoteIndex;
 import SOLRemoteIndexs.SOLShowConfirmDeleteRemoteIndexs;
 import SOLRemoteIndexs.SOLShowRemoteLaws;
@@ -821,39 +824,59 @@ public class  SOLEvents {
 	 */
 	
 	public static class DownloadIndexEvent implements ActionListener{
-		private SOLDownloadIndex p;
+		private SOLShowConfirmDownloadIndexs p;
 		
-		public DownloadIndexEvent(SOLDownloadIndex p){
+		public DownloadIndexEvent(SOLShowConfirmDownloadIndexs p){
 			this.p=p;
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
+			SOLDownloadIndex commitindex=this.p.GetSOLShowCommitIndexFrame();
+			List<String> file=commitindex.t.GetAllRowsDatasAtColumn(1);
 			try {
 				if(!file.isEmpty()){
-					p.SetSearchButtonEnable(false);
-					//Map<String,int[]> m=new HashMap<String,int[]>();
-					for(int i=0;i<file.size();i++){
-						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
-						boolean f=p.DownloadIndex(Path.urlpath, s);
-						if(f){
-							Vector<String> obj=p.t.GetDataID(s);
-							p.RemoveData(obj);
-							p.t.RemoveDataID(s);
-						}
-						else
-							JOptionPane.showMessageDialog(null,s+" 导入本地仓库失败！", "警告", JOptionPane.ERROR_MESSAGE);
-					}
-					p.t.LoadData(p.GetData());
-			        p.t.InitTable(true);
-			        p.SetSearchButtonEnable(true);
+					int size=file.size();
+					SOLDownloadIndexsProgress pb=new SOLDownloadIndexsProgress(this.p,file);
+					p.setProgressBarMaximum(size);
+					pb.execute();
+//					p.SetSearchButtonEnable(false);
+//					//Map<String,int[]> m=new HashMap<String,int[]>();
+//					for(int i=0;i<file.size();i++){
+//						String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
+//						boolean f=p.DownloadIndex(Path.urlpath, s);
+//						if(f){
+//							Vector<String> obj=p.t.GetDataID(s);
+//							p.RemoveData(obj);
+//							p.t.RemoveDataID(s);
+//						}
+//						else
+//							JOptionPane.showMessageDialog(null,s+" 导入本地仓库失败！", "警告", JOptionPane.ERROR_MESSAGE);
+//					}
+//					p.t.LoadData(p.GetData());
+//			        p.t.InitTable(true);
+//			        p.SetSearchButtonEnable(true);
 				}
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				JOptionPane.showMessageDialog(null,e1.getMessage(), "警告", JOptionPane.ERROR_MESSAGE);
 			}	
+		}	
+	}
+	
+	public static class ConfirmDownloadIndexEvent implements ActionListener{
+		private SOLDownloadIndex p;
+		
+		public ConfirmDownloadIndexEvent(SOLDownloadIndex p){
+			this.p=p;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			List<String> file=p.t.GetAllRowsDatasAtColumn(1);
+			if(!file.isEmpty())
+				new SOLShowConfirmDownloadIndexs(this.p);
 		}	
 	}
 	
