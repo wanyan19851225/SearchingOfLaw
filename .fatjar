@@ -1,14 +1,14 @@
 #Fat Jar Configuration File
-#Tue Jan 30 14:43:30 CST 2018
+#Thu Sep 06 16:55:55 CST 2018
 onejar.license.required=false
 manifest.classpath=
 manifest.removesigners=true
 onejar.checkbox=true
 jarname=E\:\\MyJar\\SearchingOfLaw.jar
 manifest.mergeall=true
-manifest.mainclass=bacy_testscript.Demo
+manifest.mainclass=Update.Update
 manifest.file=<createnew>
 jarname.isextern=true
 onejar.expand=
-excludes=
+excludes=<po|SearchingOfLaw>~Com/;<po|SearchingOfLaw>~Demo/;<po|SearchingOfLaw>~META-INF/;<po|SearchingOfLaw>~SOLAbout/;<po|SearchingOfLaw>~SOLAddIndexs/;<po|SearchingOfLaw>~SOLCommitIndexs/;<po|SearchingOfLaw>~SOLDownloadIndexs/;<po|SearchingOfLaw>~SOLRemoteIndexs/;<po|SearchingOfLaw>~SOLShowIndexs/;<po|SearchingOfLaw>~error.log;<po|SearchingOfLaw>~login.png;<po|SearchingOfLaw>~SearchingOfLaw_64bit.exe;<po|SearchingOfLaw>~wifi.png;<jar|json-lib-2.4-jdk15.jar>;<jar|lucene-core-7.1.0.jar>;<jar|lucene-analyzers-common-7.1.0.jar>;<jar|lucene-queryparser-7.1.0.jar>;<jar|lucene-queries-7.1.0.jar>;<jar|lucene-sandbox-7.1.0.jar>;<jar|poi-scratchpad-3.17.jar>;<jar|poi-3.17.jar>;<jar|poi-ooxml-3.17.jar>;<jar|poi-ooxml-schemas-3.17.jar>;<jar|lucene-highlighter-7.1.0.jar>;<jar|lucene-join-7.1.0.jar>;<jar|lucene-memory-7.1.0.jar>;<jar|substance-6.0.jar>;<jar|httpclient-4.0.1.jar>;<jar|httpcore-4.0.1.jar>;<jar|dom4j-2.1.0.jar>;<jar|jaxen-1.1.6.jar>;<jar|jsoup-1.11.3.jar>
 includes=

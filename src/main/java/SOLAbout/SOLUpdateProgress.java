@@ -25,9 +25,9 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 	
 	public SOLUpdateProgress(SOLShowUpdate p) {
 		this.p=p;
-		String download="http://47.97.108.15:8080/swd/download/SearchingOfLaw.exe";
+//		String download="http://47.97.108.15:8080/swd/download/SearchingOfLaw.exe";
 		try {
-			url = new URL(download);
+			url = new URL(Path.downloadpath);
 			http = (HttpURLConnection) url.openConnection();
 	        http.connect();
 		} catch (MalformedURLException e) {
@@ -51,7 +51,7 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 		
 		Map<String,Boolean> m=new HashMap<String,Boolean>();
 		
-		File tmp = new File(Path.downloadtmpfilepath);
+		File tmp = new File(Path.tmpfilepath);
 
 		FileOutputStream fos=null;
 		BufferedInputStream bis=null;

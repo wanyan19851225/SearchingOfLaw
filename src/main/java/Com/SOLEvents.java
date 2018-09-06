@@ -21,6 +21,7 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import Demo.Demo;
 import SOLAbout.SOLAbout;
 import SOLAbout.SOLShowUpdate;
 import SOLAddIndexs.SOLAddIndex;
@@ -411,7 +412,14 @@ public class  SOLEvents {
           }
 		
 		public void windowClosed(WindowEvent e){
-			System.out.println("主界面已经关闭");
+//			System.out.println("主界面已经关闭");
+			Runtime rn = Runtime.getRuntime();
+			try {
+				rn.exec(Path.upath);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 	

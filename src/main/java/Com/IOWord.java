@@ -21,7 +21,8 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
  * date: 2017-10-26 
  */
 
-public class IOWord{
+public class IOWord{	
+	private final String SCHAR="[a-zA-Z:/.\"_\\\\　　  ]";
 	
 	/*
 	 * 将doc、docx文件里的全部内容读取到内存
@@ -38,13 +39,9 @@ public class IOWord{
 	 * 		新增对软回车字符的判断，如果有软回车字符，则按照软回车字符使用split方法分隔成段落
 	 * 
 	 */
-	
-	
 	public List<String> GetParagraphText(File file) throws IOException{
-		
 		List<String> paragraphs=new ArrayList<String>();
 		if(file.isFile()){
-			String specialchar="[a-zA-Z:/.\"_\\\\　　 ]";
 			String filename=file.getName();
 			String filetype=filename.substring(filename.lastIndexOf(".") + 1,filename.length()).toLowerCase();
 
@@ -56,8 +53,7 @@ public class IOWord{
 					List<XWPFParagraph> lip=docx.getParagraphs();
 
 					for(int i=0;i<lip.size();i++){
-						String text=lip.get(i).getParagraphText().trim();
-						text=text.replaceAll(specialchar,"" );
+						String text=lip.get(i).getParagraphText().trim().replaceAll(SCHAR,"" );
 						if(!text.contains("")){		//判断是否包含软回车，如果包含软回车，则使用split方法分隔成段落
 							if(text.length()>3)
 	    							paragraphs.add(text);
@@ -79,8 +75,7 @@ public class IOWord{
 					Range range=doc.getRange();
 					
 					for(int i=0;i<range.numParagraphs();i++){
-						String text=range.getParagraph(i).text().trim();
-						text=text.replaceAll(specialchar,"" );
+						String text=range.getParagraph(i).text().trim().replaceAll(SCHAR,"" );
 						if(!text.contains("")){		//判断是否包含软回车，如果包含软回车，则使用split方法分隔成段落
 							if(text.length()>3)
 	    							paragraphs.add(text);
@@ -411,7 +406,7 @@ public class IOWord{
 	public static void main(String[] args) throws Exception{
 		
 		IOWord word=new IOWord();
-		UpdateString us=new UpdateString();
+//		UpdateString us=new UpdateString();
 		
 //		List<String> paragraphs=new ArrayList<String>();
 //		
@@ -437,18 +432,18 @@ public class IOWord{
 //		}
 //		doc.close();
 		
-//		File file=new File("D:\\Lucene\\src\\《企业职工患病或非因 工负伤医疗期规定》的通知.doc");//劳动人事争议仲裁办案规则（新）.doc   中华人民共和国劳动合同法.doc  （资料）变更劳动合同.doc  中华人民共和国劳动法.doc 北京市劳动局关于解除劳动合同计发经济补偿金有关问题处理意见的通知.doc
+		File file=new File("D:\\Lucene\\src\\北京市劳动局关于转发劳动部《关于发布〈企业职工患病或非因病负伤医疗期规定〉的通知》的通知.doc");//劳动人事争议仲裁办案规则（新）.doc   中华人民共和国劳动合同法.doc  （资料）变更劳动合同.doc  中华人民共和国劳动法.doc 北京市劳动局关于解除劳动合同计发经济补偿金有关问题处理意见的通知.doc
 //		
 //		
-//		List<String> paragraphs=word.GetParagraphText(file);
-//		
-//		for(int i=0;i<paragraphs.size();i++){
-////			System.out.println(text.get(i));
-////			String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
-//			String str=paragraphs.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );//
-//			System.out.println(str);
-////			System.out.println(str+us.IsInTop(str,"章")+us.CalChars(str, "章")+":"+us.GetStringBetween(str, "章"));		
-//		}
+		List<String> paragraphs=word.GetParagraphText(file);
+		
+		for(int i=0;i<paragraphs.size();i++){
+//			System.out.println(text.get(i));
+//			String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
+			String str=paragraphs.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );//
+			System.out.println(str);
+//			System.out.println(str+us.IsInTop(str,"章")+us.CalChars(str, "章")+":"+us.GetStringBetween(str, "章"));		
+		}
 		
 		
 		
