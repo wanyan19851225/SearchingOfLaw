@@ -227,7 +227,7 @@ public class SOLDownloadIndex extends JFrame{
 		return fre;	
 	}
 	
-	public boolean DownloadIndex(String url,String file) throws Exception{
+	public boolean DownloadIndex(String url,String file,int j,int fn) throws Exception{
 		boolean f;
 				JSONObject body=new JSONObject();
 				JSONObject response=new JSONObject();
@@ -260,7 +260,7 @@ public class SOLDownloadIndex extends JFrame{
 			        finfos[0]=response.getString("fpath");
 			        finfos[1]=response.getString("type");
 			        HandleLucene handle=new HandleLucene();
-			        handle.AddIndexs(content,finfos,Path.indexpath,Path.filepath);
+			        handle.AddIndexs(content,finfos,Path.indexpath,Path.filepath,j,fn);
 					f=true;
 				}
 				else

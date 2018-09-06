@@ -33,7 +33,7 @@ public class SOLDownloadIndexsProgress extends SwingWorker<Map<String,Boolean>,S
 		int size=file.size();
 		for(int i=0;i<size;i++){
 			String s=file.get(i).replaceAll("<[^>]+>","");
-			boolean f=sp.DownloadIndex(Path.urlpath, s);
+			boolean f=sp.DownloadIndex(Path.urlpath, s,i,size-1);
 			m.put(s,f);
 			if(f){
 				Vector<String> obj=sp.t.GetDataID(s);

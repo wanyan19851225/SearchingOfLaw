@@ -35,7 +35,7 @@ public class SOLCommitIndexsProgress extends SwingWorker<Map<String,int[]>,Strin
 		for(int i=0;i<size;i++){
 			String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
 			Vector<String> obj=sp.t.GetDataID(s);
-			int[] res=sp.CommitIndex(Path.urlpath,s,Path.indexpath);
+			int[] res=sp.CommitIndex(Path.urlpath,s,Path.indexpath,i,size-1);
 			m.put(s,res);
 			if(res[0]==res[1]&&res[0]!=-1&&res[1]!=-1){
 				sp.RemoveData(obj);

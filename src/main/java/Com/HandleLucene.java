@@ -79,6 +79,7 @@ public class HandleLucene {
 	private static IndexWriter indexwriter;
 	private static IndexWriter ramwriter;
 	private static Boolean ramdiriscolse=false;
+	private static final long BUF_SIZE=1024*1024;
 	
 	/*
 	 *
@@ -425,6 +426,10 @@ public class HandleLucene {
 	 * 				索引文件存放目录	
 	 * 			filepath
 	 * 				文档信息索引路径
+	 * 			i
+	 * 				删除的第几个文档
+	 * 			fn
+	 * 				总共需要删除多少个文档
 	 * @return Boolean
 	 * 			删除成功返回true
 	 * 
@@ -441,9 +446,11 @@ public class HandleLucene {
 	 * 			增加当filename有html标签时，删除html标签的功能
 	 * Modified 2018-8-30
 	 * 			新增Boolean类型返回值
+	 * Modified 2018-9-5
+	 * 			新增i和fn参数，当删除最后一个文档时，才执行forceMergeDeletes()和commit()方法，提升效率
 	 */
 
-	public Boolean DeleteIndex(String filename,String indexpath,String filepath){
+	public Boolean DeleteIndex(String filename,int i,int fn,String indexpath,String filepath){
 		Boolean f=true;
 		String s=filename.replaceAll("<[^>]+>","");
 		try {
@@ -451,13 +458,15 @@ public class HandleLucene {
 			Term t=new Term("file",s);
 
 			indexwriter.deleteDocuments(t);
-			indexwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
-			indexwriter.commit();  
-			
+	
+			if(i==fn){		//当删到最后一个文档时，才执行提交
+				indexwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
+				indexwriter.commit();  
+			}
 			FileIndexs findexs=new FileIndexs();
 			Boolean ff=false;
 			while(!ff)
-				ff=findexs.DeleteIndex(s, filepath);	
+				ff=findexs.DeleteIndex(s,i,fn,filepath);	
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			f=false;
@@ -483,7 +492,10 @@ public class HandleLucene {
 	 * 				段落索引文件路径
 	 * @param indexpath
 	 * 				文档信息索引路径
-	 * 
+	 * @param j
+	 * 			添加的第几个文档
+	 * @param fn
+	 * 			总共需要添加的文档数
 	 * @return Integer
 	 * 				返回添加到索引文件中的法条数
 	 * 
@@ -505,9 +517,13 @@ public class HandleLucene {
 	 * 			新增当为html文档创建段落索引前，先判断该文档在文档信息索引中是否已经存在
 	 * 			新增创建word文档段落索引时，捕捉IOWord.GetIndexOfgeneraldocment方法异常，捕获异常后，totalofindex赋值-3
 	 * 			新增当创建文档信息索引时，新增文档路径，文档类型，文档来源三个字段
+	 * Modified Date:2018-9-5
+	 * 			新增参数j和fn，当添加索引到最后一个文档时，才执行commit操作，优化性能
+	 * Modified Date:2018-9-6
+	 * 			修改，当读到最后一个文档时，totalofindex<=0，即读取内容为空或者报错时，不创建文档信息索引的bug
 	 */
 	
-	public Integer AddIndexs(String url,String indexpath,String filepath) throws IOException{
+	public Integer AddIndexs(String url,String indexpath,String filepath,int j,int fn) throws IOException{
 		int totalofindex=0;
 		String filename="";
 		this.CreateAddIndexWriter(indexpath);
@@ -555,7 +571,7 @@ public class HandleLucene {
 				infos[4]=Store.Docment.HTML;		//文档类型
 				infos[5]=Store.Type.L;		//文档来源
 				finfo.put(filename,infos);
-				findexs.AddFiles(finfo,filepath);
+				findexs.AddFiles(finfo,filepath,j,fn,totalofindex);
 			}
 		}else if(url.matches("[a-zA-Z]:\\\\.*")){
 			File file=new File(url);
@@ -590,7 +606,7 @@ public class HandleLucene {
 			}catch(IOException e){		//捕捉异常，如果报异常，totalofindex赋值-2，不在建立索引文件
 				totalofindex=ResultsType.DOC_Bad;
 			}
-			if(totalofindex>0){		//当段落数大于0时，创建文档信息索引
+			if(totalofindex>0||j==fn){		//当段落数大于0,或者当读取到最后一个文档时，创建文档信息索引
 				Date d=new Date(System.currentTimeMillis());
 				DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
 				FileIndexs findexs=new FileIndexs();
@@ -603,15 +619,20 @@ public class HandleLucene {
 				infos[4]=Store.Docment.WORD;		//文档类型
 				infos[5]=Store.Type.L;		//文档来源
 				finfo.put(file.getName(),infos);
-				findexs.AddFiles(finfo,filepath);
+				findexs.AddFiles(finfo,filepath,j,fn,totalofindex);
 			}
 		}
 		else
 			totalofindex=ResultsType.URL_Format_Error;
-		if(totalofindex>0){
+		if(totalofindex>0&&ramdir.ramBytesUsed()>=BUF_SIZE){
 			ramwriter.close();
-			indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
+			indexwriter.addIndexes(ramdir);
+		}
+		if(j==fn){
+			ramwriter.close();
+			indexwriter.addIndexes(ramdir);
 			indexwriter.commit();
+			ramdiriscolse=true;
 		}
         return totalofindex;
 	}
@@ -633,20 +654,25 @@ public class HandleLucene {
 	 * 				文档信息索引路径
 	 * 		   finfos
 	 * 				以[文档路径，文档类型]形式传入参数
+	 * @param j
+	 * 			添加的第几个文档
+	 * @param fn
+	 * 			总共需要添加的文档数
 	 * @return Integer
 	 * 				返回添加到索引文件中的法条数
 	 * @Modified 2018-8-13
 	 * 				修改为调用CreateAddIndexWriter方法，实现IndexWriter单例化
 	 * @Modified 2018-8-23
 	 * 				为文档段落创建索引成功后，创建文档信息索引
-	 *  @Modified 2018-8-29
+	 * @Modified 2018-8-29
 	 *  			新增finfos参数，用来传入[文档路径，文档类型]
 	 * @Modified 2018-8-29
 	 * 				如果content为空，则ramwriter不在关闭，不在执行indexwriter.commit方法 
-	 *  	   				
+	 * @Modified Date:2018-9-5
+	 * 			新增参数j和fn，当添加索引到最后一个文档时，才执行commit操作，优化性能 	   				
 	 */
 	
-	public Integer AddIndexs(Map<String,List<String[]>> content,String[] finfos,String indexpath,String filepath) throws IOException{
+	public Integer AddIndexs(Map<String,List<String[]>> content,String[] finfos,String indexpath,String filepath,int j,int fn) throws IOException{
 		int totalofindex=0;
 		this.CreateAddIndexWriter(indexpath);
 		
@@ -670,7 +696,7 @@ public class HandleLucene {
 				doc.add(new Field("law",laws.get(i)[1],TextField.TYPE_STORED));	
 			    ramwriter.addDocument(doc);	
 			}
-			if(totalofindex>0){		//当段落数大于0时，创建文档信息索引
+			if(totalofindex>0||j==fn){		//当段落数大于0时，创建文档信息索引
 				Date d=new Date(System.currentTimeMillis());
 				DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
 				FileIndexs findexs=new FileIndexs();
@@ -683,13 +709,18 @@ public class HandleLucene {
 				infos[4]=finfos[1];		//文档类型
 				infos[5]=Store.Type.R;		//文档来源
 				finfo.put(entry.getKey(),infos);
-				findexs.AddFiles(finfo,filepath);
+				findexs.AddFiles(finfo,filepath,j,fn,totalofindex);
 			}
 		}
-		if(totalofindex>0) {
+		if(totalofindex>0&&ramdir.ramBytesUsed()>=BUF_SIZE){
 			ramwriter.close();  
-			indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-			indexwriter.commit(); 
+			indexwriter.addIndexes(ramdir);
+		}
+		if(j==fn){
+			ramwriter.close();  
+			indexwriter.addIndexes(ramdir);
+			indexwriter.commit();
+			indexwriter.close();
 		}
         return totalofindex;
 	}
@@ -797,6 +828,8 @@ public class HandleLucene {
 	 * 				
 	 * Modefied Date:2018-8-10
 	 * 			修改返回值为空
+	 * Modified Date:2018-9-5
+	 * 			修改，判断当ramwriter为null，或者关闭，或者ramdircolse为真，或者占用ramdir大于等于1024*1204字节后，重新分配内存空间，并重新初始化ramwriter
 	 *          
 	 */
 	public void CreateAddIndexWriter(String indexpath) throws IOException{
@@ -804,13 +837,27 @@ public class HandleLucene {
 //		Boolean f=true;
 		
 		Path inpath=Paths.get(indexpath);
-		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
-		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
-			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		if(ramwriter==null||!ramwriter.isOpen()||ramdiriscolse) {		//判断ramwriter是否为空或者关闭，如果为空或已关闭，则创建内存索引，重新创建ramwriter
-			if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
-				ramdir.close();
-			ramdir=new RAMDirectory();		//创建内存索引文件
+		Analyzer analyzer = new StandardAnalyzer();
+		if(fsdir==null)		
+			fsdir=FSDirectory.open(inpath);	
+		if(ramwriter==null||!ramwriter.isOpen()||ramdiriscolse||ramdir.ramBytesUsed()>=BUF_SIZE) {		//判断ramwriter是否为空或者关闭，如果为空或已关闭，则创建内存索引，重新创建ramwriter
+			if(ramwriter==null||ramdiriscolse||ramdir.ramBytesUsed()>=BUF_SIZE){
+				if(ramdir!=null)
+					ramdir.close();
+				ramdir=new RAMDirectory();
+			}
+			if(ramwriter!=null){
+				if(!ramwriter.isOpen()){
+					if(ramdir!=null){
+						if(ramdir.ramBytesUsed()>=BUF_SIZE){
+							ramdir.close();
+							ramdir=new RAMDirectory();
+						}
+					}
+					else
+						ramdir=new RAMDirectory();
+				}
+			}
 			IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
 			ramwriter = new IndexWriter(ramdir,ramconfig);
 			ramdiriscolse=false;

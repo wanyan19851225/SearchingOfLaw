@@ -61,6 +61,7 @@ public class FileIndexs {
 	private static IndexWriter indexwriter;
 	private static IndexWriter ramwriter;
 	private static Boolean ramdiriscolse=false;
+	private static final long BUF_SIZE=1024*1024;
 
 	/*
  	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
@@ -79,13 +80,27 @@ public class FileIndexs {
 	public void CreateAddIndexWriter(String indexpath) throws IOException{
 		
 		Path inpath=Paths.get(indexpath);
-		Analyzer analyzer = new StandardAnalyzer();		//创建标准分词器
-		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
-			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
-		if(ramwriter==null||!ramwriter.isOpen()||ramdiriscolse) {
-			if(ramdir!=null)		//判断内存索引是否创建，如果已经创建则关闭内存索引，清空占用的内存
-				ramdir.close();
-			ramdir=new RAMDirectory();		//创建内存索引文件
+		Analyzer analyzer = new StandardAnalyzer();
+		if(fsdir==null)	
+			fsdir=FSDirectory.open(inpath);
+		if(ramwriter==null||!ramwriter.isOpen()||ramdiriscolse||ramdir.ramBytesUsed()>=BUF_SIZE) {
+			if(ramwriter==null||ramdiriscolse||ramdir.ramBytesUsed()>=BUF_SIZE){
+				if(ramdir!=null)
+					ramdir.close();
+				ramdir=new RAMDirectory();
+			}
+			if(ramwriter!=null){
+				if(!ramwriter.isOpen()){
+					if(ramdir!=null){
+						if(ramdir.ramBytesUsed()>=BUF_SIZE){
+							ramdir.close();
+							ramdir=new RAMDirectory();
+						}
+					}
+					else
+						ramdir=new RAMDirectory();
+				}
+			}
 			IndexWriterConfig ramconfig = new IndexWriterConfig(analyzer);
 			ramwriter = new IndexWriter(ramdir,ramconfig);
 			ramdiriscolse=false;
@@ -118,11 +133,11 @@ public class FileIndexs {
 	public void CreateDeleteIndexWriter(String indexpath) throws IOException{
 		
 		Path inpath=Paths.get(indexpath);
-		if(fsdir==null)		//判断磁盘索引是否创建，如果已经创建，则不再重新创建
-			fsdir=FSDirectory.open(inpath);		//创建磁盘索引文件
+		if(fsdir==null)	
+			fsdir=FSDirectory.open(inpath);	
 		
 		if(indexwriter==null||!indexwriter.isOpen()){
-			Analyzer analyzer=new StandardAnalyzer();		//创建标准分词器
+			Analyzer analyzer=new StandardAnalyzer();
 			TieredMergePolicy ti=new TieredMergePolicy();
 			ti.setForceMergeDeletesPctAllowed(0);		//设置删除索引时的默认合并策略值为0
 			IndexWriterConfig fsconfig=new IndexWriterConfig(analyzer);
@@ -202,39 +217,47 @@ public class FileIndexs {
 	 * 			创建文档信息索引，新增文档路径，文档类型，文档来源三个字段
 	 * 
 	 */	
-	public Boolean AddFiles(Map<String,String[]> file,String indexpath){
+	public Boolean AddFiles(Map<String,String[]> file,String indexpath,int j,int fn,int check){
 		Boolean f=true;
 		try {
 			this.CreateAddIndexWriter(indexpath);
+			if(check>0){
+				FieldType type=new FieldType();
+				type.setIndexOptions(IndexOptions.DOCS);
+				type.setStored(true);		
+				type.setTokenized(false);
 			
-			FieldType type=new FieldType();
-			type.setIndexOptions(IndexOptions.DOCS);
-			type.setStored(true);		
-			type.setTokenized(false);
+				FieldType itype=new FieldType();
+				itype.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+				itype.setStored(true);		
+				itype.setTokenized(true);
 			
-			FieldType itype=new FieldType();
-			itype.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
-			itype.setStored(true);		
-			itype.setTokenized(true);
-			
-			for(Entry<String, String[]> entry:file.entrySet()){
-				String[] finfo=entry.getValue();
-				Document doc=new Document();		
-				doc.add(new Field("file",entry.getKey(),type));		//文档名称字段
-				doc.add(new Field("fname",entry.getKey(),itype));		//文档名称检索字段
-				doc.add(new Field("author",finfo[0],type));		//文档作者字段
-				doc.add(new Field("time",finfo[1],type));		//创建日期字段
-				doc.add(new Field("path",finfo[3],type));		//文档路径
-				doc.add(new Field("type",finfo[4],type));		//文档类型
-				doc.add(new Field("source",finfo[5],type));		//文档来源
-				doc.add(new NumericDocValuesField("segments",Integer.valueOf(finfo[2])));		//段落总数，以Int类型存储
-				doc.add(new IntPoint("segments",Integer.valueOf(finfo[2])));
-				doc.add(new StoredField("segments",Integer.valueOf(finfo[2])));
-				ramwriter.addDocument(doc);			
+				for(Entry<String, String[]> entry:file.entrySet()){
+					String[] finfo=entry.getValue();
+					Document doc=new Document();		
+					doc.add(new Field("file",entry.getKey(),type));		//文档名称字段
+					doc.add(new Field("fname",entry.getKey(),itype));		//文档名称检索字段
+					doc.add(new Field("author",finfo[0],type));		//文档作者字段
+					doc.add(new Field("time",finfo[1],type));		//创建日期字段
+					doc.add(new Field("path",finfo[3],type));		//文档路径
+					doc.add(new Field("type",finfo[4],type));		//文档类型
+					doc.add(new Field("source",finfo[5],type));		//文档来源
+					doc.add(new NumericDocValuesField("segments",Integer.valueOf(finfo[2])));		//段落总数，以Int类型存储
+					doc.add(new IntPoint("segments",Integer.valueOf(finfo[2])));
+					doc.add(new StoredField("segments",Integer.valueOf(finfo[2])));
+					ramwriter.addDocument(doc);			
+				}
+				if(ramdir.ramBytesUsed()>=BUF_SIZE){
+					ramwriter.close();	
+					indexwriter.addIndexes(ramdir);
+				}
 			}
-			ramwriter.close();	
-			indexwriter.addIndexes(ramdir); 		//程序结束后，将内存索引写入到磁盘索引中
-	        indexwriter.commit();
+			if(j==fn){
+				ramwriter.close();	
+				indexwriter.addIndexes(ramdir);
+				indexwriter.commit();
+				ramdiriscolse=true;
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			f=false;
@@ -344,20 +367,27 @@ public class FileIndexs {
 	 * 				文档名称
 	 * 			indexpath 
 	 * 				文档信息索引文件存放目录	
+	 * 			i
+	 * 				删除的第几个文档
+	 * 			fn
+	 * 				总共需要删除多少个文档
 	 * @return Boolean
 	 * 			删除文档信息成功，返回true	   				
 	 * Modified 2018-8-30
 	 * 			修改返回值，返回Boolean
+	 * Modified 2018-9-5
+	 * 			新增i和fn参数，当删除最后一个文档时，才执行forceMergeDeletes()和commit()方法，提升效率
 	 */
-	public Boolean DeleteIndex(String filename,String indexpath){
+	public Boolean DeleteIndex(String filename,int i,int fn,String indexpath){
 		Boolean f=true;
 		try {
 			this.CreateDeleteIndexWriter(indexpath);
 			Term t=new Term("file",filename);
-
 			indexwriter.deleteDocuments(t);
-			indexwriter.forceMergeDeletes();		//删除索引时并不是立即从磁盘删除，而是放入回收站，可回滚操作，调用该方法后，是立即删除
-			indexwriter.commit();  	
+			if(i==fn){
+				indexwriter.forceMergeDeletes();
+				indexwriter.commit(); 
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			f=false;

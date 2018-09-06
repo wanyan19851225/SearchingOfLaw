@@ -164,7 +164,7 @@ public class SOLCommitIndex extends JFrame{
 		return fre;	
 	}
 	
-	public int[] CommitIndex(String url,String file,String indexpath) throws Exception{
+	public int[] CommitIndex(String url,String file,String indexpath,int j,int fn) throws Exception{
 		int[] res={-1,-1};
 		String user=DisplayGui.star.GetUserName();	//获取登录用户名
 		HandleLucene handle=new HandleLucene();  
@@ -179,6 +179,8 @@ public class SOLCommitIndex extends JFrame{
 				body.accumulate("token","");
 				body.accumulate("command","103");
 				body.accumulate("user",user);
+				body.accumulate("forder",String.valueOf(j));
+				body.accumulate("fsum",String.valueOf(fn));
 				body.accumulate("file",file);
 				for(String[] v : finfo.values()){
 					body.accumulate("fpath",v[4]);

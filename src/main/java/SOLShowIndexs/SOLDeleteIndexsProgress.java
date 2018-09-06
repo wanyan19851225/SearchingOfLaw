@@ -47,7 +47,7 @@ public class SOLDeleteIndexsProgress extends SwingWorker<Map<String,Boolean>,Str
 		int size=file.size();
 		for(int i=0;i<size;i++){
 			String s=file.get(i).replaceAll("<[^>]+>","");		//删除html标签
-			f=handle.DeleteIndex(s,Path.indexpath,Path.filepath);	
+			f=handle.DeleteIndex(s,i,size-1,Path.indexpath,Path.filepath);	
 			if(f){
 				Vector<String> obj=sp.t.GetDataID(s);
 				sp.RemoveData(obj);

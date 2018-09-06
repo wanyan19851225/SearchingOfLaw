@@ -77,7 +77,7 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 				List<String> files=findexs.GetAllFiles(Path.filepath);
 				for(int i=0; i<size; i++){		//为文件夹下的文件添加索引
 					if(!files.contains(f[i].getName())){
-						Integer t=handle.AddIndexs(f[i].getPath(), Path.indexpath,Path.filepath);
+						Integer t=handle.AddIndexs(f[i].getPath(), Path.indexpath,Path.filepath,i,size-1);
 						r.put(f[i].getPath(),t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落。由于在GetFile方法中已经对传入的url进行了判断，只要走到此分支，必然不会出现返回-2和-3的情况
 					}
 					else
@@ -91,7 +91,7 @@ public class SOLAddIndexsProgress extends SwingWorker<Map<String,Integer>,String
 			List<String> files=findexs.GetAllFiles(Path.filepath);
 			File file=new File(url);
 			if(!files.contains(file.getName())){
-				Integer t=handle.AddIndexs(url, Path.indexpath,Path.filepath);
+				Integer t=handle.AddIndexs(url, Path.indexpath,Path.filepath,1,1);
 				r.put(url,t);		//将创建索引结果返回，-1：文件内容为空，没有读取到段落；-2：网站地址无效或者无法访问；-3：输入路径url格式有误
 			}
 			else
