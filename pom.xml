@@ -105,7 +105,7 @@
             <configuration>  
                 <archive>  
                     <manifest>  
-                        <mainClass>bacy_testscript.Demo</mainClass>  
+                        <mainClass>Demo.Demo</mainClass>  
                     </manifest>  
                 </archive>  
                 <descriptorRefs>  

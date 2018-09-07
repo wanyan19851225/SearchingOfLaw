@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -415,7 +416,8 @@ public class  SOLEvents {
 //			System.out.println("主界面已经关闭");
 			Runtime rn = Runtime.getRuntime();
 			try {
-				rn.exec(Path.upath);
+				String path=URLDecoder.decode(Path.upath,"UTF-8");
+				rn.exec(path);
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

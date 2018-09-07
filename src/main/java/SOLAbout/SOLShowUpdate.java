@@ -75,7 +75,7 @@ public class SOLShowUpdate extends JFrame{
 		this.SetProgressBarLabelVisabel(true);
 		this.SetConfirmInfomationVisabel(false);
 		this.SetCancelButtonVisabel(true);
-		this.SetRebootButtonVisabel(true);
+		this.SetRebootButtonVisabel(false);
 		
 	    this.setTitle("正在准备更新数据");//窗体标签  
 	    this.setSize(FrameSize.X-36,FrameSize.Y/4);//窗体大小  
@@ -85,9 +85,9 @@ public class SOLShowUpdate extends JFrame{
 	    this.setResizable(false); //锁定窗体
 //	    this.setAlwaysOnTop(true);
 	    
-//		SOLUpdateProgress pb=new SOLUpdateProgress(this);
-//		this.setProgressBarMaximum(pb.GetFileSize());
-//		pb.execute();
+		SOLUpdateProgress pb=new SOLUpdateProgress(this);
+		this.setProgressBarMaximum(pb.GetFileSize());
+		pb.execute();
 	}
 	
 	public void SetProgressBarVisabel(Boolean f){

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -51,8 +52,6 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 		
 		Map<String,Boolean> m=new HashMap<String,Boolean>();
 		
-		File tmp = new File(Path.tmpfilepath);
-
 		FileOutputStream fos=null;
 		BufferedInputStream bis=null;
 		InputStream is=null;
@@ -60,6 +59,9 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 		int fsize=this.GetFileSize();
 		
 		try {
+			String path=URLDecoder.decode(Path.tmpfilepath, "UTF-8");
+			File tmp = new File(path);
+			
 	        byte[] buffer = new byte[1024];
 	        int size=0;
 	        int n=0;
