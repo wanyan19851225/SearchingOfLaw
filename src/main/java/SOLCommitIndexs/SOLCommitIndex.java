@@ -102,7 +102,7 @@ public class SOLCommitIndex extends JFrame{
 		sbt1.setPreferredSize(new Dimension(60,30));
 		
 		JScrollPane jsp=new JScrollPane();
-		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));
+		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-100));
 		jsp.setViewportView(t);
 
 		

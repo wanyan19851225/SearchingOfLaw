@@ -54,13 +54,6 @@ public class SOLResult extends JPanel{
 		this.add(sjs);
 	}
 	
-	public SOLResult(Boolean f){
-		BoxLayout layout=new BoxLayout(this, BoxLayout.Y_AXIS); 
-		this.setLayout(layout);
-		this.setPreferredSize(new Dimension(740,421));
-		this.setBorder(BorderFactory.createLineBorder(Color.red));
-	}
-	
 	public long UpdateText(Map<String,List<String[]>> content,String type){
 		
 		long total=0;

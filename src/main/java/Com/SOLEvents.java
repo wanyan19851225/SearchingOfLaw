@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
@@ -413,7 +414,6 @@ public class  SOLEvents {
           }
 		
 		public void windowClosed(WindowEvent e){
-//			System.out.println("主界面已经关闭");
 			Runtime rn = Runtime.getRuntime();
 			String[] cmd=new String[]{Path.upath,"E:\\SearchingOfLaw1.exe",Path.tmpfilepath};
 			try {
@@ -424,8 +424,19 @@ public class  SOLEvents {
 				e1.printStackTrace();
 			}
 		}
+		
+		public void windowOpened(WindowEvent e) {
+			try{
+				File tmp=new File(Path.tmpfilepath);
+				if(tmp.exists()&&tmp.isFile()){
+					Runtime rn = Runtime.getRuntime();
+					String[] cmd=new String[]{Path.upath,"E:\\SearchingOfLaw1.exe",Path.tmpfilepath};
+					rn.exec(cmd);
+				}
+			}catch (Exception e1) {
+			}
+		}
 	}
-	
 	
 	/** 
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
