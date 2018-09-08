@@ -13,9 +13,9 @@ public interface Path {
 	public static final String filepath = new StringBuilder(usrdocment).append("\\SearchingOfLaw\\file").toString();
 	public static final String historypath = new StringBuilder(usrdocment).append("\\SearchingOfLaw\\DB\\history.db").toString();
 	public static final String userpath = new StringBuilder(usrdocment).append("\\SearchingOfLaw\\DB\\usr.db").toString();
-	public static final String urlpath = "http://localhost:8080/swd/ServletDemo";
-//	public static final String urlpath = "http://47.97.108.15:8080/swd/ServletDemo";
+//	public static final String urlpath = "http://localhost:8080/swd/ServletDemo";
+	public static final String urlpath = "http://47.97.108.15:8080/swd/ServletDemo";
 	public static final String tmpfilepath=new StringBuilder(currentpath).append("TEMP").toString();
 	public static final String downloadpath="http://47.97.108.15:8080/swd/download/SearchingOfLaw.exe";
-	public static final String upath=new StringBuilder(currentpath).append("SearchingOfLaw_64bit.exe").toString();
+	public static final String upath=new StringBuilder(currentpath).append("Update.exe").toString();
 }

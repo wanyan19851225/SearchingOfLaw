@@ -4,11 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLDecoder;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,6 +26,8 @@ import org.pushingpixels.substance.api.skin.NebulaBrickWallSkin;
 import org.pushingpixels.substance.api.skin.SubstanceNebulaBrickWallLookAndFeel;
 
 import Com.FrameSize;
+import Com.Path;
+import Demo.Demo;
 
 public class Update extends JFrame{
 	
@@ -48,6 +53,19 @@ public class Update extends JFrame{
 		ll.setHorizontalAlignment(JLabel.CENTER);
 		ll.setText("<html><font size=4>请勿中止安装，否则软件将无法正常启动</font></html>");
 		ll.setPreferredSize(new Dimension(FrameSize.X-60,(FrameSize.Y/4-100)));
+		
+		this.addWindowListener(new WindowAdapter() {
+						
+			public void windowClosed(WindowEvent e){
+				Runtime rn = Runtime.getRuntime();
+				try {
+					rn.exec(Update.this.of.getPath());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 				
 		JPanel cpane=new JPanel();		//创建进度条、进度条提示标签面板
 		cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
@@ -64,7 +82,7 @@ public class Update extends JFrame{
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);//禁止关闭JFrame  
 		this.setVisible(true);//显示窗体
 		this.setResizable(false); //锁定窗体
-//		    this.setAlwaysOnTop(true);
+//		this.setAlwaysOnTop(true);
 		    
 			UpdateProgress ub=new UpdateProgress(this);
 			jpb.setMaximum(Integer.valueOf(String.valueOf(ub.GetFileSize())));

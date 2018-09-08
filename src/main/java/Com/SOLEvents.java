@@ -415,9 +415,10 @@ public class  SOLEvents {
 		public void windowClosed(WindowEvent e){
 //			System.out.println("主界面已经关闭");
 			Runtime rn = Runtime.getRuntime();
+			String[] cmd=new String[]{Path.upath,"E:\\SearchingOfLaw1.exe",Path.tmpfilepath};
 			try {
-				String path=URLDecoder.decode(Path.upath,"UTF-8");
-				rn.exec(path);
+//				String path=URLDecoder.decode(Path.upath,"UTF-8");
+				rn.exec(cmd);
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
