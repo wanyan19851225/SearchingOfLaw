@@ -57,7 +57,7 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 		InputStream is=null;
 
 		int fsize=this.GetFileSize();
-		
+
 		try {
 			String path=URLDecoder.decode(Path.tmpfilepath, "UTF-8");
 			File tmp = new File(path);

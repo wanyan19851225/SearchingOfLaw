@@ -60,6 +60,7 @@ public class Update extends JFrame{
 				Runtime rn = Runtime.getRuntime();
 				try {
 					rn.exec(Update.this.of.getPath());
+					Update.this.nf.delete();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

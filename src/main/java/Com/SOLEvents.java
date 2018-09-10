@@ -429,9 +429,10 @@ public class  SOLEvents {
 			try{
 				File tmp=new File(Path.tmpfilepath);
 				if(tmp.exists()&&tmp.isFile()){
-					Runtime rn = Runtime.getRuntime();
-					String[] cmd=new String[]{Path.upath,"E:\\SearchingOfLaw1.exe",Path.tmpfilepath};
-					rn.exec(cmd);
+//					Runtime rn = Runtime.getRuntime();
+//					String[] cmd=new String[]{Path.upath,"E:\\SearchingOfLaw1.exe",Path.tmpfilepath};
+//					rn.exec(cmd);
+					this.p.dispose();
 				}
 			}catch (Exception e1) {
 			}
