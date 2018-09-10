@@ -21,4 +21,5 @@ public interface Path {
 	public static final String tmpfilepath=new StringBuilder(currentpath).append("\\TEMP").toString();
 	public static final String downloadpath="http://47.97.108.15:8080/swd/download/SearchingOfLaw.exe";
 	public static final String upath=new StringBuilder(currentpath).append("\\Update.exe").toString();
+	public static final String applicationpath=new StringBuilder(currentpath).append("\\SearhingOfLaw.exe").toString();
 }
