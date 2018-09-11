@@ -720,7 +720,6 @@ public class HandleLucene {
 			ramwriter.close();  
 			indexwriter.addIndexes(ramdir);
 			indexwriter.commit();
-			indexwriter.close();
 		}
         return totalofindex;
 	}
