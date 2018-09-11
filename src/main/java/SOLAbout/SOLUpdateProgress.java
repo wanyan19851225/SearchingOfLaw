@@ -28,7 +28,11 @@ public class SOLUpdateProgress extends SwingWorker<Map<String,Boolean>,String>{
 		this.p=p;
 //		String download="http://47.97.108.15:8080/swd/download/SearchingOfLaw.exe";
 		try {
-			url = new URL(Path.downloadpath);
+			String bit=System.getProperty("sun.arch.data.model");
+			if("64".equals(bit))
+				url = new URL(Path.downloadpath64);
+			else
+				url = new URL(Path.downloadpath32);
 			http = (HttpURLConnection) url.openConnection();
 	        http.connect();
 		} catch (MalformedURLException e) {
