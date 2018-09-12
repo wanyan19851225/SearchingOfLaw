@@ -373,7 +373,7 @@ public class DisplayGui extends JFrame{
 		try {
 			send.accumulate("command","109");
 			send.accumulate("token","");	
-			send.accumulate("cversion","4.1.11");
+			send.accumulate("cversion",AppInfo.version);
 			
 			GZipUntils gzip=new GZipUntils();
 			String body = gzip.S2Gzip(send.toString());
