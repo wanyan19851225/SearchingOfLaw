@@ -11,16 +11,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import Com.AppInfo;
 import Com.DisplayGui;
 import Com.FrameSize;
 import Com.SOLEvents;
-import Com.SOLEvents.ShowSOLShowUpadteEvent;
 
 @SuppressWarnings("serial")
 public class SOLAbout extends JFrame{
-	
 	private DisplayGui p;
-	
 	public SOLAbout(DisplayGui p){
 		
 		this.p=p;
@@ -35,7 +33,7 @@ public class SOLAbout extends JFrame{
 		
 		JLabel version=new JLabel();
 		version.setHorizontalAlignment(JLabel.CENTER);
-		version.setText("<html><font size=4><center>SearchingOfLaws 4.14.11</center></font></html>");
+		version.setText("<html><font size=4><center>"+AppInfo.name+" "+AppInfo.version+"</center></font></html>");
 
 		JLabel author=new JLabel();
 		author.setHorizontalAlignment(JLabel.CENTER);
@@ -55,10 +53,12 @@ public class SOLAbout extends JFrame{
 		JLabel ul=new JLabel();
 		ul.setHorizontalAlignment(JLabel.CENTER);
 		ul.setText("<html><font size=4><center>恭喜！你的软件已是新版本！</center></font></html>");
+		ul.setVisible(false);
 //		ul.setBorder(BorderFactory.createLineBorder(Color.yellow));
 		
 		JButton update=new JButton();
 		update.setText("点击启动更新");
+		update.setVisible(false);
 		
 		update.addActionListener(new SOLEvents.ShowSOLShowUpadteEvent(this));
 		
@@ -108,6 +108,11 @@ public class SOLAbout extends JFrame{
 		
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
+		
+		if(DisplayGui.isver)
+			update.setVisible(true);
+		else
+			ul.setVisible(true);
 		
 	    this.setTitle("Searching Of Laws");//窗体标签  
 	    this.setSize(FrameSize.X-45,FrameSize.Y-173);//窗体大小  

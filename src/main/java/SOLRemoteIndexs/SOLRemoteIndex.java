@@ -170,7 +170,6 @@ public class SOLRemoteIndex extends JFrame{
 		}
 	}
 	
-	
 	/*
 	 *
 	 * Copyright @ 2018 Beijing Beidouht Co. Ltd. 
@@ -256,7 +255,6 @@ public class SOLRemoteIndex extends JFrame{
         send.put("token","");		
         send.put("data",data.toString());
         
-
         JSONObject body=http.Map2Json(send);
 		GZipUntils gzip=new GZipUntils();
 		String sends=gzip.S2Gzip(body.toString());

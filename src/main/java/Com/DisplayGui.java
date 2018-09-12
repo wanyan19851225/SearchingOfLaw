@@ -43,13 +43,13 @@ public class DisplayGui extends JFrame{
 	private JTextField stf;
 	private JButton sbt;
 	private JRadioButton accmode,fuzzymode,all,other,remote;
-	public  SOLHistory solhis;
+	public SOLHistory solhis;
 	public SOLResult solresult;
 	public static SOLLogin sollogin;
 	public static SOLStar star;
 	public static List<String> range=new ArrayList<String>();
 	public static List<Boolean> defselect=new ArrayList<Boolean>();
-	
+	public static Boolean isver=false;
 	/*
 	 *
 	 * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
@@ -149,30 +149,14 @@ public class DisplayGui extends JFrame{
 		final JRadioButton local=new JRadioButton("本地",true);
 		local.setLocation(20, 20);
 		local.setSize(50, 20);
-//		local.setName("local");
-		
+
 		remote=new JRadioButton("远程"); 
 		remote.setLocation(20, 20);
 		remote.setSize(50, 20);
-//		remote.setName("remote");
-		
+
 		sourcebg.add(local);
 		sourcebg.add(remote);
 		
-//		adr=new JTextField(19);
-//		adr.setText("http://");
-//		adr.setPreferredSize(new Dimension(300,23));
-//		adr.setEnabled(false);
-//		adr.setName("dar");
-//		
-//		JLabel jl=new JLabel(":");
-//		jl.setEnabled(false);
-//		
-//		port=new JTextField(4);
-//		port.setPreferredSize(new Dimension(300,23));
-//		port.setEnabled(false);
-//		port.setName("port");
-
 		solhis=new SOLHistory(this);	//创建搜索历史面板
 		history.clear();
 
@@ -200,17 +184,6 @@ public class DisplayGui extends JFrame{
 	    npaneofcenter1.add(local);
 	    npaneofcenter1.add(remote);
 	    
-//		JPanel npaneofcenter2=new JPanel();		/*远程地址面板*/
-//		npaneofcenter2.setBorder(BorderFactory.createTitledBorder("远程地址"));
-//		npaneofcenter2.setEnabled(false);
-//	    npaneofcenter2.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
-//	    npaneofcenter2.add(adr);
-//	    npaneofcenter2.add(jl);
-//	    npaneofcenter2.add(port);
-	    
-//		local.addMouseListener(new SOLEvents.LocalEvent(npaneofcenter2));
-//		remote.addMouseListener(new SOLEvents.HostEvent(npaneofcenter2));
-
 		JPanel npaneofcenter=new JPanel();			/*搜索条数、搜索范围、搜索源*/
 		npaneofcenter.setPreferredSize(new Dimension(400,50));
 	    npaneofcenter.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
@@ -243,7 +216,6 @@ public class DisplayGui extends JFrame{
 		aboutitem.addActionListener(new SOLEvents.AboutEvent(this));
 		sbt.addMouseListener(new SOLEvents.SearchEvent(this));
 		other.addMouseListener(new SOLEvents.ShowSOLSelectIndexEvent());
-//		remote.addMouseListener(new SOLEvents.RemoteEvent());
 		remote.addItemListener(new SOLEvents.RemoteEvent(this));
 		local.addItemListener(new SOLEvents.LocalEvent(this));
 		this.addWindowListener(new SOLEvents.DisplayGuiColseEvent(this));
@@ -256,6 +228,12 @@ public class DisplayGui extends JFrame{
 	    this.setResizable(false); //锁定窗体	
 	    
 		sollogin=new SOLLogin(this);	//创建登录窗口
+		
+		String nv=this.GetVersion(Path.urlpath);		//获取版本信息
+		if(!AppInfo.version.equals(nv)&&nv!=null){
+			this.SetStatusText("<html><font color=red>您有新版本等待升级！</font></html>");
+			isver=true;
+		}
 	}	
 	public void StoreHistory() throws IOException{
 		IOHistory iohis=new IOHistory();
@@ -307,6 +285,9 @@ public class DisplayGui extends JFrame{
 	public void SetStatusText(String s,long total){
 		star.setStatusText("检索完毕!"+" "+"耗时："+s+"ms"+" "+"共搜索到："+total);
 	}
+	public void SetStatusText(String s){
+		star.setStatusText(s);
+	}
 	public Boolean GetFuzzyMode(){
 		return fuzzymode.isSelected();
 	}
@@ -326,12 +307,6 @@ public class DisplayGui extends JFrame{
 		all.setEnabled(f);
 		other.setEnabled(f);
 	}
-	
-//	public String GetRemoteAddress(){
-//		StringBuffer s=new StringBuffer();
-//		s.append(adr.getText()+":"+port.getText());
-//		return s.toString();
-//	}
 	
 	public Boolean GetIsRemote(){
 		Boolean f=false;
@@ -353,7 +328,6 @@ public class DisplayGui extends JFrame{
 		JSONObject send=new JSONObject();
 		IOHttp http=new IOHttp(url);
 		JSONObject response;
-		
 		try {
 			send.accumulate("command","101");
 			send.accumulate("token","");	
@@ -389,5 +363,29 @@ public class DisplayGui extends JFrame{
 			e.printStackTrace();
 		}
 		return res;
+	}
+	
+	public String GetVersion(String url){
+		String nversion=null;
+		JSONObject send=new JSONObject();
+		IOHttp http=new IOHttp(url);
+		JSONObject response;
+		try {
+			send.accumulate("command","109");
+			send.accumulate("token","");	
+			send.accumulate("cversion","4.1.11");
+			
+			GZipUntils gzip=new GZipUntils();
+			String body = gzip.S2Gzip(send.toString());
+			response=http.sendPost(body);
+			nversion=response.getString("nversion");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		}
+		return nversion;
 	}
 }

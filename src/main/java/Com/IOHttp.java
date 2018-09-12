@@ -34,8 +34,6 @@ public class IOHttp {
     	JSONObject obj=new JSONObject();
     	StringBuffer result=new StringBuffer();
     	String s=null;
-
-        
         try {
         	
            	URL rurl = new URL(url);
@@ -79,8 +77,7 @@ public class IOHttp {
             		result.append(line);            
             	GZipUntils gz=new GZipUntils();
             	s=gz.Gzip2S(result.toString());
-            }
-            
+            }    
         }
         finally{
         	
@@ -104,7 +101,6 @@ public class IOHttp {
         if(s!=null)
         	obj=JSONObject.fromObject(s);
         return obj;
-        
     }
 
     public Boolean Connect() throws IOException{
