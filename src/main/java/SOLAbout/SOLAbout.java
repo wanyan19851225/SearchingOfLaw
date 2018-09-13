@@ -4,9 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -14,6 +16,7 @@ import javax.swing.JPanel;
 import Com.AppInfo;
 import Com.DisplayGui;
 import Com.FrameSize;
+import Com.Path;
 import Com.SOLEvents;
 
 @SuppressWarnings("serial")
@@ -50,6 +53,15 @@ public class SOLAbout extends JFrame{
 		JButton help=new JButton();
 		help.setText("查看帮助");
 		
+		JEditorPane ep = new JEditorPane();  	
+		ep.setEditable(false); 
+		try {
+			ep.setPage(Path.updatecontentpath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		JLabel ul=new JLabel();
 		ul.setHorizontalAlignment(JLabel.CENTER);
 		ul.setText("<html><font size=4><center>恭喜！你的软件已是新版本！</center></font></html>");
@@ -77,26 +89,21 @@ public class SOLAbout extends JFrame{
 		hpane.add(hl);
 		hpane.add(help);
 		
-		JPanel blank1pane=new JPanel();
-		
 		JPanel cont1pane=new JPanel();
 		cont1pane.setLayout(new GridLayout(3,0));
 		cont1pane.add(apane);
 		cont1pane.add(aupane);
 		cont1pane.add(hpane);
-		
-		JPanel contpane=new JPanel();
-		contpane.setLayout(new GridLayout(2,0));
-		contpane.add(cont1pane);
-		contpane.add(blank1pane);
 
-		JPanel blankpane=new JPanel();
-		blankpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
+		JPanel ucpane=new JPanel();
+		ucpane.setLayout(new FlowLayout(FlowLayout.LEFT,5,5));
+		ucpane.add(ep);
 //		blankpane.setBorder(BorderFactory.createLineBorder(Color.black));
 		
 		JPanel cpane=new JPanel();
-		cpane.add(contpane);
-		cpane.add(blankpane);
+		cpane.setLayout(new GridLayout(2,0));
+		cpane.add(cont1pane);
+		cpane.add(ucpane);
 		cpane.setLayout(new BoxLayout(cpane, BoxLayout.Y_AXIS));
 //		cpane.setBorder(BorderFactory.createLineBorder(Color.red));
 		
@@ -109,10 +116,14 @@ public class SOLAbout extends JFrame{
 		contentpane.add(cpane,BorderLayout.CENTER);
 		contentpane.add(spane,BorderLayout.SOUTH);
 		
-		if(DisplayGui.isver)
+		if(DisplayGui.isver){
+			ep.setVisible(true);
 			update.setVisible(true);
-		else
+		}
+		else{
+			ep.setVisible(false);
 			ul.setVisible(true);
+		}
 		
 	    this.setTitle("Searching Of Laws");//窗体标签  
 	    this.setSize(FrameSize.X-45,FrameSize.Y-173);//窗体大小  

@@ -1,4 +1,4 @@
-﻿package Com;
+package Com;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -8,7 +8,6 @@ import java.awt.Font;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +15,6 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -29,7 +27,6 @@ import org.apache.commons.collections4.map.LinkedMap;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-
 /** 
  * Copyright @ 2017 Beijing Beidouht Co. Ltd. 
  * All right reserved. 
@@ -39,6 +36,10 @@ import net.sf.json.JSONObject;
 
 public class DisplayGui extends JFrame{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private List<String> history,tmphis;
 	private JTextField stf;
 	private JButton sbt;

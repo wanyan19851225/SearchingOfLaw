@@ -23,4 +23,5 @@ public interface Path {
 	public static final String downloadpath64="http://47.97.108.15:8080/update/64bit/SearchingOfLaw.exe";
 	public static final String upath=new StringBuilder(currentpath).append("\\Update.exe").toString();
 	public static final String applicationpath=new StringBuilder(currentpath).append("\\SearchingOfLaw.exe").toString();
+	public static final String updatecontentpath="http://47.97.108.15:8080/swd/update.html";
 }
