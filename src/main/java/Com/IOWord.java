@@ -241,37 +241,29 @@ public class IOWord{
 		StringBuffer buf=new StringBuffer();
 		StringBuffer temp=new StringBuffer();
 		UpdateString updatestring=new UpdateString();
-		int chapterindex=0,sectionindex=0,itemindex=0,inputitemindex=0,inputchapterindex=0,inputsectionindex=0;
+		int chapterindex=0,sectionindex=0,itemindex=0,inputitemindex=0,inputchapterindex=0,inputsectionindex=0,generalindex=0;
 		
 		if(!content.isEmpty()){		
 			for(int i=0;i<content.size();i++){
 				
-				String temp1=content.get(i);
-				
-				/*** 读取章***/
-						
-				if(updatestring.IsInTop(temp1,"章")&&!updatestring.GetStringBetween(temp1,"章").contains("条")){
-					
+				String temp1=content.get(i);				
+				/*** 读取章***/						
+				if(updatestring.IsInTop(temp1,"章")&&!updatestring.GetStringBetween(temp1,"章").matches(".*[、，第条].*")){					
 					if(updatestring.GetStringBetween(temp1,"章").equals("一"))	//针对文档中有目录的情况，当读取到正文中的第一章时，章索引号清零，重新开始计数索引号
-						chapterindex=0;
-					
+						chapterindex=0;					
 					inputchapterindex=chapterindex;
 					chapterindex++;
 					chapter.put(chapterindex,content.get(i));	//添加到chapter里
-					
-
-					
+						
 	/*** 暂时将读取到的法条追加到temp里，直到当读取到章时，才将暂存的发条添加到item中***/		
 					
 					if(itemindex!=0){
 						inputitemindex=itemindex;
 						Integer index=inputchapterindex*100000+sectionindex*1000+inputitemindex;		//计算法条的索引值
-//						System.out.println(index+"-"+temp.toString());
 						item.put(index,temp.toString());	//添加到tiem里
 						buf.delete(0,buf.length());		//清空buf,以继续读取下一个法条
 						temp.delete(0,temp.length());	//清空temp，以继续暂存下一个发条
-					}
-					
+					}					
 					sectionindex=0;		//只要读取到章，就将节索引清零
 					itemindex=0;		//只要读取到章，就将法条索引清零
 				}
@@ -295,20 +287,20 @@ public class IOWord{
 					
 					itemindex=0;
 				}
-				else if(updatestring.IsInTop(temp1,"条")&&chapterindex!=0){		//增加chapterindex章索引号的判断，当章索引号为零时，即第一章之前读取到的法条不走此分支
+				else if(temp1.matches("(第[0-9一二三四五六七八九十零〇百十]{1,5}条).*")){
 					inputitemindex=itemindex;
 					itemindex++;
+					if(chapterindex==0)		//判断是否有章段落，如果没有章段落，则索引号默认设置成999
+						chapterindex=999;		
 					boolean f=legal.containsKey(updatestring.GetStringBetween(temp1,"条"));
 					if(itemindex!=1){		//非第一个法条走此分支
 						if(!f){		//判断法条的中文索引里是否已经有该法条，如果没有则作为新法条，走此分支，并将上一个法条存到法条索引中，如果有，则追加到到上一法条，成为上一法条内容
 							Integer index=chapterindex*100000+sectionindex*1000+inputitemindex;
-//							System.out.println(index+"-"+temp.toString());
 							item.put(index,temp.toString());
 							buf.delete(0,buf.length());
 							temp.delete(0,temp.length());
 						}else
-							itemindex=itemindex-1;		//如果已经存在在法条中文索引中，则追加上一个法条中，法条索引号减1，回退索引号
-						
+							itemindex=itemindex-1;		//如果已经存在在法条中文索引中，则追加上一个法条中，法条索引号减1，回退索引号						
 					}
 					
 					/***章下面的第一个发条（没有节）或者节下面的第一个发条走此分支***/
@@ -319,13 +311,15 @@ public class IOWord{
 					else
 						temp.append(buf);
 					legal.put(updatestring.GetStringBetween(temp1,"条"),"");		//将法条的中文索引存储到内存
-				}else if(!updatestring.IsInTop(temp1,"章")&&!updatestring.IsInTop(temp1,"节")&&!updatestring.IsInTop(temp1,"条")){
-					
-					/***法条下面的段落，属于同一发条的走此分支***/
-					
+				}else if(!temp1.matches("(第[0-9一二三四五六七八九十零〇百十]{1,5}[章节条]).*")){					
+					/***法条下面的段落，属于同一发条的走此分支***/					
 					if(itemindex!=0){
 						buf.append(temp1);	//追加发条段落
 						temp.replace(0,temp.length(),buf.toString());	//覆盖原temp内容
+					}
+					if(itemindex==0){		//itemindex==0说明没有扫描到法条段落，既按照普通段落处理
+						Integer index=999*100000+0*1000+(++generalindex);		//普通段落索引号
+						item.put(index,temp1.toString());
 					}
 				}
 				
@@ -432,31 +426,31 @@ public class IOWord{
 //		}
 //		doc.close();
 		
-		File file=new File("D:\\Lucene\\src\\北京市劳动局关于转发劳动部《关于发布〈企业职工患病或非因病负伤医疗期规定〉的通知》的通知.doc");//劳动人事争议仲裁办案规则（新）.doc   中华人民共和国劳动合同法.doc  （资料）变更劳动合同.doc  中华人民共和国劳动法.doc 北京市劳动局关于解除劳动合同计发经济补偿金有关问题处理意见的通知.doc
+		File file=new File("D:\\Lucene\\src\\Z职业病诊断与鉴定管理办法.doc");//劳动人事争议仲裁办案规则（新）.doc   中华人民共和国劳动合同法.doc  （资料）变更劳动合同.doc  中华人民共和国劳动法.doc 北京市劳动局关于解除劳动合同计发经济补偿金有关问题处理意见的通知.doc
 //		
 //		
-		List<String> paragraphs=word.GetParagraphText(file);
+//		List<String> paragraphs=word.GetParagraphText(file);
 		
-		for(int i=0;i<paragraphs.size();i++){
+//		for(int i=0;i<paragraphs.size();i++){
 //			System.out.println(text.get(i));
 //			String rgex="[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】'；：”“’。，、？]";
-			String str=paragraphs.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );//
-			System.out.println(str);
+//			String str=paragraphs.get(i).replaceAll("[a-zA-Z:/.\"_\\\\　　]","" );//
+//			System.out.println(str);
 //			System.out.println(str+us.IsInTop(str,"章")+us.CalChars(str, "章")+":"+us.GetStringBetween(str, "章"));		
-		}
+//		}
 		
 		
 		
-//		Map<Integer,String> item=word.GetIndexOflaw(file);
+		Map<Integer,String> item=word.GetIndexOflaw(file);
 //		Map<Integer,String> item=word.GetIndexOfnotice(file);
 //		Map<Integer,String> item=word.GetIndexOfmarkdocment(file);
 //		
 //		
 //		System.out.println(item.get(301006));
 //		
-//		for (Integer key : item.keySet()) 
-//			
-//			System.out.println(key+"-"+item.get(key));
+		for (Integer key : item.keySet()) 
+			
+			System.out.println(key+"-"+item.get(key));
 //	
 //		
 //		System.out.println(item.size());

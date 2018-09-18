@@ -90,20 +90,24 @@ public class DisplayGui extends JFrame{
 		
 	    JMenuBar menubar=new JMenuBar();
 	    JMenu file=new JMenu("文件");
+	    JMenu set=new JMenu("设置");
 	    JMenu about=new JMenu("关于");
-	    final JMenuItem addindex=new JMenuItem("添加索引");
-	    final JMenuItem showindex=new JMenuItem("查看索引");
-	    JMenuItem synchronizeindex=new JMenuItem("提交索引");
-	    JMenuItem downloadindex=new JMenuItem("导入索引");
-	    JMenuItem remoteindex=new JMenuItem("查看仓库");
+	    final JMenuItem addindex=new JMenuItem("添加文件");
+	    JMenuItem synchronizeindex=new JMenuItem("提交文件");
+	    JMenuItem downloadindex=new JMenuItem("导入文件");
+	    final JMenuItem showindex=new JMenuItem("查看本地仓库");
+	    JMenuItem remoteindex=new JMenuItem("查看远程仓库");
+	    JMenuItem setitem=new JMenuItem("设置");
 	    final JMenuItem aboutitem=new JMenuItem("关于");
 	    file.add(addindex);
-	    file.add(showindex);
 	    file.add(synchronizeindex);
 	    file.add(downloadindex);
+	    file.add(showindex);
 	    file.add(remoteindex);
+	    set.add(setitem);
 	    about.add(aboutitem);
 	    menubar.add(file);
+	    menubar.add(set);
 	    menubar.add(about);
 	    this.setJMenuBar(menubar);
 	    
@@ -111,7 +115,7 @@ public class DisplayGui extends JFrame{
 	   star.SetLoginLabelVisabel(true); //初始化时，显示登录用户标签
 	   star.AddShowSOLLLoginEvent(new SOLEvents.ShowSOLLoginEvent());		//初始化时，对登录用户名标签装载ShowSOLLogin鼠标事件
 		
-	    solresult=new SOLResult();		//创建搜索结果面板
+	   solresult=new SOLResult();		//创建搜索结果面板
 		
 		stf=new JTextField(78);
 		stf.setPreferredSize(new Dimension(300,34));

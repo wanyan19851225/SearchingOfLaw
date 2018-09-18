@@ -379,7 +379,7 @@ public class  SOLEvents {
 	
 	public static class ShowSOLAddIndexEvent implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-			new SOLAddIndex();
+			SOLAddIndex.getInstance();
 		}
 	}
 	

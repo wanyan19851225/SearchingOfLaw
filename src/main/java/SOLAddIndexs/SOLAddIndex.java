@@ -33,6 +33,7 @@ public class SOLAddIndex extends JFrame{
 	public SOLStar solstar;
 	private JScrollPane jsp;
 	private Vector<Vector<String>> data;
+	private static SOLAddIndex single=new SOLAddIndex();
 	
 	public SOLAddIndex(){
 		
@@ -136,4 +137,12 @@ public class SOLAddIndex extends JFrame{
 		data.clear();
 	}
 
+	public static SOLAddIndex getInstance(){
+		if(!single.isShowing())
+			single=new SOLAddIndex();
+		else
+			single.requestFocus();
+		return single;	
+	}
+	
 }
