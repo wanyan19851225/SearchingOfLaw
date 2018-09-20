@@ -19,18 +19,19 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import SOLAddIndexs.SOLAddIndex;
+
 
 @SuppressWarnings("serial")
-public class SOLSelectIndex extends JFrame{
+public class SOLSelectIndex extends TableFrame{
 	
-	private IOTable t;
+//	private IOTable t;
+	private static SOLSelectIndex single=null;
 	
-	@SuppressWarnings("unchecked")
 	public SOLSelectIndex(){
 		
-
-		Container contentpane=this.getContentPane();
-		contentpane.setLayout(new BorderLayout(3,3));
+//		Container contentpane=this.getContentPane();
+//		contentpane.setLayout(new BorderLayout(3,3));
 //		HandleLucene handle=new HandleLucene();
 //		Map<String,Integer> fre=new HashMap<String,Integer>();
 		FileIndexs findexs=new FileIndexs();
@@ -42,7 +43,7 @@ public class SOLSelectIndex extends JFrame{
         cname.add("法条总数");
         cname.add("是否选择");
         
-		Vector<Vector<String>> data = new Vector<Vector<String>>();
+//		Vector<Vector<String>> data = new Vector<Vector<String>>();
         
 //        fre=handle.GetTermFreq(Path.indexpath);
         
@@ -74,17 +75,18 @@ public class SOLSelectIndex extends JFrame{
 
 		this.InitSelectStatus();
 */		
-		JButton lbt=new JButton("确定");
-		lbt.setPreferredSize(new Dimension(60,35));
-		
-		JButton sbt=new JButton("全选");
-		sbt.setPreferredSize(new Dimension(60,35));
-		
-		JButton sbt1=new JButton("反选");
-		sbt1.setPreferredSize(new Dimension(60,35));
-		
-		JScrollPane jsp=new JScrollPane();
-		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));	//修改于2018-7-26,自适应窗口大小
+//		JButton lbt=new JButton("确定");
+//		lbt.setPreferredSize(new Dimension(60,35));
+//		
+//		JButton sbt=new JButton("全选");
+//		sbt.setPreferredSize(new Dimension(60,35));
+//		
+//		JButton sbt1=new JButton("反选");
+//		sbt1.setPreferredSize(new Dimension(60,35));
+//		
+//		JScrollPane jsp=new JScrollPane();
+//		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-88));	//修改于2018-7-26,自适应窗口大小
+        lbt.setText("确定");
 		jsp.setViewportView(t);
 /*		
 		DefaultTableCellRenderer r = new DefaultTableCellRenderer();    
@@ -94,30 +96,30 @@ public class SOLSelectIndex extends JFrame{
 
 		lbt.addMouseListener(new SOLEvents.ExeEvent(this));
 					
-		sbt.addActionListener(new SOLEvents.SelEvent(this));
-	
-		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
+//		sbt.addActionListener(new SOLEvents.SelEvent(this));
+//	
+//		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
 		
-		JPanel cpane=new JPanel();
-	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
-	    JPanel spane=new JPanel();
-	    spane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
-		
-		
-		cpane.add(jsp);
-		spane.add(sbt);
-		spane.add(sbt1);
-		spane.add(lbt);
-		
-		contentpane.add(cpane,BorderLayout.CENTER);
-		contentpane.add(spane,BorderLayout.SOUTH);
-		
-	    this.setTitle("Searching Of Laws");//窗体标签  
-	    this.setSize(FrameSize.X,FrameSize.Y);//窗体大小  
-	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
-	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
-	    this.setVisible(true);//显示窗体
-	    this.setResizable(false); //锁定窗体
+//		JPanel cpane=new JPanel();
+//	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
+//	    JPanel spane=new JPanel();
+//	    spane.setLayout(new FlowLayout(FlowLayout.CENTER,5,5));
+//		
+//		
+//		cpane.add(jsp);
+//		spane.add(sbt);
+//		spane.add(sbt1);
+//		spane.add(lbt);
+//		
+//		contentpane.add(cpane,BorderLayout.CENTER);
+//		contentpane.add(spane,BorderLayout.SOUTH);
+//		
+	    this.setTitle("选择检索范围");//窗体标签  
+//	    this.setSize(FrameSize.X,FrameSize.Y);//窗体大小  
+//	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
+//	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
+//	    this.setVisible(true);//显示窗体
+//	    this.setResizable(false); //锁定窗体
 	}
 	
 	public void SetRange(){
@@ -129,6 +131,18 @@ public class SOLSelectIndex extends JFrame{
 				DisplayGui.range.add(t.getValueAt(i, 1).toString());	
 			DisplayGui.defselect.set(i,((Boolean)t.getValueAt(i,cnum-1)).booleanValue());
 		}
+	}
+	
+	public static SOLSelectIndex getInstance(){
+		if(single!=null){
+			if(!single.isShowing())
+				single=new SOLSelectIndex();			
+			else
+				single.requestFocus();		
+		}
+		else
+			single=new SOLSelectIndex();
+		return single;		
 	}
 /*	
 	public void InitSelectStatus(){
@@ -145,24 +159,24 @@ public class SOLSelectIndex extends JFrame{
 		}	
 	}
 */	
-	public void SelectAll(){
-		int cnum=t.getColumnCount();
-		int rnum=t.getRowCount();
-		for(int i=0;i<rnum;i++){
-			t.setValueAt(true,i,cnum-1);
-		}
-	}
-	
-	public void SelectInvert(){
-		int cnum=t.getColumnCount();
-		int rnum=t.getRowCount();
-		for(int i=0;i<rnum;i++){
-			
-			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
-				t.setValueAt(false,i,cnum-1);
-			else
-				t.setValueAt(true,i,cnum-1);
-		}	
-	}
+//	public void SelectAll(){
+//		int cnum=t.getColumnCount();
+//		int rnum=t.getRowCount();
+//		for(int i=0;i<rnum;i++){
+//			t.setValueAt(true,i,cnum-1);
+//		}
+//	}
+//	
+//	public void SelectInvert(){
+//		int cnum=t.getColumnCount();
+//		int rnum=t.getRowCount();
+//		for(int i=0;i<rnum;i++){
+//			
+//			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
+//				t.setValueAt(false,i,cnum-1);
+//			else
+//				t.setValueAt(true,i,cnum-1);
+//		}	
+//	}
 
 }

@@ -327,7 +327,7 @@ public class DisplayGui extends JFrame{
 	public List<String> GetHistory(){
 		return history;
 	}
-	
+		
 	public Map<String,List<String[]>> QueryRemoteSegments(String url,String keywords){
 		Map<String,List<String[]>> res=new LinkedMap<String,List<String[]>>();
 		JSONObject send=new JSONObject();

@@ -43,8 +43,8 @@ public class IOHttp {
 //        	httpconn.setDoInput(true);
         	httpconn.setDoOutput(true);
         	httpconn.setDoInput(true);
-        	httpconn.setConnectTimeout(1000*60*5);
-        	httpconn.setReadTimeout(1000*60*5);
+        	httpconn.setConnectTimeout(1000*5);
+        	httpconn.setReadTimeout(1000*5);
         	httpconn.setUseCaches(false);
         	httpconn.setRequestProperty("Accept-Charset","utf-8");
         	//httpconn.setRequestProperty("contentType","utf-8");

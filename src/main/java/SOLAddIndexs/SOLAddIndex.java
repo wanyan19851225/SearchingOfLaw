@@ -23,6 +23,7 @@ import Com.IOTable;
 import Com.SOLEvents;
 import Com.SOLStar;
 import Com.SOLEvents.AddIndexEvent;
+import SOLAbout.SOLAbout;
 
 
 public class SOLAddIndex extends JFrame{
@@ -33,7 +34,7 @@ public class SOLAddIndex extends JFrame{
 	public SOLStar solstar;
 	private JScrollPane jsp;
 	private Vector<Vector<String>> data;
-	private static SOLAddIndex single=new SOLAddIndex();
+	private static SOLAddIndex single=null;
 	
 	public SOLAddIndex(){
 		
@@ -138,11 +139,14 @@ public class SOLAddIndex extends JFrame{
 	}
 
 	public static SOLAddIndex getInstance(){
-		if(!single.isShowing())
-			single=new SOLAddIndex();
+		if(single!=null){
+			if(!single.isShowing())
+				single=new SOLAddIndex();			
+			else
+				single.requestFocus();		
+		}
 		else
-			single.requestFocus();
-		return single;	
+			single=new SOLAddIndex();
+		return single;		
 	}
-	
 }

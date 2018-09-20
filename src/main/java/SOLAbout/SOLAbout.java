@@ -18,10 +18,12 @@ import Com.DisplayGui;
 import Com.FrameSize;
 import Com.Path;
 import Com.SOLEvents;
+import SOLAddIndexs.SOLAddIndex;
 
 @SuppressWarnings("serial")
 public class SOLAbout extends JFrame{
-	private DisplayGui p;
+	public DisplayGui p;
+	private static SOLAbout single=null;
 	public SOLAbout(DisplayGui p){
 		
 		this.p=p;
@@ -135,5 +137,16 @@ public class SOLAbout extends JFrame{
 	
 	public DisplayGui GetDisplayGui(){
 		return this.p;
+	}
+	public static SOLAbout getInstance(DisplayGui p){
+		if(single!=null){
+			if(!single.isShowing())
+				single=new SOLAbout(p);			
+			else
+				single.requestFocus();		
+		}
+		else
+			single=new SOLAbout(p);
+		return single;	
 	}
 }

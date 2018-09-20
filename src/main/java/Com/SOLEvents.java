@@ -93,68 +93,70 @@ public class  SOLEvents {
 	} 
 
 	public static class SelEvent implements ActionListener{
-		Object p;
-		public SelEvent(Object p){
+		TableFrame p;
+		public SelEvent(TableFrame p){
 			this.p=p;
 		}
 		
 		public void actionPerformed(ActionEvent e) {
-			if(p instanceof SOLSelectIndex) {
-				SOLSelectIndex dd=(SOLSelectIndex)this.p;
-				dd.SelectAll();
-			}
-			else if(p instanceof SOLShowIndex) {
-				SOLShowIndex dd=(SOLShowIndex)this.p;
-				dd.SelectAll();
-			}
-			else if(p instanceof SOLCommitIndex) {
-				SOLCommitIndex dd=(SOLCommitIndex)this.p;
-				dd.SelectAll();
-			}
-			else if(p instanceof SOLDownloadIndex) {
-				SOLDownloadIndex dd=(SOLDownloadIndex)this.p;
-				dd.SelectAll();
-			}
-			else if(p instanceof SOLRemoteIndex) {
-				SOLRemoteIndex dd=(SOLRemoteIndex)this.p;
-				dd.SelectAll();
-			}
+//			if(p instanceof SOLSelectIndex) {
+//				SOLSelectIndex dd=(SOLSelectIndex)this.p;
+//				dd.SelectAll();
+//			}
+//			else if(p instanceof SOLShowIndex) {
+//				SOLShowIndex dd=(SOLShowIndex)this.p;
+//				dd.SelectAll();
+//			}
+//			else if(p instanceof SOLCommitIndex) {
+//				SOLCommitIndex dd=(SOLCommitIndex)this.p;
+//				dd.SelectAll();
+//			}
+//			else if(p instanceof SOLDownloadIndex) {
+//				SOLDownloadIndex dd=(SOLDownloadIndex)this.p;
+//				dd.SelectAll();
+//			}
+//			else if(p instanceof SOLRemoteIndex) {
+//				SOLRemoteIndex dd=(SOLRemoteIndex)this.p;
+//				dd.SelectAll();
+//			}
+			p.SelectAll();
 		}
 	}
 
 	public static class UnselEvent implements ActionListener{
-		Object p;
-		public UnselEvent(Object p){
+		TableFrame p;
+		public UnselEvent(TableFrame p){
 			this.p=p;
 		}
 		public void actionPerformed(ActionEvent e) {
-			if(p instanceof SOLSelectIndex) {
-				SOLSelectIndex dd=(SOLSelectIndex)this.p;
-				dd.SelectInvert();
-			}
-			else if(p instanceof SOLShowIndex) {
-				SOLShowIndex dd=(SOLShowIndex)this.p;
-				dd.SelectInvert();
-			}
-			else if(p instanceof SOLCommitIndex) {
-				SOLCommitIndex dd=(SOLCommitIndex)this.p;
-				dd.SelectInvert();
-			}
-			else if(p instanceof SOLDownloadIndex) {
-				SOLDownloadIndex dd=(SOLDownloadIndex)this.p;
-				dd.SelectInvert();
-			}
-			else if(p instanceof SOLRemoteIndex) {
-				SOLRemoteIndex dd=(SOLRemoteIndex)this.p;
-				dd.SelectInvert();
-			}
+//			if(p instanceof SOLSelectIndex) {
+//				SOLSelectIndex dd=(SOLSelectIndex)this.p;
+//				dd.SelectInvert();
+//			}
+//			else if(p instanceof SOLShowIndex) {
+//				SOLShowIndex dd=(SOLShowIndex)this.p;
+//				dd.SelectInvert();
+//			}
+//			else if(p instanceof SOLCommitIndex) {
+//				SOLCommitIndex dd=(SOLCommitIndex)this.p;
+//				dd.SelectInvert();
+//			}
+//			else if(p instanceof SOLDownloadIndex) {
+//				SOLDownloadIndex dd=(SOLDownloadIndex)this.p;
+//				dd.SelectInvert();
+//			}
+//			else if(p instanceof SOLRemoteIndex) {
+//				SOLRemoteIndex dd=(SOLRemoteIndex)this.p;
+//				dd.SelectInvert();
+//			}
+			p.SelectInvert();
 		}
 	}
 	
 	public static class ShowSOLSelectIndexEvent extends MouseAdapter{
 		
 		public void mouseClicked(MouseEvent e){
-			new SOLSelectIndex();
+			SOLSelectIndex.getInstance();
 		}	
 	}
 	
@@ -168,7 +170,7 @@ public class  SOLEvents {
 		
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			new SOLAbout(this.p);
+			SOLAbout.getInstance(this.p);
 		}		
 	}
 
@@ -588,7 +590,7 @@ public class  SOLEvents {
 	
 	public static class ShowSOLShowIndexEvent implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-			new SOLShowIndex();
+			SOLShowIndex.getInstance();
 		}
 	}
 	
@@ -603,7 +605,7 @@ public class  SOLEvents {
 	
 	public static class ShowSOLSynchronizeIndexEvent implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-				new SOLCommitIndex();
+				SOLCommitIndex.getInstance();
 		}
 	}
 	
@@ -618,7 +620,7 @@ public class  SOLEvents {
 	
 	public static class ShowSOLRemoteIndexEvent implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-				new SOLRemoteIndex();
+				SOLRemoteIndex.getInstance();
 		}
 	}
 	
@@ -632,7 +634,7 @@ public class  SOLEvents {
 	
 	public static class ShowSOLDownloadIndexEvent implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-				new SOLDownloadIndex();
+				SOLDownloadIndex.getInstance();
 		}
 	}
 	

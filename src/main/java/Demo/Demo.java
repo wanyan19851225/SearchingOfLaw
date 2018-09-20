@@ -25,7 +25,6 @@ public class Demo{
 					UIManager.setLookAndFeel(new SubstanceNebulaBrickWallLookAndFeel());
 					SubstanceLookAndFeel.setSkin(new NebulaBrickWallSkin());
 					new DisplayGui();
-					//System.out.println(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
 				} catch (UnsupportedLookAndFeelException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

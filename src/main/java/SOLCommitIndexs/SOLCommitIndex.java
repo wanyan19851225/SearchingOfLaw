@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import Com.TableFrame;
 import Com.DisplayGui;
 import Com.FileIndexs;
 import Com.FrameSize;
@@ -34,28 +35,30 @@ import Com.SOLEvents.ConfirmCommitIndexEvent;
 import Com.SOLEvents.FilterEvent;
 import Com.SOLEvents.SelEvent;
 import Com.SOLEvents.UnselEvent;
+import SOLAddIndexs.SOLAddIndex;
+import SOLShowIndexs.SOLShowIndex;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-public class SOLCommitIndex extends JFrame{
-	public IOTable t;
-	private Vector<Vector<String>> data;
-	private JButton lbt;
-	private JTextField stf;
+public class SOLCommitIndex extends TableFrame{
+//	public IOTable t;
+//	private Vector<Vector<String>> data;
+//	private JButton lbt;
+//	private JTextField stf;
+	private static SOLCommitIndex single=null;
 	
 	public SOLCommitIndex(){
-		Container contentpane=this.getContentPane();
-		contentpane.setLayout(new BorderLayout(3,3));
+//		Container contentpane=this.getContentPane();
+//		contentpane.setLayout(new BorderLayout(3,3));
 
 		Vector<String> cname = new Vector<String>();
 		cname.add("序号");
 		cname.add("文件名");  
         cname.add("法条总数");
         cname.add("是否提交");
-        data = new Vector<Vector<String>>();
+//        data = new Vector<Vector<String>>();
 		try {
 			Map<String, Integer> rfre = this.GetRemoteIndex(Path.urlpath);
-//			HandleLucene handle=new HandleLucene();
 			FileIndexs findexs=new FileIndexs();
 			Map<String,String[]> lfre=findexs.GetFileInfo(Path.filepath);
 		    if(!lfre.isEmpty()&&!rfre.isEmpty()){	
@@ -83,60 +86,59 @@ public class SOLCommitIndex extends JFrame{
         t=new IOTable(cname,data);
         t.InitTable(true);
 		
-        stf=new JTextField(50);
-		stf.setPreferredSize(new Dimension(300,30));
-		JButton sbt2=new JButton("搜索");
-		sbt2.setPreferredSize(new Dimension(60,30));
-        lbt=new JButton("提交");
-		lbt.setPreferredSize(new Dimension(60,30));
-		
+//        stf=new JTextField(50);
+//		stf.setPreferredSize(new Dimension(300,30));
+//		JButton sbt2=new JButton("搜索");
+//		sbt2.setPreferredSize(new Dimension(60,30));
+//        lbt=new JButton("提交");
+//		lbt.setPreferredSize(new Dimension(60,30));
+        lbt.setText("提交");
 		if(DisplayGui.star.GetLoginStatus())	//判断是否处于登录状态，如果登录状态，则提交按钮启用，否则，提交按钮禁止，修改时间2018-1-31
 			lbt.setEnabled(true);
 		else
 			lbt.setEnabled(false);
 		
-		JButton sbt=new JButton("全选");
-		sbt.setPreferredSize(new Dimension(60,30));
+//		JButton sbt=new JButton("全选");
+//		sbt.setPreferredSize(new Dimension(60,30));
+//		
+//		JButton sbt1=new JButton("反选");
+//		sbt1.setPreferredSize(new Dimension(60,30));
 		
-		JButton sbt1=new JButton("反选");
-		sbt1.setPreferredSize(new Dimension(60,30));
-		
-		JScrollPane jsp=new JScrollPane();
-		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-100));
+//		JScrollPane jsp=new JScrollPane();
+//		jsp.setPreferredSize(new Dimension(FrameSize.X,FrameSize.Y-100));
 		jsp.setViewportView(t);
 
 		
 		lbt.addActionListener(new SOLEvents.ConfirmCommitIndexEvent(this));
-		sbt.addActionListener(new SOLEvents.SelEvent(this));
-		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
-		sbt2.addActionListener(new SOLEvents.FilterEvent(this));
+//		sbt.addActionListener(new SOLEvents.SelEvent(this));
+//		sbt1.addActionListener(new SOLEvents.UnselEvent(this));
+//		sbt2.addActionListener(new SOLEvents.FilterEvent(this));
 //		t.addMouseListener(new SOLEvents.ShowSOLShowLawsEvent(this));
 		
-		JPanel npane=new JPanel();		//搜索框、搜索按钮面板
-	    npane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
-		JPanel cpane=new JPanel();		//列表面板
-	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
-	    JPanel spane=new JPanel();		//全选，反选，删除按钮面板
-	    spane.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
+//		JPanel npane=new JPanel();		//搜索框、搜索按钮面板
+//	    npane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
+//		JPanel cpane=new JPanel();		//列表面板
+//	    cpane.setLayout(new FlowLayout(FlowLayout.CENTER,0,0));
+//	    JPanel spane=new JPanel();		//全选，反选，删除按钮面板
+//	    spane.setLayout(new FlowLayout(FlowLayout.CENTER,5,0));
 		
-		npane.add(stf);
-		npane.add(sbt2);
-	    cpane.add(jsp);
-		spane.add(sbt);
-		spane.add(sbt1);
-		spane.add(lbt);
+//		npane.add(stf);
+//		npane.add(sbt2);
+//	    cpane.add(jsp);
+//		spane.add(sbt);
+//		spane.add(sbt1);
+//		spane.add(lbt);
 		
-		contentpane.add(npane,BorderLayout.NORTH);
-		contentpane.add(cpane,BorderLayout.CENTER);
-		contentpane.add(spane,BorderLayout.SOUTH);
+//		contentpane.add(npane,BorderLayout.NORTH);
+//		contentpane.add(cpane,BorderLayout.CENTER);
+//		contentpane.add(spane,BorderLayout.SOUTH);
 		
-	    this.setTitle("Searching Of Laws");//窗体标签  
-	    this.setSize(FrameSize.X,FrameSize.Y);//窗体大小  
-	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
-	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
-	    this.setVisible(true);//显示窗体
-	    this.setResizable(false); //锁定窗体
-
+	    this.setTitle("提交文件");//窗体标签  
+//	    this.setSize(FrameSize.X,FrameSize.Y);//窗体大小  
+//	    this.setLocationRelativeTo(null);//在屏幕中间显示(居中显示)  
+//	    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//退出关闭JFrame  
+//	    this.setVisible(true);//显示窗体
+//	    this.setResizable(false); //锁定窗体
 }
 	public Map<String,Integer> GetRemoteIndex(String url) throws Exception{
 		Map<String,Integer> fre=new HashMap<String,Integer>();
@@ -253,60 +255,72 @@ public class SOLCommitIndex extends JFrame{
 		lbt.setEnabled(f);
 	} 
 	
-	public void SelectAll(){
-		int cnum=t.getColumnCount();
-		int rnum=t.getRowCount();
-		for(int i=0;i<rnum;i++){
-			t.setValueAt(true,i,cnum-1);
-		}
-	}
+//	public void SelectAll(){
+//		int cnum=t.getColumnCount();
+//		int rnum=t.getRowCount();
+//		for(int i=0;i<rnum;i++){
+//			t.setValueAt(true,i,cnum-1);
+//		}
+//	}
+//	
+//	public void SelectInvert(){
+//		int cnum=t.getColumnCount();
+//		int rnum=t.getRowCount();
+//		for(int i=0;i<rnum;i++){
+//			
+//			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
+//				t.setValueAt(false,i,cnum-1);
+//			else
+//				t.setValueAt(true,i,cnum-1);
+//		}	
+//	}
 	
-	public void SelectInvert(){
-		int cnum=t.getColumnCount();
-		int rnum=t.getRowCount();
-		for(int i=0;i<rnum;i++){
-			
-			if(((Boolean)t.getValueAt(i,cnum-1)).booleanValue())
-				t.setValueAt(false,i,cnum-1);
+//	public String GetKeywordsInputText(Boolean f){		//参数f判断是否使用模糊搜索方式
+//
+//		StringBuffer s=new StringBuffer();
+//		String[] k=this.InputText2Keywords();
+//		if(k!=null){		//判断输入框是否为空
+//			if(k.length!=0){
+//				if(f)		//使用模糊搜索
+//					for(int i=0;i<k.length;i++){
+//						if(i==k.length-1)
+//							s.append(k[i]);
+//						else
+//							s.append(k[i]+" AND ");
+//					}
+//				else		//使用精确搜索
+//					for(int i=0;i<k.length;i++){
+//						if(i==k.length-1)
+//							s.append("\""+k[i]+"\"");
+//						else
+//							s.append("\""+k[i]+"\""+" AND ");
+//						
+//					}
+//			}
+//		}
+//		return s.toString();
+//	}
+//	
+//	public String[] InputText2Keywords(){
+//		String s=stf.getText().trim();
+//		String[] keywords=null;
+//		if(!s.isEmpty()){		//判断输入框是否为空
+//			UpdateString us=new UpdateString();
+//			String fk=us.FilterDoubleString(s," ");
+//			keywords=fk.split(" ");
+//		}
+//		return keywords;
+//	}
+	
+	public static SOLCommitIndex getInstance(){
+		if(single!=null){
+			if(!single.isShowing())
+				single=new SOLCommitIndex();			
 			else
-				t.setValueAt(true,i,cnum-1);
-		}	
-	}
-	
-	public String GetKeywordsInputText(Boolean f){		//参数f判断是否使用模糊搜索方式
-
-		StringBuffer s=new StringBuffer();
-		String[] k=this.InputText2Keywords();
-		if(k!=null){		//判断输入框是否为空
-			if(k.length!=0){
-				if(f)		//使用模糊搜索
-					for(int i=0;i<k.length;i++){
-						if(i==k.length-1)
-							s.append(k[i]);
-						else
-							s.append(k[i]+" AND ");
-					}
-				else		//使用精确搜索
-					for(int i=0;i<k.length;i++){
-						if(i==k.length-1)
-							s.append("\""+k[i]+"\"");
-						else
-							s.append("\""+k[i]+"\""+" AND ");
-						
-					}
-			}
+				single.requestFocus();		
 		}
-		return s.toString();
-	}
-	
-	public String[] InputText2Keywords(){
-		String s=stf.getText().trim();
-		String[] keywords=null;
-		if(!s.isEmpty()){		//判断输入框是否为空
-			UpdateString us=new UpdateString();
-			String fk=us.FilterDoubleString(s," ");
-			keywords=fk.split(" ");
-		}
-		return keywords;
+		else
+			single=new SOLCommitIndex();
+		return single;	
 	}
 }
