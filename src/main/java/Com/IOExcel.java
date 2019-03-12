@@ -1,15 +1,19 @@
 package Com;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -49,15 +53,15 @@ public class IOExcel {
 		
 		cell.setCellValue(value);  
 		
-		CellStyle cellStyle = wb.createCellStyle();  
-			
-		cellStyle.setAlignment(HorizontalAlignment.CENTER);
-			
-		cellStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);  
-			
-		cellStyle.setFont(font);  
-			
-		cell.setCellStyle(cellStyle); 
+//		CellStyle cellStyle = wb.createCellStyle();  
+//			
+//		cellStyle.setAlignment(HorizontalAlignment.CENTER);
+//			
+//		cellStyle.setVerticalAlignment(VerticalAlignment.BOTTOM);  
+//			
+//		cellStyle.setFont(font);  
+//			
+//		cell.setCellStyle(cellStyle); 
 		
 }
 	
@@ -119,7 +123,7 @@ public class IOExcel {
 		  Map<Integer,String> title=new HashMap<Integer,String>();
 	  
 		  IOExcel excel = new IOExcel();
-		  IOMysql mysql=new IOMysql();
+//		  IOMysql mysql=new IOMysql();
   
 		  Workbook book=excel.CreatExcelWorkbook();				//创建工作簿
 		  
@@ -129,29 +133,52 @@ public class IOExcel {
 		  
 		  Row row=excel.CreateRow(sheet,0);				//创建行
 		  	  
-		  java.sql.Connection connect=mysql.ConnectMysql("com.mysql.jdbc.Driver","jdbc:mysql://192.168.1.31:3306/BACY?useSSL=false","root","bd@bdht.C0M");		//连接数据库
+//		  java.sql.Connection connect=mysql.ConnectMysql("com.mysql.jdbc.Driver","jdbc:mysql://192.168.1.31:3306/BACY?useSSL=false","root","bd@bdht.C0M");		//连接数据库
 
-		  String sql=mysql.QuerySql(args,"BACY_DEVICE","imei=862623030095703");			//拼接sql查询语句
+//		  String sql=mysql.QuerySql(args,"BACY_DEVICE","imei=862623030095703");			//拼接sql查询语句
 		  
-		  System.out.println(sql.toString());
+//		  System.out.println(sql.toString());
 	      
-          ResultSet rs=mysql.QueryMysql(connect,sql.toString());		//执行查询语句
+//          ResultSet rs=mysql.QueryMysql(connect,sql.toString());		//执行查询语句
           
-          title=mysql.GetFeild(connect, sql.toString());		//获取数据库查询结果的字段名称
+//          title=mysql.GetFeild(connect, sql.toString());		//获取数据库查询结果的字段名称
+		  title.put(0, "imei");
+		  title.put(1,"SN");
+		  title.put(2, "设备类型");
+		  title.put(3,"设备型号");
 	      				  
 		  excel.WriteTopRow(book,row,title,font);		//写入首行
 		  
-		  int i=0;		  
-		  while(rs.next()){
-			  i++;
-			  Row drow=excel.CreateRow(sheet,i);
-			 
-			  for (Map.Entry<Integer, String> entry : title.entrySet())  
-				  excel.WriteCell(book,drow,entry.getKey(),rs.getString(entry.getValue()),font);		//写入数据
-				  
-		  }
+//		  int i=0;		  
+//		  while(rs.next()){
+//			  i++;
+//			  Row drow=excel.CreateRow(sheet,i);
+//			 
+//			  for (Map.Entry<Integer, String> entry : title.entrySet())  
+//				  excel.WriteCell(book,drow,entry.getKey(),rs.getString(entry.getValue()),font);		//写入数据
+//				  
+//		  }
 		  
-		  excel.MakeExcel(book,"E:\\hello.xlsx");			//写入excel文件
+		  List<String> imei=new ArrayList<String>();
+	      InputStreamReader fr=new InputStreamReader(new FileInputStream("D:\\OLDTestDatas.CSV"), "UTF-8");
+	      BufferedReader bufferedReader = new BufferedReader(fr);              
+	      String line=null;                           
+	      while((line=bufferedReader.readLine()) != null){
+	    	  String[] s=line.split(",");
+	    	  imei.add(s[1]);                   
+	       }
+	      fr.close();
+		  
+	      for(int i=0;i<imei.size();i++){
+	    	  Row drow=excel.CreateRow(sheet,i+1);
+	    	  IOExcel.WriteCell(book,drow,0,imei.get(i),font);		//写入数据
+	    	  IOExcel.WriteCell(book,drow,1,"W5AFCH00016P",font);		//写入数据
+	    	  IOExcel.WriteCell(book,drow,2,"老人手表",font);		//写入数据
+	    	  IOExcel.WriteCell(book,drow,3,"WAN0509",font);		//写入数据
+	    	  System.out.println(i);
+	      }
+		  
+		  excel.MakeExcel(book,"D:\\OLDTestDatas.xlsx");			//写入excel文件
 		
 }
 	  

@@ -37,6 +37,7 @@ import SOLDownloadIndexs.SOLShowConfirmDownloadIndexs;
 import SOLRemoteIndexs.SOLRemoteIndex;
 import SOLRemoteIndexs.SOLShowConfirmDeleteRemoteIndexs;
 import SOLRemoteIndexs.SOLShowRemoteLaws;
+import SOLSetting.SOLSetting;
 import SOLShowIndexs.SOLDeleteIndexsProgress;
 import SOLShowIndexs.SOLShowConfirmDeleteIndexs;
 import SOLShowIndexs.SOLShowIndex;
@@ -1053,6 +1054,12 @@ public class  SOLEvents {
 			p.dispose();
 			this.dp.setExtendedState(JFrame.ICONIFIED);
 		}	
+	}
+	
+	public static class ShowSOLSettingEvent implements ActionListener{
+		public void actionPerformed(ActionEvent e) {
+			SOLSetting.getInstance();
+		}
 	}
 	
 }

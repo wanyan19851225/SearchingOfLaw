@@ -214,6 +214,7 @@ public class DisplayGui extends JFrame{
 		contentpane.add(solhis,BorderLayout.WEST);
 		
 		addindex.addActionListener(new SOLEvents.ShowSOLAddIndexEvent());
+		setitem.addActionListener(new SOLEvents.ShowSOLSettingEvent());
 		showindex.addActionListener(new SOLEvents.ShowSOLShowIndexEvent());
 		synchronizeindex.addActionListener(new SOLEvents.ShowSOLSynchronizeIndexEvent());
 		downloadindex.addActionListener(new SOLEvents.ShowSOLDownloadIndexEvent());
