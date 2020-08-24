@@ -132,8 +132,6 @@ public class IOExcel {
 		  Font font=excel.CreateFonts(book,true,"宋体",false,(short)200);		//设置字体格式
 		  
 		  Row row=excel.CreateRow(sheet,0);				//创建行
-		  	  
-//		  java.sql.Connection connect=mysql.ConnectMysql("com.mysql.jdbc.Driver","jdbc:mysql://192.168.1.31:3306/BACY?useSSL=false","root","bd@bdht.C0M");		//连接数据库
 
 //		  String sql=mysql.QuerySql(args,"BACY_DEVICE","imei=862623030095703");			//拼接sql查询语句
 		  
